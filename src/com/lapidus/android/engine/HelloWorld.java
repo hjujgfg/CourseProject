@@ -14,7 +14,6 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.renderscript.Mesh.Primitive;
@@ -42,7 +41,7 @@ import com.threed.jpct.TextureManager;
 import com.threed.jpct.World;
 import com.threed.jpct.util.BitmapHelper;
 import com.threed.jpct.util.MemoryHelper;
-
+import com.lapidus.android.painter.Point;
 /**
  * A simple demo. This shows more how to use jPCT-AE than it shows how to write
  * a proper application for Android. It includes basic activity management to
@@ -116,7 +115,7 @@ public class HelloWorld extends Activity {
 		mGLView.setRenderer(renderer);
 		setContentView(mGLView);
 		Display d = getWindowManager().getDefaultDisplay();
-		Point p = new Point();
+		android.graphics.Point p = new android.graphics.Point();
 		d.getSize(p);
 		screenHeight = p.y;
 		screenWidth = p.x;
@@ -181,7 +180,7 @@ public class HelloWorld extends Activity {
 			Log.i("TE", "happend");
 			return true;
 		}
-
+		
 		if (me.getActionMasked() == MotionEvent.ACTION_MOVE) {
 			float xd = me.getX() - xpos;
 			float yd = me.getY() - ypos;
@@ -304,10 +303,12 @@ public class HelloWorld extends Activity {
 				Texture car3 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car3)), 64, 64));
 				Texture car4 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car_ref)), 64, 64));
 				Texture car5 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car_lit)), 64, 64));
+				Texture asphalt = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.asphalt)), 64, 64));
 				TextureManager.getInstance().addTexture("texture", texture);
 				TextureManager.getInstance().addTexture("police_car3.tga", car3);
 				TextureManager.getInstance().addTexture("police_car.tga", car4);
 				TextureManager.getInstance().addTexture("police_car_lit.tga", car5);		
+				TextureManager.getInstance().addTexture("asphalt", asphalt);
 				
 				nobj = Primitives.getSphere(10);
 				nobj.calcTextureWrapSpherical();
@@ -315,7 +316,7 @@ public class HelloWorld extends Activity {
 				nobj.strip();
 				nobj.build();
 				nobj.translate(10, 10, 10);
-				cube = Primitives.getCube(10);
+				cube = Primitives.getCube(90);
 				cube.calcTextureWrap();
 				//cube.setTexture("texture");
 				cube.strip();
@@ -329,6 +330,8 @@ public class HelloWorld extends Activity {
 				loadedCar.strip();
 				loadedCar.build();		
 				loadedCar.scale(0.1f);
+				Object3D flore = new Object3D(4);
+				flore.addTriangle(new SimpleVector(-70, 100, -70), new SimpleVector(70, 100, -70), new SimpleVector(0, 100, 200));
 				t = Primitives.getPlane(5, 10);
 				t.calcTextureWrapSpherical();
 				t.setTexture("texture");
@@ -337,13 +340,14 @@ public class HelloWorld extends Activity {
 				t.rotateX(90);
 				
 				//Object3D[] suround = new Object3D[path.size()];			
-				SimpleVector s1,s2,s3,s4;
+				/*SimpleVector s1,s2,s3,s4;
 				s1 = new SimpleVector(0,0,0);
 				s2 = new SimpleVector(0,0,0);
 				s3 = new SimpleVector(0,0,0);
 				s4 = new SimpleVector(0,0,0);
-				Log.i("RR", "fwe " + path.size());
-				for (int i = 0; i < path.size(); i ++) {
+				Log.i("RR", "fwe " + path.size());*/
+				// работает для просто набора точек - пиксели
+				/*for (int i = 0; i < path.size(); i ++) {
 					
 					s1.x = path.get(i).x - path.get(0).x - 10;
 					s1.y = 100;
@@ -358,26 +362,24 @@ public class HelloWorld extends Activity {
 					s4.y = 100;
 					s4.z = path.get(i).y - path.get(0).y + 10;
 					newods.addTriangle(s1, s2, s3);
-					newods.addTriangle(s3, s2, s4);
-					/*suround[i] = Primitives.getCube(5);
-					suround[i].translate(path.get(i).y, 100, path.get(i).x);
-					suround[i].rotateY((float)(Math.PI / 4));
-					suround[i].strip();*/
-					
-					/*suround[i].strip();
-					suround[i].build();					
-					suround[i].setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
-					suround[i].setCollisionOptimization(true);*/
+					newods.addTriangle(s3, s2, s4);									
+				}	*/	
+				normalizePath();
+				SimpleVector[] svv;
+				for (int i = 0; i < path.size() - 1; i ++) {
+					svv = generateRect(path.get(i), path.get(i + 1));
+					newods.addTriangle(svv[0], svv[1], svv[2]);
+					newods.addTriangle(svv[2], svv[1], svv[3]);
 				}
-				//Object3D track = Object3D.mergeAll(suround);
-				//track.strip();
-				//track.build();
-				newods.scale(3f);
+				newods.scale(4f);
+				newods.setTexture("asphalt");
 				newods.strip();
 				newods.build();
-				loadedCar.setCollisionMode(Object3D.COLLISION_CHECK_SELF | Object3D.COLLISION_CHECK_OTHERS);
-				
-				
+				//loadedCar.translate(path.get(0).x, path.get(0).y, path.get(0).z);
+				newods.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
+				loadedCar.setCollisionMode(Object3D.COLLISION_CHECK_SELF);
+				flore.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
+				cube.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 				/*loadedCar.addCollisionListener(new CollisionListener() {
 					
 					public boolean requiresPolygonIDs() {
@@ -394,11 +396,11 @@ public class HelloWorld extends Activity {
 				});*/
 				//world.addObjects(suround);
 				//world.addObject(track);
+				world.addObject(flore);
 				world.addObject(t);
 				world.addObject(cube);
 				world.addObject(nobj);
-				world.addObject(newods);
-				//world.addObjects(loadedCar);
+				world.addObject(newods);				
 				world.addObject(loadedCar);
 				world.compileAllObjects();
 				cam = world.getCamera();
@@ -429,13 +431,38 @@ public class HelloWorld extends Activity {
 				}
 			}
 		}
-
+		private SimpleVector[] generateRect(Point a, Point b) {
+			SimpleVector[] t = new SimpleVector[4];
+			float x, y = 100, z; 
+			x = a.x - 10;
+			z = a.y - 10;
+			t[0] = new SimpleVector(x, y, z);
+			x = a.x + 10;
+			z = a.y - 10;
+			t[1] = new SimpleVector(x, y, z);
+			x = b.x - 10;
+			z = b.y;
+			t[2] = new SimpleVector(x, y, z);
+			x = b.x + 10;
+			z = b.y;
+			t[3] = new SimpleVector(x, y, z);
+			return t;
+		}
+		private void normalizePath () {
+			float xx = path.get(0).x;
+			float zz = path.get(0).z;
+			for (Point x : path) {
+				x.x -= xx;
+				x.z -= zz;
+			}
+		}
+		
 		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		}
 		
 		public void onDrawFrame(GL10 gl) {
 			
-			if (touchTurn != 0) {
+			/*if (touchTurn != 0) {
 				cube.rotateY(touchTurn);
 				nobj.rotateY(touchTurn);
 				t.rotateY(touchTurn);							
@@ -448,7 +475,7 @@ public class HelloWorld extends Activity {
 				t.rotateX(touchTurnUp);				
 				cameraTransformMatrix.translate(new SimpleVector(0, -touchTurnUp * 30, 0));								
 				touchTurnUp = 0;				
-			}
+			}*/
 			SimpleVector s = loadedCar.getTransformedCenter();
 			s.x -= 50; 
 			cube.translate(-1, 0 , 1);
@@ -464,9 +491,20 @@ public class HelloWorld extends Activity {
 				//cameraRotationAngle = (float)Math.PI / 180;
 				speed -= 0.1;
 			}
-			
+			//loadedCar.setCenter(loadedCar.getTransformedCenter());
 			loadedCar.rotateY(cameraRotationAngle);
-			loadedCar.translate(-loadedCar.getZAxis().x * speed, 0, -loadedCar.getZAxis().z * speed);
+			/*if (loadedCar.checkForCollision(new SimpleVector(0, -1, 0), 10f) != Object3D.NO_OBJECT) {
+				Log.i("collision", "v " + loadedCar.checkForCollision(new SimpleVector(0, -1, 0), 10f));
+				Toast t = Toast.makeText(getApplicationContext(), "shit", Toast.LENGTH_SHORT);
+				t.show();
+			}*/
+			//loadedCar.translate(-loadedCar.getZAxis().x * speed, 0, -loadedCar.getZAxis().z * speed);
+			SimpleVector t = new SimpleVector(-loadedCar.getZAxis().x * speed, 0, -loadedCar.getZAxis().z * speed);			
+			//t.scalarMul(speed);
+			t = loadedCar.checkForCollisionEllipsoid(t, ellipsoid, 8);
+			loadedCar.translate(t);
+			//loadedCar.setCenter(loadedCar.getTransformedCenter());
+			Log.i(mytag, loadedCar.getTransformedCenter().toString() + " " + loadedCar.getCenter().toString());
 			SimpleVector backVect = loadedCar.getTransformedCenter();
 			backVect.scalarMul(-1.0f);					
 			cameraTransformMatrix.translate(backVect);
@@ -481,11 +519,7 @@ public class HelloWorld extends Activity {
 			cam.lookAt(loadedCar.getTransformedCenter());
 			sun.setPosition(cam.getPosition());
 			cameraTransformMatrix.setIdentity();
-			fb.clear(back);
-			//loadedCar.setCenter(loadedCar.getTransformedCenter());
-			if (loadedCar.checkForCollision(loadedCar.getZAxis(), 0.1f) != Object3D.NO_OBJECT) {
-				Log.i("col", "v " + loadedCar.getCenter().toString() );//+ loadedCar.checkForCollision(new SimpleVector(0, 0, 1), 1f));
-			}
+			fb.clear(back);					
 			world.renderScene(fb);
 			world.draw(fb);
 			fb.display();

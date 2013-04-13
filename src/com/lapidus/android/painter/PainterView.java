@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Message;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -23,16 +24,17 @@ public class PainterView extends View {
 		paint = new Paint();
 		this.setOnTouchListener(ontouchlistener);
 		startX = startY = stopX = stopY = 0;
-		points = new ArrayList<PainterView.Point>();
+		points = new ArrayList<Point>();
 		Bitmap.Config conf = Bitmap.Config.ARGB_8888;
 		image = Bitmap.createBitmap(480, 800, conf);
 		canvas = new Canvas(image);
-		shouldDrawBitmap = false;
+		shouldDrawBitmap = false;		
 	}
 	Paint paint;
 	Bitmap image;
 	Canvas canvas;
 	ArrayList<Point> points;
+	public Point[] approximizedPoints;
 	float startX, startY, stopX, stopY;
 	boolean shouldDrawBitmap;
 	@Override
@@ -58,10 +60,23 @@ public class PainterView extends View {
 		}
 		for (int i = 0; i < points.size() - 1; i ++) {
 			canvas.drawLine(points.get(i).x, points.get(i).y, 
-					points.get(i+1).x, points.get(i+1).y, paint);
+					points.get(i+1).x, points.get(i+1).y, paint);						
 		}
+		paint.setColor(Color.GREEN);
+		canvas.drawCircle(points.get(0).x, points.get(0).y, 1, paint);
+		paint.setColor(Color.RED);
+		canvas.drawCircle(points.get(points.size() - 1).x, points.get(points.size() - 1).y, 1, paint);
+		paint.setColor(Color.RED);
+		canvas.drawLine(0, 0, 100, 100, paint);
+		if (approximizedPoints != null && approximizedPoints.length != 0) {			
+			for (int i = 0; i < approximizedPoints.length - 1; i ++) {
+				canvas.drawLine(approximizedPoints[i].x, approximizedPoints[i].y, 
+						approximizedPoints[i + 1].x, approximizedPoints[i + 1].y, paint);						
+			}
+		}
+		paint.setColor(Color.BLACK);
 	}
-	
+	Point pp;
 	private OnTouchListener ontouchlistener = new OnTouchListener() {
 		
 		public boolean onTouch(View v, MotionEvent event) {
@@ -69,18 +84,40 @@ public class PainterView extends View {
 			
 			if((stopX-event.getX())*(stopX-event.getX()) > 100 
 					&& (stopX-event.getX())*(stopX-event.getX()) > 100 ) {
-				points.add(new Point(event.getX(), event.getY()));
+				pp = new Point(event.getX(), event.getY(), 0f, points.size());
+				/*int tmp = checkForIntersection(pp);
+				if (tmp != -1) {
+					pp.collides = true;
+					pp.collisionIndex = tmp;
+				}*/
+				points.add(pp);				
+			}
+			if (MotionEvent.ACTION_UP == event.getAction()) {
+				approximizedPoints = new Point[points.size()];
+				Point[] temp = new Point[points.size()];
+				int i = 0;
+				for (Point x : points) {					
+					temp[i] = x;
+					i ++;
+				}
+				approximizedPoints = Approximizer.approximize(2f, temp);
 			}
 			invalidate();
 			return true;
 		}
 	};
-	private class Point {
+	/*private class Point {
 		float x, y;		
 		Point (float x, float y) {
 			this.x = x;
 			this.y = y;
 		}
+	}*/
+	private int checkForIntersection(Point p) {
+		for (Point x : points ) {			
+			if (p.x == x.x && p.y == x.y) return x.index; 
+		}
+		return -1;
 	}
 	public void setImage(String s) {
 		image = BitmapFactory.decodeFile(s);	

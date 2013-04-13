@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import com.lapidus.android.R;
 import com.lapidus.android.engine.HelloWorld;
@@ -13,12 +14,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import java.util.Vector;
 public class Reader extends Activity {
 	TextView tw;
 	@Override
@@ -38,8 +38,14 @@ public class Reader extends Activity {
 					//sb.append("<" + i + " " + j + image.getPixel(i, j) + ">");
 					//sb.append ("<item>" + i + "</item>\n");
 					//sb2.append("<item>" + j + "</item>\n");
-					arr.add(new Point(i, j));
-				}							
+					arr.add(new Point(i, j, 0, arr.size()));
+				}
+				if (Color.GREEN == image.getPixel(i, j)) {
+					arr.add(new Point(i, j, 0, 0));
+				}
+				if (Color.RED == image.getPixel(i, j)) {
+					arr.add(new Point(i, j, 0, arr.size()));
+				}
 			}
 			//sb.append("\n");
 		}
@@ -61,5 +67,24 @@ public class Reader extends Activity {
 		}*/
 		
 		System.out.print(sb);
+	}
+	private static ArrayList<Point> processPointsFromBitmap(ArrayList<Point> arr) {
+		Collections.sort(arr, Point.indexComp);
+		for (int i = 0; i < arr.size(); i++) {
+			
+		}
+		return null;
+	}
+	private static int findPoint(int x, int y, ArrayList<Point> arr) {
+		for (Point p : arr) {
+			if (p.x == x && p.y == y) return p.index;
+		}
+		return -1;
+	}
+	public static ArrayList<Point> processPointsPrepared(ArrayList<Point> arr) {
+		
+		Collections.sort(arr, Point.indexComp);
+		
+		return null;
 	}
 }

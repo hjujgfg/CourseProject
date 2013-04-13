@@ -3,8 +3,10 @@ package com.lapidus.android.painter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
 
 import com.lapidus.android.R;
+import com.lapidus.android.engine.HelloWorld;
 
 import android.os.Bundle;
 import android.os.Environment;
@@ -46,6 +48,7 @@ public class Painter extends Activity {
 		menu.add(Menu.NONE, 1, Menu.NONE, "Read File");
 		menu.add(Menu.NONE, 2, Menu.NONE, "Save Image");
 		menu.add(Menu.NONE, 3, Menu.NONE, "Choose File");
+		menu.add(Menu.NONE, 4, Menu.NONE, "Pass route");
 		return true;
 	}
 	@Override 
@@ -71,6 +74,14 @@ public class Painter extends Activity {
 		if (item.getItemId() == 3) {
 			loadFileList();
 			this.onCreateDialog(1000);
+		}
+		if (item.getItemId() == 4) {
+			HelloWorld.path = new ArrayList<Point>();
+			for (int i = 0; i < view.approximizedPoints.length; i++) {
+				HelloWorld.path.add(view.approximizedPoints[i]);
+			}
+			Intent i = new Intent(this, HelloWorld.class);
+			startActivity(i);
 		}
 		return true;
 	}
