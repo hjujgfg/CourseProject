@@ -87,4 +87,16 @@ public class Reader extends Activity {
 		
 		return null;
 	}
+	private static final int LEFT = 0;
+	private static final int LEFT_UP = 1;
+	private static final int UP = 2;
+	private static final int RIGHT_UP = 3;
+	private static final int RIGHT = 4;
+	private static final int RIGHT_DOWN = 5;
+	private static final int DOWN = 6;
+	private static final int LEFT_DOWN = 7;
+	private static final int NIN = -1;
+	private class Intersection {
+		
+	}	
 }

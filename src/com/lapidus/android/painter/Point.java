@@ -2,7 +2,7 @@ package com.lapidus.android.painter;
 
 import java.util.Comparator;
 
-public class Point {
+public class Point implements Cloneable {
 	public float x,y,z;
 	public int index;
 	public boolean collides;
@@ -70,10 +70,7 @@ public class Point {
 			if (arg0.index > arg1.index) return 1;
 			if (arg0.index < arg1.index) return -1;
 			return 0;
-		}
-		
-	}
-	
-	
+		}		
+	}	
 }
  

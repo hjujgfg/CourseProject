@@ -78,7 +78,7 @@ public class Painter extends Activity {
 		if (item.getItemId() == 4) {
 			HelloWorld.path = new ArrayList<Point>();
 			for (int i = 0; i < view.approximizedPoints.length; i++) {
-				HelloWorld.path.add(view.approximizedPoints[i]);
+				HelloWorld.path.add(new Point(view.approximizedPoints[i].x, view.approximizedPoints[i].y));
 			}
 			Intent i = new Intent(this, HelloWorld.class);
 			startActivity(i);

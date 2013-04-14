@@ -66,8 +66,7 @@ public class PainterView extends View {
 		canvas.drawCircle(points.get(0).x, points.get(0).y, 1, paint);
 		paint.setColor(Color.RED);
 		canvas.drawCircle(points.get(points.size() - 1).x, points.get(points.size() - 1).y, 1, paint);
-		paint.setColor(Color.RED);
-		canvas.drawLine(0, 0, 100, 100, paint);
+		paint.setColor(Color.RED);		
 		if (approximizedPoints != null && approximizedPoints.length != 0) {			
 			for (int i = 0; i < approximizedPoints.length - 1; i ++) {
 				canvas.drawLine(approximizedPoints[i].x, approximizedPoints[i].y, 

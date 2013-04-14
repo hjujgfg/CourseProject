@@ -130,7 +130,7 @@ public class HelloWorld extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		mGLView.onResume();
+		mGLView.onResume();		
 	}
 
 	@Override
@@ -345,9 +345,9 @@ public class HelloWorld extends Activity {
 				s2 = new SimpleVector(0,0,0);
 				s3 = new SimpleVector(0,0,0);
 				s4 = new SimpleVector(0,0,0);
-				Log.i("RR", "fwe " + path.size());*/
+				Log.i("RR", "fwe " + path.size());
 				// работает для просто набора точек - пиксели
-				/*for (int i = 0; i < path.size(); i ++) {
+				for (int i = 0; i < path.size(); i ++) {
 					
 					s1.x = path.get(i).x - path.get(0).x - 10;
 					s1.y = 100;
@@ -363,15 +363,21 @@ public class HelloWorld extends Activity {
 					s4.z = path.get(i).y - path.get(0).y + 10;
 					newods.addTriangle(s1, s2, s3);
 					newods.addTriangle(s3, s2, s4);									
-				}	*/	
+				}		*/
 				normalizePath();
-				SimpleVector[] svv;
+				SimpleVector[] svv = new SimpleVector[4];
 				for (int i = 0; i < path.size() - 1; i ++) {
-					svv = generateRect(path.get(i), path.get(i + 1));
-					newods.addTriangle(svv[0], svv[1], svv[2]);
-					newods.addTriangle(svv[2], svv[1], svv[3]);
+					svv = generateRect(path.get(i), path.get(i + 1), svv);
+					if (path.get(i).y < path.get(i + 1).y) {
+						newods.addTriangle(svv[0], svv[1], svv[2]);					
+						newods.addTriangle(svv[2], svv[1], svv[3]);
+					} else {
+						newods.addTriangle(svv[2], svv[1], svv[0]);					
+						newods.addTriangle(svv[3], svv[1], svv[2]);
+					}
+					
 				}
-				newods.scale(4f);
+				newods.scale(8f);
 				newods.setTexture("asphalt");
 				newods.strip();
 				newods.build();
@@ -431,29 +437,28 @@ public class HelloWorld extends Activity {
 				}
 			}
 		}
-		private SimpleVector[] generateRect(Point a, Point b) {
-			SimpleVector[] t = new SimpleVector[4];
+		private SimpleVector[] generateRect(Point a, Point b, SimpleVector[] t) {
 			float x, y = 100, z; 
-			x = a.x - 10;
-			z = a.y - 10;
+			x = a.x - 2;
+			z = a.y - 2;
 			t[0] = new SimpleVector(x, y, z);
-			x = a.x + 10;
-			z = a.y - 10;
+			x = a.x + 2;
+			z = a.y - 2;
 			t[1] = new SimpleVector(x, y, z);
-			x = b.x - 10;
-			z = b.y;
+			x = b.x - 2;
+			z = b.y + 2;
 			t[2] = new SimpleVector(x, y, z);
-			x = b.x + 10;
-			z = b.y;
-			t[3] = new SimpleVector(x, y, z);
+			x = b.x + 2;
+			z = b.y + 2;
+			t[3] = new SimpleVector(x, y, z);			
 			return t;
 		}
 		private void normalizePath () {
 			float xx = path.get(0).x;
-			float zz = path.get(0).z;
+			float yy = path.get(0).y;
 			for (Point x : path) {
 				x.x -= xx;
-				x.z -= zz;
+				x.y -= yy;
 			}
 		}
 		
