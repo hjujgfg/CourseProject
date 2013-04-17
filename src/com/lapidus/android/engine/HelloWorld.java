@@ -326,10 +326,15 @@ public class HelloWorld extends Activity {
 				InputStream fis = null;
 				fis = getResources().openRawResource(R.raw.policecar);				
 				Object3D[] loadedCars = Loader.loadOBJ(fis, null, 1);				
-				loadedCar = Object3D.mergeAll(loadedCars);						
+				loadedCar = Object3D.mergeAll(loadedCars);	
+				//loadedCar.scale(0.05f);	
+				Log.i("CO", loadedCar.getCenter().toString());
+				loadedCar.setScale(0.01f);
+				Log.i("CO", loadedCar.getCenter().toString());
+				//loadedCar.translate(-loadedCar.getCenter().x+8, -loadedCar.getCenter().y + 100, -loadedCar.getCenter().z);
+				//loadedCar.translate(loadedCar.getCenter().z, loadedCar.getCenter().x, loadedCar.getCenter().y);
 				loadedCar.strip();
-				loadedCar.build();		
-				loadedCar.scale(0.1f);
+				loadedCar.build();	
 				Object3D flore = new Object3D(4);
 				flore.addTriangle(new SimpleVector(-70, 100, -70), new SimpleVector(70, 100, -70), new SimpleVector(0, 100, 200));
 				t = Primitives.getPlane(5, 10);
@@ -366,6 +371,7 @@ public class HelloWorld extends Activity {
 				}		*/
 				normalizePath();
 				SimpleVector[] svv = new SimpleVector[4];
+				Log.i("CO", loadedCar.getTransformedCenter().toString() + ": " + loadedCar.getCenter());
 				for (int i = 0; i < path.size() - 1; i ++) {
 					svv = generateRect(path.get(i), path.get(i + 1), svv);
 					if (path.get(i).y < path.get(i + 1).y) {
@@ -375,9 +381,12 @@ public class HelloWorld extends Activity {
 						newods.addTriangle(svv[2], svv[1], svv[0]);					
 						newods.addTriangle(svv[3], svv[1], svv[2]);
 					}
-					
+					for (int k = 0; k < 4; k ++) {
+						Log.i("CO", svv[k].toString() + ": " + i);
+					}					
 				}
-				newods.scale(8f);
+				newods.scale(2f);
+				Log.i("CO", " newods " + newods.getCenter().toString() + " : " +newods.getTransformedCenter().toString());
 				newods.setTexture("asphalt");
 				newods.strip();
 				newods.build();
@@ -411,14 +420,17 @@ public class HelloWorld extends Activity {
 				world.compileAllObjects();
 				cam = world.getCamera();
 				loadedCar.setOrientation(new SimpleVector(0, 0, -1), new SimpleVector(0, -1, 0));				
-				carDirection = loadedCar.getXAxis();
-				Log.i(mytag, carDirection.toString());				
+				carDirection = loadedCar.getZAxis();
+				Log.i("CO", "centr " + loadedCar.getTransformedCenter().toString());				
 				Log.i(mytag, "car o ^ " + loadedCar.getXAxis().toString());
 				SimpleVector temp = loadedCar.getTransformedCenter();
-				temp.y = -50;
-				temp.z = -50;				
+				temp.y -= 10;
+				temp.z -= 10;
+				Log.i("CO", "cam pos " + cam.getPosition().toString());
 				cam.setPosition(temp);
-				cam.moveCamera(temp, 0.5f);
+				Log.i("CO", "cam pos " + cam.getPosition().toString());
+				//cam.moveCamera(temp, 1f);
+				//cam.transform(temp);
 				cam.lookAt(loadedCar.getTransformedCenter());
 				
 				Log.i("MyTag", " " + cam.getPosition().x + " " + cam.getPosition().y + " " + cam.getPosition().z);
@@ -440,10 +452,10 @@ public class HelloWorld extends Activity {
 		private SimpleVector[] generateRect(Point a, Point b, SimpleVector[] t) {
 			float x, y = 100, z; 
 			x = a.x - 2;
-			z = a.y - 2;
+			z = a.y + 2;
 			t[0] = new SimpleVector(x, y, z);
 			x = a.x + 2;
-			z = a.y - 2;
+			z = a.y + 2;
 			t[1] = new SimpleVector(x, y, z);
 			x = b.x - 2;
 			z = b.y + 2;
@@ -472,7 +484,7 @@ public class HelloWorld extends Activity {
 				nobj.rotateY(touchTurn);
 				t.rotateY(touchTurn);							
 				touchTurn = 0;
-			}
+			}*/
 
 			if (touchTurnUp != 0) {
 				cube.rotateX(touchTurnUp);
@@ -480,17 +492,17 @@ public class HelloWorld extends Activity {
 				t.rotateX(touchTurnUp);				
 				cameraTransformMatrix.translate(new SimpleVector(0, -touchTurnUp * 30, 0));								
 				touchTurnUp = 0;				
-			}*/
+			}
 			SimpleVector s = loadedCar.getTransformedCenter();
 			s.x -= 50; 
 			cube.translate(-1, 0 , 1);
-			if (speed < 3 && (ypos < 2 * screenHeight / 3 || ypos < 0))  {
+			if (speed < 0.3 && (ypos < 2 * screenHeight / 3 || ypos < 0))  {
 				speed += 0.2;
 			}
 			if (xpos > screenWidth / 2 && ypos < 2 * screenHeight / 3 && ypos >= 0) {
-				cameraRotationAngle = (float)Math.PI / 180;				
+				cameraRotationAngle = (float)Math.PI / 90;				
 			} else if (xpos < 200 && xpos >= 0 && ypos < 2 * screenHeight / 3 && ypos >= 0) {
-				cameraRotationAngle = -(float)Math.PI / 180;				
+				cameraRotationAngle = -(float)Math.PI / 90;				
 			} 
 			if (ypos > 2 * screenHeight / 3  && ypos >= 0 && speed > 0 ) {
 				//cameraRotationAngle = (float)Math.PI / 180;
@@ -506,7 +518,9 @@ public class HelloWorld extends Activity {
 			//loadedCar.translate(-loadedCar.getZAxis().x * speed, 0, -loadedCar.getZAxis().z * speed);
 			SimpleVector t = new SimpleVector(-loadedCar.getZAxis().x * speed, 0, -loadedCar.getZAxis().z * speed);			
 			//t.scalarMul(speed);
-			t = loadedCar.checkForCollisionEllipsoid(t, ellipsoid, 8);
+			t = loadedCar.checkForCollisionEllipsoid(t, ellipsoid, 10);
+			loadedCar.translate(t);
+			t = loadedCar.checkForCollisionEllipsoid(new SimpleVector(0, 1, 0), ellipsoid, 1);
 			loadedCar.translate(t);
 			//loadedCar.setCenter(loadedCar.getTransformedCenter());
 			Log.i(mytag, loadedCar.getTransformedCenter().toString() + " " + loadedCar.getCenter().toString());
@@ -520,7 +534,7 @@ public class HelloWorld extends Activity {
 			temp = cam.getPosition();
 			temp.matMul(cameraTransformMatrix);
 			cam.setPosition(temp);			
-			cam.moveCamera(new SimpleVector(cam.getDirection().x, 0, cam.getDirection().z), speed * 1.3f);			
+			cam.moveCamera(new SimpleVector(cam.getDirection().x, 0, cam.getDirection().z), speed * 1.414f);			
 			cam.lookAt(loadedCar.getTransformedCenter());
 			sun.setPosition(cam.getPosition());
 			cameraTransformMatrix.setIdentity();

@@ -70,6 +70,7 @@ public class Reader extends Activity {
 	}
 	private static ArrayList<Point> processPointsFromBitmap(ArrayList<Point> arr) {
 		Collections.sort(arr, Point.indexComp);
+		ArrayList<Point> result = new ArrayList<Point>();
 		for (int i = 0; i < arr.size(); i++) {
 			
 		}
@@ -81,6 +82,7 @@ public class Reader extends Activity {
 		}
 		return -1;
 	}
+	private static Point findPoint(){return null;}
 	public static ArrayList<Point> processPointsPrepared(ArrayList<Point> arr) {
 		
 		Collections.sort(arr, Point.indexComp);
