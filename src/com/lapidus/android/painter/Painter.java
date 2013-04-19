@@ -80,6 +80,7 @@ public class Painter extends Activity {
 			for (int i = 0; i < view.approximizedPoints.length; i++) {
 				HelloWorld.path.add(new Point(view.approximizedPoints[i].x, view.approximizedPoints[i].y));
 			}
+			HelloWorld.bb = true;
 			Intent i = new Intent(this, HelloWorld.class);
 			startActivity(i);
 		}

@@ -57,7 +57,11 @@ public class Reader extends Activity {
 			}
 			//sb.append("\n");		
 		}
-		ArrayList<Point> ret;
+		HelloWorld.path = (ArrayList<Point>) arr.clone(); 
+		HelloWorld.bb = false;
+		Intent k = new Intent(this, HelloWorld.class);
+		startActivity(k);
+		/*ArrayList<Point> ret;
 		try {
 			ret = processPointsFromBitmap(arr);
 			HelloWorld.path = ret;
@@ -65,7 +69,7 @@ public class Reader extends Activity {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
 		/*ArrayList<Point> sortedPoints = processPointsFromBitmap(arr);
 		Point[] tmp = new Point[arr.size()];

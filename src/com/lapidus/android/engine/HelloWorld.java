@@ -21,6 +21,7 @@ import android.renderscript.Mesh.TriangleMeshBuilder;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.Window;
 import android.widget.Toast;
 
 import com.lapidus.android.R;
@@ -74,6 +75,7 @@ public class HelloWorld extends Activity {
 	private Object3D t = null;
 	private Object3D loadedCar = null;
 	private SimpleVector carDirection = null; 
+	private Object3D newods = null;
 	private int fps = 0;
 
 	private Light sun = null;
@@ -88,6 +90,7 @@ public class HelloWorld extends Activity {
 	
 	private String mytag = "MyTag";
 	private SimpleVector ellipsoid = new SimpleVector(2, 2, 2);
+	public static boolean bb; 
 	protected void onCreate(Bundle savedInstanceState) {
 
 		Logger.log("onCreate");
@@ -110,7 +113,7 @@ public class HelloWorld extends Activity {
 				return configs[0];
 			}
 		});
-
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		renderer = new MyRenderer();
 		mGLView.setRenderer(renderer);
 		setContentView(mGLView);
@@ -118,7 +121,7 @@ public class HelloWorld extends Activity {
 		android.graphics.Point p = new android.graphics.Point();
 		d.getSize(p);
 		screenHeight = p.y;
-		screenWidth = p.x;
+		screenWidth = p.x;		
 	}
 
 	@Override
@@ -321,7 +324,7 @@ public class HelloWorld extends Activity {
 				//cube.setTexture("texture");
 				cube.strip();
 				cube.build();
-				Object3D newods = new Object3D(path.size() * 3);
+				newods = new Object3D(path.size() * 3);
 				//newods.addTriangle(new SimpleVector(-50, 0, -50), new SimpleVector(50, 0, -50), new SimpleVector(-50, 0, 0));
 				InputStream fis = null;
 				fis = getResources().openRawResource(R.raw.policecar);				
@@ -329,7 +332,7 @@ public class HelloWorld extends Activity {
 				loadedCar = Object3D.mergeAll(loadedCars);	
 				//loadedCar.scale(0.05f);	
 				Log.i("CO", loadedCar.getCenter().toString());
-				loadedCar.setScale(0.01f);
+				loadedCar.setScale(0.005f);
 				Log.i("CO", loadedCar.getCenter().toString());
 				//loadedCar.translate(-loadedCar.getCenter().x+8, -loadedCar.getCenter().y + 100, -loadedCar.getCenter().z);
 				//loadedCar.translate(loadedCar.getCenter().z, loadedCar.getCenter().x, loadedCar.getCenter().y);
@@ -351,47 +354,10 @@ public class HelloWorld extends Activity {
 				t3.makeEqualLength(t1);
 				Log.i("CO" , "1 -3e " + t1.calcAngleFast(t3));
 				//Object3D[] suround = new Object3D[path.size()];			
-				/*SimpleVector s1,s2,s3,s4;
-				s1 = new SimpleVector(0,0,0);
-				s2 = new SimpleVector(0,0,0);
-				s3 = new SimpleVector(0,0,0);
-				s4 = new SimpleVector(0,0,0);
-				Log.i("RR", "fwe " + path.size());
-				// работает для просто набора точек - пиксели
-				for (int i = 0; i < path.size(); i ++) {
-					
-					s1.x = path.get(i).x - path.get(0).x - 10;
-					s1.y = 100;
-					s1.z = path.get(i).y - path.get(0).y - 10;
-					s2.x = path.get(i).x - path.get(0).x + 10;
-					s2.y = 100;
-					s2.z = path.get(i).y - path.get(0).y - 10;
-					s3.x = path.get(i).x - path.get(0).x - 10;
-					s3.y = 100;
-					s3.z = path.get(i).y - path.get(0).y + 10;
-					s4.x = path.get(i).x - path.get(0).x + 10;
-					s4.y = 100;
-					s4.z = path.get(i).y - path.get(0).y + 10;
-					newods.addTriangle(s1, s2, s3);
-					newods.addTriangle(s3, s2, s4);									
-				}		*/
-				normalizePath();
-				SimpleVector[] svv = new SimpleVector[4];
-				Log.i("CO", loadedCar.getTransformedCenter().toString() + ": " + loadedCar.getCenter());
-				for (int i = 0; i < path.size() - 1; i ++) {
-					svv = generateRect(path.get(i), path.get(i + 1), svv);
-					if (path.get(i).y < path.get(i + 1).y) {
-						newods.addTriangle(svv[0], svv[1], svv[2]);					
-						newods.addTriangle(svv[2], svv[1], svv[3]);
-					} else {
-						newods.addTriangle(svv[2], svv[1], svv[0]);					
-						newods.addTriangle(svv[3], svv[1], svv[2]);
-					}
-					for (int k = 0; k < 4; k ++) {
-						Log.i("CO", svv[k].toString() + ": " + i);
-					}					
-				}
-				newods.scale(2f);
+				if (bb) generatePathSorted();
+				else generatePathUnsorted();
+				
+				//newods.scale(2f);
 				Log.i("CO", " newods " + newods.getCenter().toString() + " : " +newods.getTransformedCenter().toString());
 				newods.setTexture("asphalt");
 				newods.strip();
@@ -430,8 +396,8 @@ public class HelloWorld extends Activity {
 				Log.i("CO", "centr " + loadedCar.getTransformedCenter().toString());				
 				Log.i(mytag, "car o ^ " + loadedCar.getXAxis().toString());
 				SimpleVector temp = loadedCar.getTransformedCenter();
-				temp.y -= 10;
-				temp.z -= 10;
+				temp.y -= 2;
+				temp.z -= 2;
 				Log.i("CO", "cam pos " + cam.getPosition().toString());
 				cam.setPosition(temp);
 				Log.i("CO", "cam pos " + cam.getPosition().toString());
@@ -455,19 +421,63 @@ public class HelloWorld extends Activity {
 				}
 			}
 		}
+		private void generatePathSorted() {
+			normalizePath();
+			SimpleVector[] svv = new SimpleVector[4];
+			Log.i("CO", loadedCar.getTransformedCenter().toString() + ": " + loadedCar.getCenter());
+			for (int i = 0; i < path.size() - 1; i ++) {
+				svv = generateRect(path.get(i), path.get(i + 1), svv);
+				if (path.get(i).y < path.get(i + 1).y) {
+					newods.addTriangle(svv[0], svv[1], svv[2]);					
+					newods.addTriangle(svv[2], svv[1], svv[3]);
+				} else {
+					newods.addTriangle(svv[2], svv[1], svv[0]);					
+					newods.addTriangle(svv[3], svv[1], svv[2]);
+				}
+				for (int k = 0; k < 4; k ++) {
+					Log.i("CO", svv[k].toString() + ": " + i);
+				}					
+			}
+		}
+		private void generatePathUnsorted() {
+			SimpleVector s1,s2,s3,s4;
+			s1 = new SimpleVector(0,0,0);
+			s2 = new SimpleVector(0,0,0);
+			s3 = new SimpleVector(0,0,0);
+			s4 = new SimpleVector(0,0,0);
+			Log.i("RR", "fwe " + path.size());
+			// работает для просто набора точек - пиксели
+			for (int i = 0; i < path.size(); i ++) {
+				
+				s1.x = path.get(i).x - path.get(0).x - 5;
+				s1.y = 100;
+				s1.z = path.get(i).y - path.get(0).y - 5;
+				s2.x = path.get(i).x - path.get(0).x + 5;
+				s2.y = 100;
+				s2.z = path.get(i).y - path.get(0).y - 5;
+				s3.x = path.get(i).x - path.get(0).x - 5;
+				s3.y = 100;
+				s3.z = path.get(i).y - path.get(0).y + 5;
+				s4.x = path.get(i).x - path.get(0).x + 5;
+				s4.y = 100;
+				s4.z = path.get(i).y - path.get(0).y + 5;
+				newods.addTriangle(s1, s2, s3);
+				newods.addTriangle(s3, s2, s4);									
+			}		
+		}
 		private SimpleVector[] generateRect(Point a, Point b, SimpleVector[] t) {
 			float x, y = 100, z; 
-			x = a.x - 2;
-			z = a.y + 2;
+			x = a.x - 5;
+			z = a.y + 5;
 			t[0] = new SimpleVector(x, y, z);
-			x = a.x + 2;
-			z = a.y + 2;
+			x = a.x + 5;
+			z = a.y + 5;
 			t[1] = new SimpleVector(x, y, z);
-			x = b.x - 2;
-			z = b.y + 2;
+			x = b.x - 5;
+			z = b.y + 5;
 			t[2] = new SimpleVector(x, y, z);
-			x = b.x + 2;
-			z = b.y + 2;
+			x = b.x + 5;
+			z = b.y + 5;
 			t[3] = new SimpleVector(x, y, z);			
 			return t;
 		}
@@ -482,7 +492,7 @@ public class HelloWorld extends Activity {
 		
 		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		}
-		
+		boolean onGround = false;
 		public void onDrawFrame(GL10 gl) {
 			
 			/*if (touchTurn != 0) {
@@ -502,17 +512,17 @@ public class HelloWorld extends Activity {
 			SimpleVector s = loadedCar.getTransformedCenter();
 			s.x -= 50; 
 			cube.translate(-1, 0 , 1);
-			if (speed < 0.3 && (ypos < 2 * screenHeight / 3 || ypos < 0))  {
-				speed += 0.2;
-			}
-			if (xpos > screenWidth / 2 && ypos < 2 * screenHeight / 3 && ypos >= 0) {
+			
+			if (xpos > screenWidth / 2 && speed >= 0) {//&& ypos < 2 * screenHeight / 3 && ypos >= 0) {
 				cameraRotationAngle = (float)Math.PI / 90;				
-			} else if (xpos < 200 && xpos >= 0 && ypos < 2 * screenHeight / 3 && ypos >= 0) {
+			} else if (xpos < 200 && xpos >= 0 && speed >= 0) {// && ypos < 2 * screenHeight / 3 && ypos >= 0) {
 				cameraRotationAngle = -(float)Math.PI / 90;				
 			} 
-			if (ypos > 2 * screenHeight / 3  && ypos >= 0 && speed > 0 ) {
+			if (ypos > 2 * screenHeight / 3  && ypos >= 0 && speed >= 0) {
 				//cameraRotationAngle = (float)Math.PI / 180;
-				speed -= 0.1;
+				speed -= 0.02;
+				//if (xpos > screenWidth / 2) cameraRotationAngle = -(float)Math.PI / 90;
+				//if (xpos < screenWidth / 2) cameraRotationAngle = (float)Math.PI / 90;
 			}
 			//loadedCar.setCenter(loadedCar.getTransformedCenter());
 			loadedCar.rotateY(cameraRotationAngle);
@@ -527,7 +537,21 @@ public class HelloWorld extends Activity {
 			t = loadedCar.checkForCollisionEllipsoid(t, ellipsoid, 10);
 			loadedCar.translate(t);
 			//GRAVITY
-			//t = loadedCar.checkForCollisionEllipsoid(new SimpleVector(0, 1, 0), ellipsoid, 1);
+			t = loadedCar.checkForCollisionEllipsoid(new SimpleVector(0, 1, 0), ellipsoid, 1);
+			Log.i("GR", "corrected"  + t.toString());
+			if (t.y == 1 && !onGround) loadedCar.translate(t);
+			else {
+				onGround = true;				
+			}
+			if (t.y == 1 && onGround) {
+				if (speed > 0.2) {
+					speed -= 0.01;
+				}
+			} else if (onGround) {
+				if (speed < 0.4 && (ypos < 2 * screenHeight / 3 || ypos < 0))  {
+					speed += 0.05;
+				}
+			}
 			//loadedCar.translate(t);
 			//loadedCar.setCenter(loadedCar.getTransformedCenter());
 			Log.i(mytag, loadedCar.getTransformedCenter().toString() + " " + loadedCar.getCenter().toString());
