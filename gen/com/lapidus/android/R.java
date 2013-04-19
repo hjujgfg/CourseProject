@@ -28,6 +28,7 @@ public final class R {
     }
     public static final class menu {
         public static final int activity_painter=0x7f070000;
+        public static final int activity_reader=0x7f070001;
     }
     public static final class raw {
         public static final int policecar=0x7f040000;

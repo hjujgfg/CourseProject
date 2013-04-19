@@ -66,13 +66,13 @@ public class PainterView extends View {
 		canvas.drawCircle(points.get(0).x, points.get(0).y, 1, paint);
 		paint.setColor(Color.RED);
 		canvas.drawCircle(points.get(points.size() - 1).x, points.get(points.size() - 1).y, 1, paint);
-		paint.setColor(Color.RED);		
+		/*paint.setColor(Color.RED);		
 		if (approximizedPoints != null && approximizedPoints.length != 0) {			
 			for (int i = 0; i < approximizedPoints.length - 1; i ++) {
 				canvas.drawLine(approximizedPoints[i].x, approximizedPoints[i].y, 
 						approximizedPoints[i + 1].x, approximizedPoints[i + 1].y, paint);						
 			}
-		}
+		}*/
 		paint.setColor(Color.BLACK);
 	}
 	Point pp;
@@ -98,8 +98,9 @@ public class PainterView extends View {
 				for (Point x : points) {					
 					temp[i] = x;
 					i ++;
+					Log.i("PP", x.toString() + " i = " + i);
 				}
-				approximizedPoints = Approximizer.approximize(2f, temp);
+				approximizedPoints = Approximizer.approximize(2f, temp);				
 			}
 			invalidate();
 			return true;

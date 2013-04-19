@@ -343,7 +343,13 @@ public class HelloWorld extends Activity {
 				t.strip();
 				t.build();
 				t.rotateX(90);
-				
+				SimpleVector t1 = new SimpleVector(0, 0, 0);
+				SimpleVector t2 = new SimpleVector(1, 0, 1);
+				SimpleVector t3 = new SimpleVector(-1, 0, 1);
+				Log.i("CO", " 1- 2 " + t1.calcAngleFast(t2));
+				Log.i("CO" , "1 -3 " + t1.calcAngleFast(t3));
+				t3.makeEqualLength(t1);
+				Log.i("CO" , "1 -3e " + t1.calcAngleFast(t3));
 				//Object3D[] suround = new Object3D[path.size()];			
 				/*SimpleVector s1,s2,s3,s4;
 				s1 = new SimpleVector(0,0,0);
@@ -520,8 +526,9 @@ public class HelloWorld extends Activity {
 			//t.scalarMul(speed);
 			t = loadedCar.checkForCollisionEllipsoid(t, ellipsoid, 10);
 			loadedCar.translate(t);
-			t = loadedCar.checkForCollisionEllipsoid(new SimpleVector(0, 1, 0), ellipsoid, 1);
-			loadedCar.translate(t);
+			//GRAVITY
+			//t = loadedCar.checkForCollisionEllipsoid(new SimpleVector(0, 1, 0), ellipsoid, 1);
+			//loadedCar.translate(t);
 			//loadedCar.setCenter(loadedCar.getTransformedCenter());
 			Log.i(mytag, loadedCar.getTransformedCenter().toString() + " " + loadedCar.getCenter().toString());
 			SimpleVector backVect = loadedCar.getTransformedCenter();
