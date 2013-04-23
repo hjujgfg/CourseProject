@@ -7,6 +7,7 @@ public class Point implements Cloneable {
 	public int index;
 	public boolean collides;
 	public int collisionIndex;
+	public boolean chkd;
 	public static Comparator<Point> indexComp = new indexComparator();
 	public static Comparator<Point> xComp = new xComparator();
 	public Point (float x, float y, float z, int index) {
@@ -16,12 +17,14 @@ public class Point implements Cloneable {
 		this.index = index;
 		collides = false;
 		collisionIndex = -1;
+		chkd = false;
 	}
 	public Point (float x, float y) {
 		this.x = x;
 		this.y = y;
 		z = 0;
 		index = -1;
+		chkd = false;
 		collides = false;
 		collisionIndex = -1;
 	}

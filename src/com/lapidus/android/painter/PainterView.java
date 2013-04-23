@@ -59,6 +59,7 @@ public class PainterView extends View {
 			return;
 		}
 		for (int i = 0; i < points.size() - 1; i ++) {
+			//if (i == 0) canvas.drawText(points.get(0).toString(), 40, 40, paint);
 			canvas.drawLine(points.get(i).x, points.get(i).y, 
 					points.get(i+1).x, points.get(i+1).y, paint);						
 		}
