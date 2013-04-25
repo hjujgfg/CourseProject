@@ -14,13 +14,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.telephony.NeighboringCellInfo;
 import android.view.Menu;
 import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 public class Reader extends Activity {
 	TextView tw;
-	PainterView view;
+	ReaderView view;
+	ArrayList<Collision> collisions;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -51,9 +53,11 @@ public class Reader extends Activity {
 		}
 		//HelloWorld.path = (ArrayList<Point>) arr.clone(); 
 		//HelloWorld.bb = false;
-		ArrayList<Point> processedPoints = processPointsFromBitmap(arr);
-		view.approximizedPoints = Approximizer.approximize(2f, toArray(processedPoints));
-		view.points = processedPoints;			
+		//ArrayList<Point> processedPoints = processPointsFromBitmap(arr);
+		//view.approximizedPoints = Approximizer.approximize(2f, toArray(processedPoints));
+		//view.points = processedPoints;
+		view.points = arr;
+		view.cols = findCollisions(arr);
 		System.out.print(sb);
 	}
 	private Point[] toArray(ArrayList<Point> a) {
@@ -73,17 +77,53 @@ public class Reader extends Activity {
 		menu.add(Menu.NONE, 1, Menu.NONE, "Process");
 		return true;
 	}
+	private static ArrayList<Collision> findCollisions (ArrayList<Point> arr) {
+		ArrayList<Collision> cols = new ArrayList<Collision>();
+		int o = 0;
+		Point[] sur; 
+		for (Point x : arr) {
+			if (x.collides == false) {
+				o = 0;
+				sur = findNeighbors(x.x, x.y, arr);
+				o = sur[8].collisionIndex;
+				if (o > 2) cols.add(processCollision(arr, x, sur));
+			}
+		}
+		return cols;
+	}
+	private static Collision processCollision(ArrayList<Point> arr, Point p, Point[] neighbors) {
+		Collision col = new Collision();
+		int o = -1;
+		Point[] nextNeighbors;
+		col.addCollidingPoint(p);
+		p.collides = true;
+		for (int i = 0; i < 8; i ++) {
+			if (neighbors[i] != null) {
+				o = -1;
+				nextNeighbors = findNeighbors(neighbors[i].x, neighbors[i].y, arr);
+				o = nextNeighbors[8].collisionIndex;
+				if (o <= 2) col.addExitPoint(neighbors[i]);
+				if (o > 2) {
+					if (neighbors[i].collides == false) {
+						col.merge(processCollision(arr, neighbors[i], nextNeighbors));
+					}					
+				}							
+			}
+		}		
+		return col; 
+	}
 	private static ArrayList<Point> processPointsFromBitmap(ArrayList<Point> arr) {
 		Collections.sort(arr, Point.indexComp);		
 		boolean bb = true; 
 		Point[] circum;
 		Point tmp; 
+		Integer quantity = 0;
 		ArrayList<Point> result = new ArrayList<Point>();
 		result.add(arr.get(0));
 		tmp = arr.get(0);
 		int counter; 
 		while (bb) {
-			circum = findNeighbours(tmp.x, tmp.y, arr);
+			circum = findNeighbors(tmp.x, tmp.y, arr);
 			tmp.chkd = true;
 			result.add(tmp);
 			tmp = chooseSmoothest(tmp, circum, result.get(result.size() - 2));
@@ -109,7 +149,7 @@ public class Reader extends Activity {
 		int index = -1;
 		float tmp; 
 		boolean hasPoints = false; 
-		for (int i = 0; i < sur.length; i ++) {
+		for (int i = 0; i < 8; i ++) {
 			if (sur[i] != null) hasPoints = true; 
 			if (sur[i] != null && sur[i].chkd == false) {
 				tmp = vectorMult(prev, a, sur[i]);
@@ -128,15 +168,16 @@ public class Reader extends Activity {
 	}
 	private static float vectorMult(Point p1, Point p2, Point p3) {
 		return (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
-	}
+	}	
 	private static Point findPoint(float x, float y, ArrayList<Point> arr) {
 		for (Point p : arr) {
 			if (p.x == x && p.y == y) return p;
 		}
 		return null;
 	}
-	private static Point[] findNeighbours(float x, float y, ArrayList<Point> arr) {
-		Point[] res = new Point[8];
+	private static Point[] findNeighbors(float x, float y, ArrayList<Point> arr) {
+		Point[] res = new Point[9];
+		int quantity;
 			res[0] = findPoint(x-1, y-1, arr);
 			res[1] = findPoint(x, y-1, arr);
 			res[2] = findPoint(x+1, y-1, arr);
@@ -145,6 +186,12 @@ public class Reader extends Activity {
 			res[5] = findPoint(x, y+1, arr);
 			res[6] = findPoint(x-1, y+1, arr);
 			res[7] = findPoint(x-1, y, arr);
+		quantity = 0;
+		for (int i = 0; i < 8; i ++) {
+			if (res[i] != null) quantity ++;
+		}
+		res[8] = new Point();
+		res[8].collisionIndex = quantity;
 		return res;
 	}	
 	
@@ -166,4 +213,5 @@ public class Reader extends Activity {
 	private class Intersection {
 		
 	}	
+	
 }

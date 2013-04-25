@@ -10,6 +10,7 @@ public class Point implements Cloneable {
 	public boolean chkd;
 	public static Comparator<Point> indexComp = new indexComparator();
 	public static Comparator<Point> xComp = new xComparator();
+	public static Comparator<Point> yComp = new yComparator();
 	public Point (float x, float y, float z, int index) {
 		this.x = x;
 		this.y = y;
@@ -27,6 +28,16 @@ public class Point implements Cloneable {
 		chkd = false;
 		collides = false;
 		collisionIndex = -1;
+	}
+	public Point() {
+		// TODO Auto-generated constructor stub
+		x = -1;
+		y = -1;
+		z = -1;
+		index = -1;
+		collides = false;
+		collisionIndex = -1;
+		chkd = false;
 	}
 	public String toString()
 	{
@@ -55,16 +66,20 @@ public class Point implements Cloneable {
 	///Comparators
 	
 	private static class xComparator implements Comparator<Point> {
-
 		public int compare(Point lhs, Point rhs) {
 			// TODO Auto-generated method stub
 			if (lhs.x > rhs.x) return 1; 
-			if (lhs.x < rhs.x) return -1; 
-			if (lhs.y > rhs.y) return 1;
-			if (lhs.y < rhs.y) return -1;
+			if (lhs.x < rhs.x) return -1;			
 			return 0;
-		}
-		
+		}		
+	}
+	private static class yComparator implements Comparator<Point> {
+		public int compare(Point lhs, Point rhs) {
+			// TODO Auto-generated method stub
+			if (lhs.y > rhs.y) return 1;
+			if (lhs.y < rhs.y) return -1;  
+			return 0;
+		}		
 	}
 	private static class indexComparator implements Comparator<Point> {
 
