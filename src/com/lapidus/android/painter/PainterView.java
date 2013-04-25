@@ -52,7 +52,7 @@ public class PainterView extends View {
 		
 		drawPoints(canvas, paint);
 	}
-	private void drawPoints(Canvas canvas, Paint paint) {
+	protected void drawPoints(Canvas canvas, Paint paint) {
 		if (points.size() == 0) return;
 		if (points.size() == 1) {
 			canvas.drawCircle(points.get(0).x, points.get(0).y, 5, paint);

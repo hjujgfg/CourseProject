@@ -25,7 +25,8 @@ public class Reader extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-						
+		view = new ReaderView(getApplicationContext());			
+		setContentView(view);
 		//Bitmap image = BitmapFactory.decodeFile("/Painter/res/drawable-hdpi/test.bmp");
 		
 		ArrayList<Point> arr = new ArrayList<Point>();
@@ -51,11 +52,20 @@ public class Reader extends Activity {
 		//HelloWorld.path = (ArrayList<Point>) arr.clone(); 
 		//HelloWorld.bb = false;
 		ArrayList<Point> processedPoints = processPointsFromBitmap(arr);
-		view = new PainterView(getApplicationContext());
-		view.points = processedPoints;		
-		setContentView(view);
+		view.approximizedPoints = Approximizer.approximize(2f, toArray(processedPoints));
+		view.points = processedPoints;			
 		System.out.print(sb);
 	}
+	private Point[] toArray(ArrayList<Point> a) {
+		int i = 0;
+		Point[] res = new Point[a.size()];
+		for (Point x : a) {
+			res[i] = x;
+			i ++;
+		}
+		return res;
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu (Menu menu) {
 		super.onCreateOptionsMenu(menu);
@@ -71,21 +81,53 @@ public class Reader extends Activity {
 		ArrayList<Point> result = new ArrayList<Point>();
 		result.add(arr.get(0));
 		tmp = arr.get(0);
+		int counter; 
 		while (bb) {
 			circum = findNeighbours(tmp.x, tmp.y, arr);
 			tmp.chkd = true;
 			result.add(tmp);
-			tmp = null;
+			tmp = chooseSmoothest(tmp, circum, result.get(result.size() - 2));
+			/*counter = 0; 
 			for (int i = 0; i < 8; i++) {
 				if (circum[i] != null && circum[i].chkd == false) {
+					counter ++;
 					tmp = circum[i];
 				}				
 			}
+			if (counter > 2) {
+				result.get(result.size() - 1).collides = true;				
+			}*/
+			
 			if (tmp == null) {
 				bb = false; 
 			}
 		}
 		return result;
+	}
+	private static Point chooseSmoothest(Point a, Point[] sur, Point prev) {
+		float mul = Integer.MAX_VALUE; 
+		int index = -1;
+		float tmp; 
+		boolean hasPoints = false; 
+		for (int i = 0; i < sur.length; i ++) {
+			if (sur[i] != null) hasPoints = true; 
+			if (sur[i] != null && sur[i].chkd == false) {
+				tmp = vectorMult(prev, a, sur[i]);
+				if (Math.abs(tmp) < Math.abs(mul)) { 
+					mul = tmp;
+					index = i;
+				}
+			}
+		}
+		if (mul != Integer.MAX_VALUE) {
+			return sur[index];
+		}
+		if (!hasPoints) return null; 
+		
+		return null;
+	}
+	private static float vectorMult(Point p1, Point p2, Point p3) {
+		return (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
 	}
 	private static Point findPoint(float x, float y, ArrayList<Point> arr) {
 		for (Point p : arr) {
