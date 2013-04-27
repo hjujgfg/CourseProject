@@ -114,12 +114,12 @@ public class PainterView extends View {
 			this.y = y;
 		}
 	}*/
-	private int checkForIntersection(Point p) {
+	/*private int checkForIntersection(Point p) {
 		for (Point x : points ) {			
 			if (p.x == x.x && p.y == x.y) return x.index; 
 		}
 		return -1;
-	}
+	}*/
 	public void setImage(String s) {
 		image = BitmapFactory.decodeFile(s);	
 		shouldDrawBitmap = true;

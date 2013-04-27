@@ -23,6 +23,8 @@ public class Reader extends Activity {
 	TextView tw;
 	ReaderView view;
 	ArrayList<Collision> collisions;
+	ArrayList<Point> arr;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -31,7 +33,7 @@ public class Reader extends Activity {
 		setContentView(view);
 		//Bitmap image = BitmapFactory.decodeFile("/Painter/res/drawable-hdpi/test.bmp");
 		
-		ArrayList<Point> arr = new ArrayList<Point>();
+		arr = new ArrayList<Point>();
 		Bitmap image = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj"+"/newimage.png" );
 		StringBuilder sb = new StringBuilder();		
 		for (int i = 0; i < image.getWidth(); i ++) {
@@ -53,14 +55,27 @@ public class Reader extends Activity {
 		}
 		//HelloWorld.path = (ArrayList<Point>) arr.clone(); 
 		//HelloWorld.bb = false;
-		//ArrayList<Point> processedPoints = processPointsFromBitmap(arr);
-		//view.approximizedPoints = Approximizer.approximize(2f, toArray(processedPoints));
-		//view.points = processedPoints;
-		view.points = arr;
-		view.cols = findCollisions(arr);
-		System.out.print(sb);
+		/*view.pointsAreProcessed = true;
+		ArrayList<Point> processedPoints = processPointsFromBitmap(arr);
+		view.approximizedPoints = Approximizer.approximize(2f, toArray(processedPoints));
+		view.points = processedPoints;*/
+		Track track = generateTrack(arr);
+		view.track = track;
+		//view.invalidate();
+		/*view.points = arr;
+		collisions = view.cols;
+		Thread t = new Thread(new Runnable() {
+			
+			public void run() {
+				// TODO Auto-generated method stub				
+				findCollisions(arr, collisions, view);
+				view.postInvalidate();
+			}
+		});
+		t.start();	*/	
+		
 	}
-	private Point[] toArray(ArrayList<Point> a) {
+	public static Point[] toArray(ArrayList<Point> a) {
 		int i = 0;
 		Point[] res = new Point[a.size()];
 		for (Point x : a) {
@@ -77,26 +92,105 @@ public class Reader extends Activity {
 		menu.add(Menu.NONE, 1, Menu.NONE, "Process");
 		return true;
 	}
-	private static ArrayList<Collision> findCollisions (ArrayList<Point> arr) {
-		ArrayList<Collision> cols = new ArrayList<Collision>();
+	private static void collisionStarter (Point p, Point prev, ArrayList<Point> arr, Track track) {
+		if (p.collides == true) return;
+		Collision col = new Collision();
+		processCollision(arr, p, col, prev);
+		for (Point x : col.exitPoints) {
+			doLine(x, arr, track);
+		}
+		track.addCollision(col);
+	}
+	private static void findCollisions (ArrayList<Point> arr, ArrayList<Collision> cols, ReaderView v) {
+		//ArrayList<Collision> cols = vi;
 		int o = 0;
 		Point[] sur; 
+		Collision tmp; 
 		for (Point x : arr) {
 			if (x.collides == false) {
 				o = 0;
 				sur = findNeighbors(x.x, x.y, arr);
 				o = sur[8].collisionIndex;
-				if (o > 2) cols.add(processCollision(arr, x, sur));
+				if (o > 2) {
+					//tmp = processCollision(arr, x, sur);
+					//if (tmp.getExitsQuantity() > 2) {
+						
+					//}
+					cols.add(processCollision(arr, x, sur));
+					v.postInvalidate();
+				}
+			}
+		}			
+		//return cols;
+	}
+	private static void doLine(Point start, ArrayList<Point> arr, Track track) {
+		if (start.chkd == true) return;
+		Line line = new Line();
+		line.addNextPoint(start);
+		start.chkd = true;
+		boolean bb = true;
+		Point[] sur;
+		Point tmp = start; 
+		while (bb) {
+			sur = findNeighbors(tmp.x, tmp.y, arr);
+			if (sur[8].collisionIndex == 2) {
+				for (int i = 0; i < 8; i ++) {
+					if (sur[i] != null && sur[i].chkd == false) tmp = sur[i];
+				}
+				line.addNextPoint(tmp);
+				tmp.chkd = true;
+			}
+			if (sur[8].collisionIndex > 2) {
+				collisionStarter(tmp, line.getLast(), arr, track);
+				bb = false;
+			} else if (sur[8].collisionIndex < 2) {
+				line.addNextPoint(tmp);
+				bb = false;
 			}
 		}
-		return cols;
+		track.addLine(line);
 	}
-	private static Collision processCollision(ArrayList<Point> arr, Point p, Point[] neighbors) {
+	private static Track generateTrack(ArrayList<Point> arr) {
+		Track track = new Track();
+		Collections.sort(arr, Point.indexComp);	
+		doLine(arr.get(0), arr, track);
+		return track;
+	}
+	public static void processCollision(ArrayList<Point> arr, Point p, Collision c, Point prev) {
+		Point[] sur = findNeighbors(p.x, p.y, arr);	
+		for (int i = 0; i < 8; i ++) {
+			if (sur[i] != null) {
+				for (Point x : c.exitPoints) {
+					if (x.equals(sur[i])) return;
+				}
+			}
+		}
+		if (sur[8].collisionIndex > 2) {
+			c.addCollidingPoint(p);
+			p.collides = true;
+			for (int i = 0; i < 8; i ++) {
+				if (sur[i] != null && sur[i].collides == false && !sur[i].equals(prev)) {
+					processCollision(arr, sur[i], c, p);
+				}
+			}
+		} else if (sur[8].collisionIndex <= 2) {
+			//avoid double exits from one colliding point 
+			for (int i = 0; i < 8; i ++) {
+				if (sur[i] != null) {
+					for (Point x : c.exitPoints) {
+						if (x.equals(sur[i])) return;
+					}
+				}
+			}
+			if (sur[8].collisionIndex != sur[9].collisionIndex) c.addExitPoint(p);
+		}
+	}					
+		public static Collision processCollision(ArrayList<Point> arr, Point p, Point[] neighbors) {
 		Collision col = new Collision();
-		int o = -1;
+		int o = -1;											
 		Point[] nextNeighbors;
 		col.addCollidingPoint(p);
-		p.collides = true;
+		p.collides = true;									
 		for (int i = 0; i < 8; i ++) {
 			if (neighbors[i] != null) {
 				o = -1;
@@ -126,17 +220,8 @@ public class Reader extends Activity {
 			circum = findNeighbors(tmp.x, tmp.y, arr);
 			tmp.chkd = true;
 			result.add(tmp);
-			tmp = chooseSmoothest(tmp, circum, result.get(result.size() - 2));
-			/*counter = 0; 
-			for (int i = 0; i < 8; i++) {
-				if (circum[i] != null && circum[i].chkd == false) {
-					counter ++;
-					tmp = circum[i];
-				}				
-			}
-			if (counter > 2) {
-				result.get(result.size() - 1).collides = true;				
-			}*/
+			tmp.index = result.size() - 1;
+			tmp = chooseSmoothest(tmp, circum, result.get(result.size() - 2));			
 			
 			if (tmp == null) {
 				bb = false; 
@@ -176,8 +261,9 @@ public class Reader extends Activity {
 		return null;
 	}
 	private static Point[] findNeighbors(float x, float y, ArrayList<Point> arr) {
-		Point[] res = new Point[9];
+		Point[] res = new Point[10];
 		int quantity;
+		int nocolQuantity = 0;
 			res[0] = findPoint(x-1, y-1, arr);
 			res[1] = findPoint(x, y-1, arr);
 			res[2] = findPoint(x+1, y-1, arr);
@@ -189,16 +275,17 @@ public class Reader extends Activity {
 		quantity = 0;
 		for (int i = 0; i < 8; i ++) {
 			if (res[i] != null) quantity ++;
+			if (res[i] != null && res[i].collides == false) nocolQuantity ++;
 		}
 		res[8] = new Point();
 		res[8].collisionIndex = quantity;
+		res[9] = new Point();
+		res[9].collisionIndex = nocolQuantity;
 		return res;
 	}	
 	
-	public static ArrayList<Point> processPointsPrepared(ArrayList<Point> arr) {
-		
-		Collections.sort(arr, Point.indexComp);
-		
+	public static ArrayList<Point> processPointsPrepared(ArrayList<Point> arr) {		
+		Collections.sort(arr, Point.indexComp);		
 		return null;
 	}
 	private static final int LEFT = 7;

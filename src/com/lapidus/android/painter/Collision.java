@@ -1,7 +1,6 @@
 package com.lapidus.android.painter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 public class Collision {
 	ArrayList<Point> collidingPoints; 
 	ArrayList<Point> exitPoints; 
@@ -20,8 +19,22 @@ public class Collision {
 		calcCenter();
 	}
 	public void merge(Collision b) {
-		this.collidingPoints.addAll(b.collidingPoints);
-		this.exitPoints.addAll(b.exitPoints);	
+		/*this.collidingPoints.addAll(b.collidingPoints);
+		this.exitPoints.addAll(b.exitPoints);	*/
+		ArrayList<Point> tmp = new ArrayList<Point>();
+		for (Point x : b.exitPoints) {
+			for (Point y : this.exitPoints) {
+				if (!x.equals(y)) tmp.add(y);
+			}
+		}
+		this.exitPoints.addAll(tmp);
+		tmp = new ArrayList<Point>();
+		for (Point x : b.collidingPoints) {
+			for (Point y : this.collidingPoints) {
+				if (!x.equals(y)) tmp.add(y);
+			}
+		}
+		this.collidingPoints.addAll(tmp);
 		calcCenter();
 	}
 	public void calcCenter() {
@@ -41,5 +54,11 @@ public class Collision {
 	}
 	public Point areAdjacent(Collision c) {
 		return null;
+	}
+	public int getExitsQuantity() {
+		return exitPoints.size();
+	}
+	public void removeExitPoint(Point p) {
+		exitPoints.remove(p);
 	}
 }
