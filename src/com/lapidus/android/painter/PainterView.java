@@ -28,15 +28,19 @@ public class PainterView extends View {
 		Bitmap.Config conf = Bitmap.Config.ARGB_8888;
 		image = Bitmap.createBitmap(480, 800, conf);
 		canvas = new Canvas(image);
-		shouldDrawBitmap = false;		
+		shouldDrawBitmap = false;
+		touched = false;
+		hangingPoint = new Point();
 	}
 	Paint paint;
 	Bitmap image;
 	Canvas canvas;
 	ArrayList<Point> points;
+	Point hangingPoint; 
 	public Point[] approximizedPoints;
 	float startX, startY, stopX, stopY;
 	boolean shouldDrawBitmap;
+	boolean touched;
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);		
@@ -81,7 +85,8 @@ public class PainterView extends View {
 		
 		public boolean onTouch(View v, MotionEvent event) {
 			// TODO Auto-generated method stub	
-			
+			hangingPoint.x = event.getX();
+			hangingPoint.y = event.getY();
 			if((stopX-event.getX())*(stopX-event.getX()) > 100 
 					&& (stopX-event.getX())*(stopX-event.getX()) > 100 ) {
 				pp = new Point(event.getX(), event.getY(), 0f, points.size());
@@ -101,7 +106,12 @@ public class PainterView extends View {
 					i ++;
 					Log.i("PP", x.toString() + " i = " + i);
 				}
-				approximizedPoints = Approximizer.approximize(2f, temp);				
+				approximizedPoints = Approximizer.approximize(2f, temp);	
+				touched = false;				
+				//points.add(hangingPoint);
+			}
+			if (MotionEvent.ACTION_DOWN == event.getAction()) {
+				touched = true; 				
 			}
 			invalidate();
 			return true;

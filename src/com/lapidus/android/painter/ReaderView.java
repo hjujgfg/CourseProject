@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -52,9 +53,10 @@ public class ReaderView extends View {
 		}		
 		paint.setColor(Color.BLACK);
 	}
-	protected void drawProcessedPoints (ArrayList<Point> points) {
-		paint.setColor(Color.GREEN);
+	protected void drawProcessedPoints (ArrayList<Point> points, Canvas canvas, Paint paint) {
+		paint.setColor(Color.DKGRAY);
 		for (int i = 0; i < points.size() - 1; i ++) {
+			Log.i("PO", points.get(i).toString());
 			canvas.drawLine(points.get(i).x, points.get(i).y, 
 					points.get(i + 1).x, points.get(i + 1).y, paint);
 		}
@@ -72,22 +74,29 @@ public class ReaderView extends View {
 	protected void drawCollisions(Canvas canvas, Paint paint, ArrayList<Collision> cols) {
 		paint.setColor(Color.YELLOW);
 		if (cols == null) return;
-		for (Collision c : cols) {
+		/*for (Collision c : cols) {
 			canvas.drawCircle(c.x(), c.y(), 15, paint);
+		}*/
+		for (int i = 0; i < cols.size(); i ++) {
+			canvas.drawCircle(cols.get(i).x(), cols.get(i).y(), 15, paint);
 		}
 		paint.setColor(Color.BLACK);
 	}
 	protected void drawTrack(Track track, Canvas canvas, Paint paint) {
-		if (track == null) return; 
-		for (Line l : track.getLines()) {
-			drawLine(l);
+		if (track == null) return;
+		//generates concurentmodificationexception when multithreading
+		/*for (Line l : track.getLines()) {
+			drawLine(l, canvas, paint);
+		}*/
+		for (int i = 0; i < track.getLines().size(); i ++) {
+			drawLine(track.getLines().get(i), canvas, paint);
 		}
 		drawCollisions(canvas, paint, track.getCollisions());
 		paint.setColor(Color.BLACK);
 		canvas.drawCircle(0, 0, 30, paint);
 	}
-	protected void drawLine(Line l) {
-		drawProcessedPoints(l.getPoints());
+	protected void drawLine(Line l, Canvas canvas, Paint paint) {
+		drawProcessedPoints(l.getPoints(), canvas, paint);
 	}
 	private OnTouchListener ontouchlistener = new OnTouchListener() {
 		
