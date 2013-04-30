@@ -2,6 +2,9 @@ package com.lapidus.android.painter;
 
 import java.util.ArrayList;
 
+import com.lapidus.android.reader.Approximizer;
+
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +12,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -22,7 +26,7 @@ public class PainterView extends View {
 		super(context);
 		// TODO Auto-generated constructor stub
 		paint = new Paint();
-		this.setOnTouchListener(ontouchlistener);
+		this.setOnTouchListener(ontouchlistener2);
 		startX = startY = stopX = stopY = 0;
 		points = new ArrayList<Point>();
 		Bitmap.Config conf = Bitmap.Config.ARGB_8888;
@@ -30,13 +34,22 @@ public class PainterView extends View {
 		canvas = new Canvas(image);
 		shouldDrawBitmap = false;
 		touched = false;
-		hangingPoint = new Point();
+		a = new Point();
+		b = new Point();
+		pointCounter = 0;
+		intersectingPoints = new ArrayList<Point>();
+		segs = new ArrayList<Segment>();
+		tempIntersectingPoints = new ArrayList<Point>();
 	}
+	int pointCounter;
 	Paint paint;
 	Bitmap image;
 	Canvas canvas;
 	ArrayList<Point> points;
-	Point hangingPoint; 
+	ArrayList<Segment> segs; 
+	ArrayList<Point> intersectingPoints; 
+	ArrayList<Point> tempIntersectingPoints;
+	Point a, b;	 
 	public Point[] approximizedPoints;
 	float startX, startY, stopX, stopY;
 	boolean shouldDrawBitmap;
@@ -55,21 +68,53 @@ public class PainterView extends View {
 		}
 		
 		drawPoints(canvas, paint);
+		drawIntersetingPoints(intersectingPoints, canvas, paint);
+	}
+	protected void drawSegs(ArrayList<Segment> segs, Canvas canvas, Paint paint) {
+		paint.setColor(Color.GRAY);
+		for (Segment s : segs) {
+			canvas.drawLine(s.start.x, s.start.y, s.stop.x, s.stop.y, paint);			
+		}
+		paint.setColor(Color.BLACK);
+	}
+	protected void drawPoints(ArrayList<Point> arr, Canvas canvas, Paint paint) {
+		paint.setColor(Color.YELLOW);
+		for (Point x : arr) {
+			canvas.drawCircle(x.x, x.y, 10, paint);
+		}
+		paint.setColor(Color.BLACK);
+	}
+	protected void drawIntersetingPoints(ArrayList<Point> arr, Canvas canvas, Paint paint) {
+		paint.setColor(Color.BLUE);
+		paint.setStyle(Style.FILL_AND_STROKE);
+		for (Point x : arr) {
+			canvas.drawCircle(x.x, x.y, 5, paint);
+		}
+		for (Point x : tempIntersectingPoints) {
+			canvas.drawCircle(x.x, x.y, 5, paint);
+		}
+		paint.setStyle(Style.STROKE);
+		paint.setColor(Color.BLACK);
 	}
 	protected void drawPoints(Canvas canvas, Paint paint) {
 		if (points.size() == 0) return;
+		paint.setColor(Color.YELLOW);
 		if (points.size() == 1) {
-			canvas.drawCircle(points.get(0).x, points.get(0).y, 5, paint);
+			canvas.drawCircle(points.get(0).x, points.get(0).y, 17, paint);
 			return;
 		}
 		for (int i = 0; i < points.size() - 1; i ++) {
 			//if (i == 0) canvas.drawText(points.get(0).toString(), 40, 40, paint);
+			paint.setColor(Color.BLACK);
 			canvas.drawLine(points.get(i).x, points.get(i).y, 
-					points.get(i+1).x, points.get(i+1).y, paint);						
+					points.get(i+1).x, points.get(i+1).y, paint);	
+			paint.setColor(Color.YELLOW);
+			canvas.drawCircle(points.get(i).x, points.get(i).y, 17, paint);
 		}
-		paint.setColor(Color.GREEN);
-		canvas.drawCircle(points.get(0).x, points.get(0).y, 1, paint);
-		paint.setColor(Color.RED);
+		
+		/*paint.setColor(Color.GREEN);
+		canvas.drawCircle(points.get(0).x, points.get(0).y, 1, paint);*/
+		paint.setColor(Color.YELLOW);
 		canvas.drawCircle(points.get(points.size() - 1).x, points.get(points.size() - 1).y, 1, paint);
 		/*paint.setColor(Color.RED);		
 		if (approximizedPoints != null && approximizedPoints.length != 0) {			
@@ -85,8 +130,7 @@ public class PainterView extends View {
 		
 		public boolean onTouch(View v, MotionEvent event) {
 			// TODO Auto-generated method stub	
-			hangingPoint.x = event.getX();
-			hangingPoint.y = event.getY();
+			
 			if((stopX-event.getX())*(stopX-event.getX()) > 100 
 					&& (stopX-event.getX())*(stopX-event.getX()) > 100 ) {
 				pp = new Point(event.getX(), event.getY(), 0f, points.size());
@@ -112,6 +156,86 @@ public class PainterView extends View {
 			}
 			if (MotionEvent.ACTION_DOWN == event.getAction()) {
 				touched = true; 				
+			}
+			invalidate();
+			return true;
+		}
+	};
+	boolean n;
+	private OnTouchListener ontouchlistener2 = new OnTouchListener() {
+		
+		public boolean onTouch(View v, MotionEvent event) {
+			// TODO Auto-generated method stub
+			if (MotionEvent.ACTION_DOWN == event.getAction()) {
+				for (Point x : points) {
+					if (Math.abs(x.x - event.getX()) < 17 && Math.abs(x.y - event.getY()) < 17) {
+						touched = true;
+						a = x;
+						break;
+					}
+				}
+				if (touched == false) points.add(new Point(event.getX(), event.getY()));
+			}
+			if (MotionEvent.ACTION_MOVE == event.getAction()) {
+				if (touched == true) {
+					a.x = event.getX();
+					a.y = event.getY();
+					if (segs.size() > 2) {					
+						intersectingPoints = new ArrayList<Point>();
+						for (int i = 0; i < segs.size(); i ++) {
+							for (int j = 0; j < segs.size(); j ++) {
+								n = false;												
+								if (j != (i - 1) && j != i && j != (i + 1)) {
+									n = segs.get(i).checkForIntersection(segs.get(j));
+									if (n == true) {
+										intersectingPoints.add(segs.get(i).findIntersection(segs.get(j)));
+									}
+								}							
+							}
+						}
+					}
+				} else {
+					points.get(points.size() - 1).x = event.getX();
+					points.get(points.size() - 1).y = event.getY();
+					Segment tmp = new Segment(points.get(points.size() - 1), points.get(points.size() - 2));
+					tempIntersectingPoints = new ArrayList<Point>();
+					for (int i = 0; i < segs.size() - 1; i ++) {
+						n = false;
+						n = tmp.checkForIntersection(segs.get(i));
+						if (n == true) {
+							tempIntersectingPoints.add(tmp.findIntersection(segs.get(i)));
+						}
+					}
+				}	
+				
+			}
+			if (MotionEvent.ACTION_UP == event.getAction()) {
+				touched = false;
+				tempIntersectingPoints = new ArrayList<Point>();
+				if (points.size() > 1) {
+					segs.add(new Segment(points.get(points.size() - 2), points.get(points.size() - 1)));
+				}
+				if (segs.size() > 2) {
+					/*for (int i = 0; i < segs.size() - 2; i ++) {
+						n = false;
+						n = segs.get(segs.size() - 1).checkForIntersection(segs.get(i));
+						if (n == true) { 
+							intersectingPoints.add(segs.get(segs.size() - 1).findIntersection(segs.get(i)));
+						}
+					}*/
+					intersectingPoints = new ArrayList<Point>();
+					for (int i = 0; i < segs.size(); i ++) {
+						for (int j = 0; j < segs.size(); j ++) {
+							n = false;												
+							if (j != (i - 1) && j != i && j != (i + 1)) {
+								n = segs.get(i).checkForIntersection(segs.get(j));
+								if (n == true) {
+									intersectingPoints.add(segs.get(i).findIntersection(segs.get(j)));
+								}
+							}							
+						}
+					}
+				}
 			}
 			invalidate();
 			return true;

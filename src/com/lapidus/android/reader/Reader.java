@@ -1,4 +1,4 @@
-package com.lapidus.android.painter;
+package com.lapidus.android.reader;
 
 
 import java.io.File;
@@ -10,6 +10,7 @@ import java.util.Collections;
 
 import com.lapidus.android.R;
 import com.lapidus.android.engine.HelloWorld;
+import com.lapidus.android.painter.Point;
 
 import android.app.Activity;
 import android.content.Intent;

@@ -1,6 +1,8 @@
-package com.lapidus.android.painter;
+package com.lapidus.android.reader;
 
 import java.util.ArrayList;
+
+import com.lapidus.android.painter.Point;
 
 import android.content.Context;
 import android.graphics.Canvas;

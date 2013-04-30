@@ -1,6 +1,8 @@
-package com.lapidus.android.painter;
+package com.lapidus.android.reader;
 
 import java.util.Vector;
+
+import com.lapidus.android.painter.Point;
 
 public class Approximizer {
 	public static Point[] approximize (float tol, Point [] V) {
