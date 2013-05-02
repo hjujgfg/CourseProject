@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.lapidus.android.R;
-import com.lapidus.android.engine.HelloWorld;
-import com.lapidus.android.painter.Point;
+import com.lapidus.android.engine.Engine;
+import com.lapidus.android.primitives.Point;
 
 import android.app.Activity;
 import android.content.Intent;

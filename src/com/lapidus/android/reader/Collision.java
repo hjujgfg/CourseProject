@@ -2,7 +2,7 @@ package com.lapidus.android.reader;
 
 import java.util.ArrayList;
 
-import com.lapidus.android.painter.Point;
+import com.lapidus.android.primitives.Point;
 public class Collision {
 	ArrayList<Point> collidingPoints; 
 	ArrayList<Point> exitPoints; 

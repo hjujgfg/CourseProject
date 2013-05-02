@@ -2,7 +2,7 @@ package com.lapidus.android.reader;
 
 import java.util.ArrayList;
 
-import com.lapidus.android.painter.Point;
+import com.lapidus.android.primitives.Point;
 
 import android.content.Context;
 import android.graphics.Canvas;

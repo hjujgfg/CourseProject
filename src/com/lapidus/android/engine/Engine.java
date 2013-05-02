@@ -42,7 +42,8 @@ import com.threed.jpct.TextureManager;
 import com.threed.jpct.World;
 import com.threed.jpct.util.BitmapHelper;
 import com.threed.jpct.util.MemoryHelper;
-import com.lapidus.android.painter.Point;
+import com.lapidus.android.primitives.Point;
+import com.lapidus.android.primitives.Segment;
 /**
  * A simple demo. This shows more how to use jPCT-AE than it shows how to write
  * a proper application for Android. It includes basic activity management to
@@ -52,10 +53,10 @@ import com.lapidus.android.painter.Point;
  * 
  */
 @TargetApi(13)
-public class HelloWorld extends Activity {
+public class Engine extends Activity {
 
 	// Used to handle pause and resume...
-	private static HelloWorld master = null;
+	private static Engine master = null;
 
 	private GLSurfaceView mGLView;
 	private MyRenderer renderer = null;
@@ -76,6 +77,10 @@ public class HelloWorld extends Activity {
 	private Object3D loadedCar = null;
 	private SimpleVector carDirection = null; 
 	private Object3D newods = null;
+	private Object3D leftBorder = null;
+	private Object3D rightBorder = null;
+	private SimpleVector sv1 = null;
+	private SimpleVector sv2 = null; 
 	private int fps = 0;
 
 	private Light sun = null;
@@ -201,9 +206,9 @@ public class HelloWorld extends Activity {
 			Thread.sleep(15);
 		} catch (Exception e) {
 			// No need for this...
-		}
+		}*/
 
-		return super.onTouchEvent(me);*/
+		//return super.onTouchEvent(me);
 		
 		
 		// событие
@@ -325,6 +330,8 @@ public class HelloWorld extends Activity {
 				cube.strip();
 				cube.build();
 				newods = new Object3D(path.size() * 3);
+				leftBorder = new Object3D(path.size() * 3);
+				rightBorder = new Object3D(path.size() * 3);
 				//newods.addTriangle(new SimpleVector(-50, 0, -50), new SimpleVector(50, 0, -50), new SimpleVector(-50, 0, 0));
 				InputStream fis = null;
 				fis = getResources().openRawResource(R.raw.policecar);				
@@ -417,7 +424,7 @@ public class HelloWorld extends Activity {
 					
 				if (master == null) {
 					Logger.log("Saving master Activity!");
-					master = HelloWorld.this;
+					master = Engine.this;
 				}
 			}
 		}
@@ -465,16 +472,62 @@ public class HelloWorld extends Activity {
 				newods.addTriangle(s3, s2, s4);									
 			}		
 		}
+		private SimpleVector[] generateSegment(Point a, Point b, Point c) {
+			SimpleVector[] res = new SimpleVector[6];
+			float angle = a.anglePoint(b, c);
+			Segment s1 = new Segment(a, b);
+			Segment s2 = new Segment(b, c);
+			float k = s1.countK();
+			float bb = s1.countB();
+			float l = 2 * angle;			
+			if (b.x >= a.x && b.y >=a.y) {
+				float xxl = b.x - ((float)Math.sqrt(k * k + 1) / l);
+				Point xl = new Point(xxl, k * xxl + bb);
+				Point xd1, xd2, xd3;
+				float kl = 0 - (1 / k);
+				float bl = xl.y - kl * xl.x;
+				float k23 = s2.countK();
+				float b23 = s2.countB();						
+				if (a.vectorMult(b, c) < 0) {
+					float tmp = xl.x + (float)Math.sqrt(k * k + 1) / 5;
+					float tmpp = kl * tmp + bl;
+					xd1 = new Point(tmp, tmpp);
+					tmp = xl.x - (float)Math.sqrt(k * k + 1) / 5;
+					tmpp = kl * tmp + bl;
+					xd2 = new Point(tmp,  tmpp);
+					float kd3 = 0 - (1 / k23);
+					float bd3 = xd2.y - kd3 * xd2.x;
+					tmp = xd2.x + (float)Math.sqrt(kd3 * kd3 + 1) / (2 * 5);
+					tmpp = kd3 * tmp + bd3;
+					xd3 = new Point(tmp, tmpp);
+				} else {
+					float tmp = xl.x + (float)Math.sqrt(k * k + 1) / 5;
+					float tmpp = kl * tmp + bl;
+					xd1 = new Point(tmp, tmpp);
+					tmp = xl.x - (float)Math.sqrt(k * k + 1) / 5;
+					tmpp = kl * tmp + bl;
+					xd2 = new Point(tmp,  tmpp);
+					float kd3 = 0 - (1 / k23);
+					float bd3 = xd2.y - kd3 * xd2.x;
+					tmp = xd2.x + (float)Math.sqrt(kd3 * kd3 + 1) / (2 * 5);
+					tmpp = kd3 * tmp + bd3;
+					xd3 = new Point(tmp, tmpp);
+				}
+			} 
+			return null;
+		}
 		private SimpleVector[] generateRect(Point a, Point b, SimpleVector[] t) {
-			float x, y = 100, z; 
+			float x, y, z; 
 			x = a.x - 5;
 			z = a.y + 5;
+			y = 100 + a.z;
 			t[0] = new SimpleVector(x, y, z);
 			x = a.x + 5;
 			z = a.y + 5;
 			t[1] = new SimpleVector(x, y, z);
 			x = b.x - 5;
 			z = b.y + 5;
+			y = 100 + b.z;
 			t[2] = new SimpleVector(x, y, z);
 			x = b.x + 5;
 			z = b.y + 5;

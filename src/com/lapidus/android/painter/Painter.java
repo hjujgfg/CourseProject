@@ -7,7 +7,8 @@ import java.util.ArrayList;
 
 
 import com.lapidus.android.R;
-import com.lapidus.android.engine.HelloWorld;
+import com.lapidus.android.engine.Engine;
+import com.lapidus.android.primitives.Point;
 import com.lapidus.android.reader.Reader;
 
 import android.os.Bundle;
@@ -23,9 +24,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 public class Painter extends Activity {
@@ -35,8 +38,11 @@ public class Painter extends Activity {
 		super.onCreate(savedInstanceState);
 		view = new PainterView(getApplicationContext());
 		setContentView(view);
+		b = new Button(view.getContext());
+		
 	}
 	PainterView view;
+	Button b;
 	private static final int DIALOG_LOAD_FILE = 1000;
 	private String[] mFileList;
 	private String mChosenFile;
@@ -51,6 +57,7 @@ public class Painter extends Activity {
 		menu.add(Menu.NONE, 2, Menu.NONE, "Save Image");
 		menu.add(Menu.NONE, 3, Menu.NONE, "Choose File");
 		menu.add(Menu.NONE, 4, Menu.NONE, "Pass route");
+		menu.add(Menu.NONE, 5, Menu.NONE, "Redo");
 		return true;
 	}
 	@Override 
@@ -74,17 +81,31 @@ public class Painter extends Activity {
 			}
 		}
 		if (item.getItemId() == 3) {
-			loadFileList();
-			this.onCreateDialog(1000);
+			//loadFileList();
+			//this.onCreateDialog(1000);
+			Intent i = new Intent(this, Options.class);
+			startActivity(i);
 		}
 		if (item.getItemId() == 4) {
-			HelloWorld.path = new ArrayList<Point>();
-			for (int i = 0; i < view.approximizedPoints.length; i++) {
-				HelloWorld.path.add(new Point(view.approximizedPoints[i].x, view.approximizedPoints[i].y));
+			Engine.path = new ArrayList<Point>();
+			/*for (int i = 0; i < view.approximizedPoints.length; i++) {
+				Engine.path.add(new Point(view.approximizedPoints[i].x, view.approximizedPoints[i].y));
+			}*/
+			for (Point x : view.points) {
+				Engine.path.add(new Point(x.x, x.y, x.z));
 			}
-			HelloWorld.bb = true;
-			Intent i = new Intent(this, HelloWorld.class);
+			//Engine.path = (ArrayList<Point>) view.points.clone();
+			Engine.bb = true;
+			Intent i = new Intent(this, Engine.class);
 			startActivity(i);
+		}
+		if (item.getItemId() == 5) {
+			if (view.redoPoints.size() > 0) {
+				view.points.add(view.redoPoints.get(view.redoPoints.size() - 1));
+				view.redoPoints.remove(view.redoPoints.get(view.redoPoints.size() - 1));
+				view.refreshSegs();				
+			}			
+			view.invalidate();
 		}
 		return true;
 	}
@@ -124,6 +145,23 @@ public class Painter extends Activity {
 		}
 		dialog = builder.show();
 		return dialog;
+	}
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			if (view.points.size() == 0) {
+				view.invalidate();
+				return super.onKeyDown(keyCode, event);
+			}
+			if (view.points.size() > 0)	{
+				view.undo();
+			}			
+			view.invalidate();			
+			return true;
+		} else {
+			view.invalidate();
+			return super.onKeyDown(keyCode, event);
+		}					
 	}
 	private void loadFileList() {
 	    try {

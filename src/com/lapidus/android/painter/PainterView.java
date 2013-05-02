@@ -2,6 +2,8 @@ package com.lapidus.android.painter;
 
 import java.util.ArrayList;
 
+import com.lapidus.android.primitives.Point;
+import com.lapidus.android.primitives.Segment;
 import com.lapidus.android.reader.Approximizer;
 
 
@@ -13,12 +15,10 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
-import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
-import android.widget.Toast;
 
 public class PainterView extends View {
 
@@ -40,6 +40,9 @@ public class PainterView extends View {
 		intersectingPoints = new ArrayList<Point>();
 		segs = new ArrayList<Segment>();
 		tempIntersectingPoints = new ArrayList<Point>();
+		redoPoints = new ArrayList<Point>();
+		redoSegs = new ArrayList<Segment>();
+		lastAction = 0;
 	}
 	int pointCounter;
 	Paint paint;
@@ -47,6 +50,8 @@ public class PainterView extends View {
 	Canvas canvas;
 	ArrayList<Point> points;
 	ArrayList<Segment> segs; 
+	ArrayList<Point> redoPoints; 
+	ArrayList<Segment> redoSegs;
 	ArrayList<Point> intersectingPoints; 
 	ArrayList<Point> tempIntersectingPoints;
 	Point a, b;	 
@@ -54,6 +59,7 @@ public class PainterView extends View {
 	float startX, startY, stopX, stopY;
 	boolean shouldDrawBitmap;
 	boolean touched;
+	int lastAction; 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);		
@@ -66,7 +72,20 @@ public class PainterView extends View {
 		if (image != null) {			
 			canvas.drawBitmap(image, new Matrix(), paint);
 		}
-		
+		if (segs.size() > 2) {					
+			intersectingPoints.clear();
+			for (int i = 0; i < segs.size(); i ++) {
+				for (int j = 0; j < segs.size(); j ++) {
+					n = false;												
+					if (j != (i - 1) && j != i && j != (i + 1)) {
+						n = segs.get(i).checkForIntersection(segs.get(j));
+						if (n == true) {
+							intersectingPoints.add(segs.get(i).findIntersection(segs.get(j)));
+						}
+					}							
+				}
+			}
+		} else intersectingPoints.clear();
 		drawPoints(canvas, paint);
 		drawIntersetingPoints(intersectingPoints, canvas, paint);
 	}
@@ -115,7 +134,7 @@ public class PainterView extends View {
 		/*paint.setColor(Color.GREEN);
 		canvas.drawCircle(points.get(0).x, points.get(0).y, 1, paint);*/
 		paint.setColor(Color.YELLOW);
-		canvas.drawCircle(points.get(points.size() - 1).x, points.get(points.size() - 1).y, 1, paint);
+		canvas.drawCircle(points.get(points.size() - 1).x, points.get(points.size() - 1).y, 17, paint);
 		/*paint.setColor(Color.RED);		
 		if (approximizedPoints != null && approximizedPoints.length != 0) {			
 			for (int i = 0; i < approximizedPoints.length - 1; i ++) {
@@ -170,30 +189,24 @@ public class PainterView extends View {
 				for (Point x : points) {
 					if (Math.abs(x.x - event.getX()) < 17 && Math.abs(x.y - event.getY()) < 17) {
 						touched = true;
+						lastAction = 1;
+						b.x = x.x;
+						b.y = x.y;
 						a = x;
 						break;
 					}
 				}
-				if (touched == false) points.add(new Point(event.getX(), event.getY()));
+				if (touched == false) {
+					lastAction = 2;
+					points.add(new Point(event.getX(), event.getY()));
+				}
+				redoPoints.clear();
+				redoSegs.clear();
 			}
 			if (MotionEvent.ACTION_MOVE == event.getAction()) {
 				if (touched == true) {
 					a.x = event.getX();
-					a.y = event.getY();
-					if (segs.size() > 2) {					
-						intersectingPoints = new ArrayList<Point>();
-						for (int i = 0; i < segs.size(); i ++) {
-							for (int j = 0; j < segs.size(); j ++) {
-								n = false;												
-								if (j != (i - 1) && j != i && j != (i + 1)) {
-									n = segs.get(i).checkForIntersection(segs.get(j));
-									if (n == true) {
-										intersectingPoints.add(segs.get(i).findIntersection(segs.get(j)));
-									}
-								}							
-							}
-						}
-					}
+					a.y = event.getY();					
 				} else {
 					points.get(points.size() - 1).x = event.getX();
 					points.get(points.size() - 1).y = event.getY();
@@ -206,8 +219,7 @@ public class PainterView extends View {
 							tempIntersectingPoints.add(tmp.findIntersection(segs.get(i)));
 						}
 					}
-				}	
-				
+				}				
 			}
 			if (MotionEvent.ACTION_UP == event.getAction()) {
 				touched = false;
@@ -241,6 +253,27 @@ public class PainterView extends View {
 			return true;
 		}
 	};
+	public void refreshSegs() {
+		segs.clear();
+		for (int i = 0; i < points.size() - 1; i ++) {
+			segs.add(new Segment(points.get(i), points.get(i+1)));
+		}
+	}
+	public void undo() {
+		if (points.size() == 0) return;
+		switch(lastAction) {
+		case 1 : 
+			a.x = b.x;
+			a.y = b.y;
+			break;
+		case 2 : 
+			redoPoints.add(points.get(points.size() - 1));
+			points.remove(points.size() - 1);
+			break;
+		}
+		refreshSegs();
+		invalidate();
+	}
 	/*private class Point {
 		float x, y;		
 		Point (float x, float y) {
@@ -254,6 +287,7 @@ public class PainterView extends View {
 		}
 		return -1;
 	}*/
+	
 	public void setImage(String s) {
 		image = BitmapFactory.decodeFile(s);	
 		shouldDrawBitmap = true;

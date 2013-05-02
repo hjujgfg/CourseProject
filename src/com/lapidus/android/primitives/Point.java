@@ -1,4 +1,4 @@
-package com.lapidus.android.painter;
+package com.lapidus.android.primitives;
 
 import java.util.Comparator;
 
@@ -24,6 +24,15 @@ public class Point implements Cloneable {
 		this.x = x;
 		this.y = y;
 		z = 0;
+		index = -1;
+		chkd = false;
+		collides = false;
+		collisionIndex = -1;
+	}
+	public Point (float x, float y, float z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
 		index = -1;
 		chkd = false;
 		collides = false;
@@ -62,7 +71,17 @@ public class Point implements Cloneable {
 	public Point times(float a) {
 	    return new Point(this.x * a, this.y * a);
 	}
-	
+	public float anglePoint (Point b, Point c)
+	{
+	   double x1 = this.x - b.x, x2 = c.x - b.x;
+	   double y1 = this.y - b.y, y2 = c.y - b.y;
+	   double d1 = Math.sqrt (x1 * x1 + y1 * y1);
+	   double d2 = Math.sqrt (x2 * x2 + y2 * y2);
+	   return (float) Math.acos ((x1 * x2 + y1 * y2) / (d1 * d2));
+	}
+	public float vectorMult(Point p1, Point p2) {
+        return ((p1.x - x)*(p2.y - y) - (p2.x - x) * (p1.y - y));
+    }
 	///Comparators
 	
 	private static class xComparator implements Comparator<Point> {
