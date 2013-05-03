@@ -59,7 +59,7 @@ public class Engine extends Activity {
 	private static Engine master = null;
 
 	private GLSurfaceView mGLView;
-	private MyRenderer renderer = null;
+	public MyRenderer renderer = null;
 	private FrameBuffer fb = null;
 	private World world = null;
 	private RGBColor back = new RGBColor(50, 50, 100);
@@ -96,6 +96,9 @@ public class Engine extends Activity {
 	private String mytag = "MyTag";
 	private SimpleVector ellipsoid = new SimpleVector(2, 2, 2);
 	public static boolean bb; 
+	public Engine() {
+		renderer = new MyRenderer();
+	}
 	protected void onCreate(Bundle savedInstanceState) {
 
 		Logger.log("onCreate");
@@ -284,7 +287,7 @@ public class Engine extends Activity {
 		return true;
 	}
 
-	class MyRenderer implements GLSurfaceView.Renderer {
+	public class MyRenderer implements GLSurfaceView.Renderer {
 
 		private long time = System.currentTimeMillis();
 
@@ -329,7 +332,7 @@ public class Engine extends Activity {
 				//cube.setTexture("texture");
 				cube.strip();
 				cube.build();
-				newods = new Object3D(path.size() * 3);
+				newods = new Object3D(path.size() * 5);
 				leftBorder = new Object3D(path.size() * 3);
 				rightBorder = new Object3D(path.size() * 3);
 				//newods.addTriangle(new SimpleVector(-50, 0, -50), new SimpleVector(50, 0, -50), new SimpleVector(-50, 0, 0));
@@ -361,7 +364,7 @@ public class Engine extends Activity {
 				t3.makeEqualLength(t1);
 				Log.i("CO" , "1 -3e " + t1.calcAngleFast(t3));
 				//Object3D[] suround = new Object3D[path.size()];			
-				if (bb) generatePathSorted();
+				if (bb) generateTrack();//generatePathSorted();
 				else generatePathUnsorted();
 				
 				//newods.scale(2f);
@@ -472,6 +475,141 @@ public class Engine extends Activity {
 				newods.addTriangle(s3, s2, s4);									
 			}		
 		}
+		private void generateTrack () {
+			normalizePath();
+			SimpleVector[] sv = new SimpleVector[4];
+			SimpleVector t1;
+			SimpleVector t2; 
+			processPoints(path.get(1), path.get(0), new Point(-1, -1, -1), false, sv);
+			t1 = sv[2];
+			t2 = sv[3];
+			newods.addTriangle(new SimpleVector(-20, 0, -20), new SimpleVector(20, 0, -20), new SimpleVector(0, 20, 20));
+			for (int i = 1; i < path.size() - 1; i ++) {
+				processPoints(path.get(i-1), path.get(i), path.get(i + 1), true, sv);
+				newods.addTriangle(t2, sv[1], sv[0]);
+				newods.addTriangle(t2, t1, sv[1]);
+				newods.addTriangle(sv[0], sv[1], sv[2]);
+				newods.addTriangle(sv[2], sv[3], sv[0]);
+				t2 = sv[3];
+				t1 = sv[2];
+			}
+			newods.invert();
+		}
+		public void processPoints(Point a, Point b, Point c, boolean needrec, SimpleVector[] sv) {
+			int q;
+			int d = 5;
+			if (needrec == true) {
+				for (int i = 0; i < 4; i ++) {
+					sv[i] = null;
+				}
+				q = 0;
+			} else {
+				q = 2;
+			}
+			
+			Point[] arr = new Point[4];
+			Point t1, t2;
+			float angle = a.anglePoint(b, c);
+			float l = 6 / angle;
+			Segment s1 = new Segment(a, b);
+			Segment s2 = new Segment(b, c);
+			float k = s1.countK();			
+			float bb = s1.countB();
+			
+			if (b.x > a.x && k != 0 && k != Float.NaN) {
+				float xxl = b.x - (l / android.util.FloatMath.sqrt(k * k + 1));
+				Point xl = new Point(xxl, k * xxl + bb);
+				float kl = 0 - (1 / k);
+				float bl = xl.y - kl * xl.x;
+				
+				float tmp = xl.x - d / android.util.FloatMath.sqrt(kl * kl + 1) ;
+				float tmpp = kl * tmp + bl;
+				t1 = new Point(tmp, tmpp);
+				tmp = xl.x + d / android.util.FloatMath.sqrt(kl * kl + 1) ;
+				tmpp = kl * tmp + bl;
+				t2 = new Point(tmp, tmpp);									
+				if (b.y > a.y) {
+					arr[q] = t1;
+					arr[q + 1] = t2;					
+				} else {
+					arr[q] = t2;
+					arr[q + 1] = t1;
+				}
+				t1 = null;
+				t2 = null;
+			} else if (b.x < a.x && k != 0 && k != Float.NaN) {
+				float xxl = b.x + (l / android.util.FloatMath.sqrt(k * k + 1));
+				Point xl = new Point(xxl, k * xxl + bb);
+				float kl = 0 - (1 / k);
+				float bl = xl.y - kl * xl.x;
+				
+				float tmp = xl.x - d / android.util.FloatMath.sqrt(kl * kl + 1);
+				float tmpp = kl * tmp + bl;
+				t1 = new Point(tmp, tmpp);
+				tmp = xl.x + d / android.util.FloatMath.sqrt(kl * kl + 1);
+				tmpp = kl * tmp + bl;
+				t2 = new Point(tmp, tmpp);									
+				if (b.y > a.y) {
+					arr[q] = t1;
+					arr[q+1] = t2;					
+				} else {
+					arr[q] = t2;
+					arr[q+1] = t1;
+				}
+				t1 = null;
+				t2 = null;
+			} 
+			if (k == Float.MAX_VALUE) {
+				
+				if (b.y > a.y) {
+					t1 = new Point(b.x - d, b.y - l, b.z);
+					t2 = new Point(b.x + d, b.y - l, b.z);
+					arr[q] = t1;
+					arr[q+1] = t2;
+				} else if (b.y <= a.y){
+					t1 = new Point(b.x - d, b.y + l, b.z);
+					t2 = new Point(b.x + d, b.y + l, b.z);
+					arr[q] = t2;
+					arr[q+1] = t1;
+				}
+				t1 = null;
+				t2 = null;
+			}
+			if (k == 0) {
+				
+				if (b.x > a.x) {
+					t1 = new Point(b.x - l, b.y + d, b.z);
+					t2 = new Point(b.x - l, b.y - d, b.z);
+					arr[q] = t1;
+					arr[q+1] = t2;
+				} else if (b.x <= a.x){
+					t1 = new Point(b.x + l, b.y + d, b.z);
+					t2 = new Point(b.x + l, b.y - d, b.z);
+					arr[q] = t2;
+					arr[q+1] = t1;
+				}
+				t1 = null;
+				t2 = null;
+			}
+			try {
+				if (needrec == true) {
+					processPoints(c, b, a, false, sv);
+					sv[0] = new SimpleVector(arr[0].y, 100, arr[0].x);
+					sv[1] = new SimpleVector(arr[1].y, 100, arr[1].x);
+				} else {				
+					sv[2] = new SimpleVector(arr[2].y, 100, arr[2].x);
+					sv[3] = new SimpleVector(arr[3].y, 100, arr[3].x);
+				}
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+				for (int i = 0; i < 4; i ++) {
+					Log.i("EN", "a " + a.toString() + " b " + b.toString() + " c " + c.toString());
+					Log.i("EN", "arr^ " + arr[i].toString());
+					Log.i("EN", "sv^ " + sv[i].toString());
+				}
+			}
+					
+		}
 		private SimpleVector[] generateSegment(Point a, Point b, Point c) {
 			SimpleVector[] res = new SimpleVector[6];
 			float angle = a.anglePoint(b, c);
@@ -489,31 +627,64 @@ public class Engine extends Activity {
 				float k23 = s2.countK();
 				float b23 = s2.countB();						
 				if (a.vectorMult(b, c) < 0) {
-					float tmp = xl.x + (float)Math.sqrt(k * k + 1) / 5;
+					float tmp = xl.x + android.util.FloatMath.sqrt(k * k + 1) / 5;
 					float tmpp = kl * tmp + bl;
 					xd1 = new Point(tmp, tmpp);
-					tmp = xl.x - (float)Math.sqrt(k * k + 1) / 5;
+					tmp = xl.x - android.util.FloatMath.sqrt(k * k + 1) / 5;
 					tmpp = kl * tmp + bl;
 					xd2 = new Point(tmp,  tmpp);
 					float kd3 = 0 - (1 / k23);
 					float bd3 = xd2.y - kd3 * xd2.x;
-					tmp = xd2.x + (float)Math.sqrt(kd3 * kd3 + 1) / (2 * 5);
+					tmp = xd2.x + android.util.FloatMath.sqrt(kd3 * kd3 + 1) / (2 * 5);
 					tmpp = kd3 * tmp + bd3;
 					xd3 = new Point(tmp, tmpp);
 				} else {
-					float tmp = xl.x + (float)Math.sqrt(k * k + 1) / 5;
+					float tmp = xl.x + android.util.FloatMath.sqrt(k * k + 1) / 5;
 					float tmpp = kl * tmp + bl;
 					xd1 = new Point(tmp, tmpp);
-					tmp = xl.x - (float)Math.sqrt(k * k + 1) / 5;
+					tmp = xl.x - android.util.FloatMath.sqrt(k * k + 1) / 5;
 					tmpp = kl * tmp + bl;
 					xd2 = new Point(tmp,  tmpp);
 					float kd3 = 0 - (1 / k23);
 					float bd3 = xd2.y - kd3 * xd2.x;
-					tmp = xd2.x + (float)Math.sqrt(kd3 * kd3 + 1) / (2 * 5);
+					tmp = xd2.x + android.util.FloatMath.sqrt(kd3 * kd3 + 1) / (2 * 5);
 					tmpp = kd3 * tmp + bd3;
 					xd3 = new Point(tmp, tmpp);
 				}
-			} 
+			} else if (b.x < a.x && b.y > a.y){
+				float xxl = b.x + (android.util.FloatMath.sqrt(k * k + 1) / l);
+				Point xl = new Point(xxl, k * xxl + bb);
+				Point xd1, xd2, xd3;
+				float kl = 0 - (1 / k);
+				float bl = xl.y - kl * xl.x;
+				float k23 = s2.countK();
+				float b23 = s2.countB();						
+				if (a.vectorMult(b, c) < 0) {
+					float tmp = xl.x - android.util.FloatMath.sqrt(k * k + 1) / 5;
+					float tmpp = kl * tmp + bl;
+					xd1 = new Point(tmp, tmpp);
+					tmp = xl.x + android.util.FloatMath.sqrt(k * k + 1) / 5;
+					tmpp = kl * tmp + bl;
+					xd2 = new Point(tmp,  tmpp);
+					float kd3 = 0 - (1 / k23);
+					float bd3 = xd2.y - kd3 * xd2.x;
+					tmp = xd2.x - android.util.FloatMath.sqrt(kd3 * kd3 + 1) / (2 * 5);
+					tmpp = kd3 * tmp + bd3;
+					xd3 = new Point(tmp, tmpp);
+				} else {
+					float tmp = xl.x + android.util.FloatMath.sqrt(k * k + 1) / 5;
+					float tmpp = kl * tmp + bl;
+					xd1 = new Point(tmp, tmpp);
+					tmp = xl.x - android.util.FloatMath.sqrt(k * k + 1) / 5;
+					tmpp = kl * tmp + bl;
+					xd2 = new Point(tmp,  tmpp);
+					float kd3 = 0 - (1 / k23);
+					float bd3 = xd2.y - kd3 * xd2.x;
+					tmp = xd2.x - android.util.FloatMath.sqrt(kd3 * kd3 + 1) / (2 * 5);
+					tmpp = kd3 * tmp + bd3;
+					xd3 = new Point(tmp, tmpp);
+				}
+			}
 			return null;
 		}
 		private SimpleVector[] generateRect(Point a, Point b, SimpleVector[] t) {

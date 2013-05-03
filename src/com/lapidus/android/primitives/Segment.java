@@ -19,9 +19,10 @@ public class Segment {
 		stop = new Point(x2, y2);
 	}
 	public float countK() {
+		if (start.x == stop.x) return Float.MAX_VALUE;
 		return (start.y - stop.y) / (start.x - stop.x);
 	}
-	public float countB() {
+	public float countB() {		
 		return stop.y - (countK() * stop.x);
 	}
 	public Point findIntersection(Segment s) {
