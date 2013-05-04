@@ -333,8 +333,8 @@ public class Engine extends Activity {
 				cube.strip();
 				cube.build();
 				newods = new Object3D(path.size() * 5);
-				leftBorder = new Object3D(path.size() * 3);
-				rightBorder = new Object3D(path.size() * 3);
+				leftBorder = new Object3D(path.size() * 5);
+				rightBorder = new Object3D(path.size() * 5);
 				//newods.addTriangle(new SimpleVector(-50, 0, -50), new SimpleVector(50, 0, -50), new SimpleVector(-50, 0, 0));
 				InputStream fis = null;
 				fis = getResources().openRawResource(R.raw.policecar);				
@@ -349,7 +349,7 @@ public class Engine extends Activity {
 				loadedCar.strip();
 				loadedCar.build();	
 				Object3D flore = new Object3D(4);
-				flore.addTriangle(new SimpleVector(-70, 100, -70), new SimpleVector(70, 100, -70), new SimpleVector(0, 100, 200));
+				flore.addTriangle(new SimpleVector(-130, 100, -130), new SimpleVector(130, 100, -130), new SimpleVector(0, 100, 280));
 				t = Primitives.getPlane(5, 10);
 				t.calcTextureWrapSpherical();
 				t.setTexture("texture");
@@ -369,11 +369,17 @@ public class Engine extends Activity {
 				
 				//newods.scale(2f);
 				Log.i("CO", " newods " + newods.getCenter().toString() + " : " +newods.getTransformedCenter().toString());
+				leftBorder.strip();
+				leftBorder.build();
+				rightBorder.strip();
+				rightBorder.build();
 				newods.setTexture("asphalt");
 				newods.strip();
 				newods.build();
 				//loadedCar.translate(path.get(0).x, path.get(0).y, path.get(0).z);
 				newods.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
+				leftBorder.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
+				rightBorder.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 				loadedCar.setCollisionMode(Object3D.COLLISION_CHECK_SELF);
 				flore.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 				cube.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
@@ -393,12 +399,17 @@ public class Engine extends Activity {
 				});*/
 				//world.addObjects(suround);
 				//world.addObject(track);
+				newods.setCulling(false);
+				leftBorder.setCulling(false);
+				rightBorder.setCulling(false);
 				world.addObject(flore);
 				world.addObject(t);
 				world.addObject(cube);
 				world.addObject(nobj);
 				world.addObject(newods);				
 				world.addObject(loadedCar);
+				world.addObject(leftBorder);
+				world.addObject(rightBorder);
 				world.compileAllObjects();
 				cam = world.getCamera();
 				loadedCar.setOrientation(new SimpleVector(0, 0, -1), new SimpleVector(0, -1, 0));				
@@ -480,19 +491,38 @@ public class Engine extends Activity {
 			SimpleVector[] sv = new SimpleVector[4];
 			SimpleVector t1;
 			SimpleVector t2; 
+			SimpleVector tb1;
+			SimpleVector tb2;
 			processPoints(path.get(1), path.get(0), new Point(-1, -1, -1), false, sv);
 			t1 = sv[2];
-			t2 = sv[3];
-			newods.addTriangle(new SimpleVector(-20, 0, -20), new SimpleVector(20, 0, -20), new SimpleVector(0, 20, 20));
+			t2 = sv[3];			
 			for (int i = 1; i < path.size() - 1; i ++) {
 				processPoints(path.get(i-1), path.get(i), path.get(i + 1), true, sv);
 				newods.addTriangle(t2, sv[1], sv[0]);
 				newods.addTriangle(t2, t1, sv[1]);
 				newods.addTriangle(sv[0], sv[1], sv[2]);
 				newods.addTriangle(sv[2], sv[3], sv[0]);
+				
+				tb1 = new SimpleVector(t1.x, t1.y - 5, t1.z);
+				leftBorder.addTriangle(t1, sv[1], tb1);
+				tb2 = new SimpleVector(sv[1].x, sv[1].y - 5, sv[1].z);
+				leftBorder.addTriangle(sv[1], tb2, tb1);
+				leftBorder.addTriangle(sv[1], sv[2], tb2);
+				tb1 = new SimpleVector(sv[2].x, sv[2].y - 5, sv[2].z);
+				leftBorder.addTriangle(sv[2], tb1, tb2);
+				
+				tb1 = new SimpleVector(t2.x, t2.y - 2, t2.z);
+				rightBorder.addTriangle(t2, sv[0], tb1);
+				tb2 = new SimpleVector(sv[0].x, sv[0].y - 2, sv[0].z);
+				rightBorder.addTriangle(sv[0], tb2, tb1);
+				rightBorder.addTriangle(sv[0], sv[3], tb2);
+				tb1 = new SimpleVector(sv[3].x, sv[3].y - 2, sv[3].z);
+				rightBorder.addTriangle(sv[3], tb1, tb2);
 				t2 = sv[3];
 				t1 = sv[2];
 			}
+			//leftBorder.invert();
+			rightBorder.invert();
 			newods.invert();
 		}
 		public void processPoints(Point a, Point b, Point c, boolean needrec, SimpleVector[] sv) {
@@ -510,7 +540,7 @@ public class Engine extends Activity {
 			Point[] arr = new Point[4];
 			Point t1, t2;
 			float angle = a.anglePoint(b, c);
-			float l = 6 / angle;
+			float l = 21 / angle;
 			Segment s1 = new Segment(a, b);
 			Segment s2 = new Segment(b, c);
 			float k = s1.countK();			
@@ -524,10 +554,10 @@ public class Engine extends Activity {
 				
 				float tmp = xl.x - d / android.util.FloatMath.sqrt(kl * kl + 1) ;
 				float tmpp = kl * tmp + bl;
-				t1 = new Point(tmp, tmpp);
+				t1 = new Point(tmp, tmpp, b.z);
 				tmp = xl.x + d / android.util.FloatMath.sqrt(kl * kl + 1) ;
 				tmpp = kl * tmp + bl;
-				t2 = new Point(tmp, tmpp);									
+				t2 = new Point(tmp, tmpp, b.z);									
 				if (b.y > a.y) {
 					arr[q] = t1;
 					arr[q + 1] = t2;					
@@ -545,10 +575,10 @@ public class Engine extends Activity {
 				
 				float tmp = xl.x - d / android.util.FloatMath.sqrt(kl * kl + 1);
 				float tmpp = kl * tmp + bl;
-				t1 = new Point(tmp, tmpp);
+				t1 = new Point(tmp, tmpp, b.z);
 				tmp = xl.x + d / android.util.FloatMath.sqrt(kl * kl + 1);
 				tmpp = kl * tmp + bl;
-				t2 = new Point(tmp, tmpp);									
+				t2 = new Point(tmp, tmpp, b.z);									
 				if (b.y > a.y) {
 					arr[q] = t1;
 					arr[q+1] = t2;					
@@ -594,11 +624,11 @@ public class Engine extends Activity {
 			try {
 				if (needrec == true) {
 					processPoints(c, b, a, false, sv);
-					sv[0] = new SimpleVector(arr[0].y, 100, arr[0].x);
-					sv[1] = new SimpleVector(arr[1].y, 100, arr[1].x);
+					sv[0] = new SimpleVector(arr[0].y, 100 + arr[0].z, arr[0].x);
+					sv[1] = new SimpleVector(arr[1].y, 100 + arr[1].z, arr[1].x);
 				} else {				
-					sv[2] = new SimpleVector(arr[2].y, 100, arr[2].x);
-					sv[3] = new SimpleVector(arr[3].y, 100, arr[3].x);
+					sv[2] = new SimpleVector(arr[2].y, 100 + arr[2].z, arr[2].x);
+					sv[3] = new SimpleVector(arr[3].y, 100 + arr[3].z, arr[3].x);
 				}
 			} catch (NullPointerException e) {
 				e.printStackTrace();
@@ -762,6 +792,7 @@ public class Engine extends Activity {
 			loadedCar.translate(t);
 			//GRAVITY
 			t = loadedCar.checkForCollisionEllipsoid(new SimpleVector(0, 1, 0), ellipsoid, 1);
+			loadedCar.translate(t);
 			Log.i("GR", "corrected"  + t.toString());
 			if (t.y == 1 && !onGround) loadedCar.translate(t);
 			else {
@@ -769,10 +800,10 @@ public class Engine extends Activity {
 			}
 			if (t.y == 1 && onGround) {
 				if (speed > 0.2) {
-					speed -= 0.01;
+					//speed -= 0.01;
 				}
 			} else if (onGround) {
-				if (speed < 0.4 && (ypos < 2 * screenHeight / 3 || ypos < 0))  {
+				if (speed < 0.6 && (ypos < 2 * screenHeight / 3 || ypos < 0))  {
 					speed += 0.05;
 				}
 			}

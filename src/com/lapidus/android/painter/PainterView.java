@@ -54,6 +54,7 @@ public class PainterView extends View {
 	ArrayList<Segment> redoSegs;
 	ArrayList<Point> intersectingPoints; 
 	ArrayList<Point> tempIntersectingPoints;
+	Point tmp;
 	Point a, b;	 
 	public Point[] approximizedPoints;
 	float startX, startY, stopX, stopY;
@@ -80,7 +81,16 @@ public class PainterView extends View {
 					if (j != (i - 1) && j != i && j != (i + 1)) {
 						n = segs.get(i).checkForIntersection(segs.get(j));
 						if (n == true) {
-							intersectingPoints.add(segs.get(i).findIntersection(segs.get(j)));
+							boolean pointExists = false;
+							for (Point x : intersectingPoints) {
+								if ((x.S1() == segs.get(j) && x.S2() == segs.get(i)) || (x.S1() == segs.get(j) && x.S2() == segs.get(i))) {
+									pointExists = true;
+								}
+							}
+							if (!pointExists) { 
+								intersectingPoints.add(segs.get(i).findIntersection(segs.get(j)));
+								intersectingPoints.get(intersectingPoints.size() - 1).addSegs(segs.get(i), segs.get(j));
+							}														
 						}
 					}							
 				}

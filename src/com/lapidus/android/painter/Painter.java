@@ -87,7 +87,15 @@ public class Painter extends Activity {
 			startActivity(i);
 		}
 		if (item.getItemId() == 4) {
+			view.invalidate();
 			Engine.path = new ArrayList<Point>();
+			int ind;
+			for (Point x : view.intersectingPoints) {
+				ind = view.points.indexOf(x.S1().start);
+				view.points.add(ind + 1, new Point(x.x, x.y, 5));
+				ind = view.points.indexOf(x.S2().start);
+				view.points.add(ind + 1, new Point(x.x, x.y, -5));
+			}
 			/*for (int i = 0; i < view.approximizedPoints.length; i++) {
 				Engine.path.add(new Point(view.approximizedPoints[i].x, view.approximizedPoints[i].y));
 			}*/

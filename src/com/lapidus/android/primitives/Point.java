@@ -7,6 +7,7 @@ public class Point implements Cloneable {
 	public int index;
 	public boolean collides;
 	public int collisionIndex;
+	Segment s1, s2; 
 	public boolean chkd;
 	public static Comparator<Point> indexComp = new indexComparator();
 	public static Comparator<Point> xComp = new xComparator();
@@ -19,6 +20,8 @@ public class Point implements Cloneable {
 		collides = false;
 		collisionIndex = -1;
 		chkd = false;
+		s1 = null;
+		s2 = null;
 	}
 	public Point (float x, float y) {
 		this.x = x;
@@ -28,6 +31,8 @@ public class Point implements Cloneable {
 		chkd = false;
 		collides = false;
 		collisionIndex = -1;
+		s1 = null;
+		s2 = null;
 	}
 	public Point (float x, float y, float z) {
 		this.x = x;
@@ -37,6 +42,8 @@ public class Point implements Cloneable {
 		chkd = false;
 		collides = false;
 		collisionIndex = -1;
+		s1 = null;
+		s2 = null;
 	}
 	public Point() {
 		// TODO Auto-generated constructor stub
@@ -47,6 +54,8 @@ public class Point implements Cloneable {
 		collides = false;
 		collisionIndex = -1;
 		chkd = false;
+		s1 = null;
+		s2 = null;
 	}
 	public String toString()
 	{
@@ -82,6 +91,16 @@ public class Point implements Cloneable {
 	public float vectorMult(Point p1, Point p2) {
         return ((p1.x - x)*(p2.y - y) - (p2.x - x) * (p1.y - y));
     }
+	public void addSegs(Segment a, Segment b) {
+		s1 = a; 
+		s2 = b;
+	}
+	public Segment S1() {
+		return s1;
+	}
+	public Segment S2() {
+		return s2;
+	}
 	///Comparators
 	
 	private static class xComparator implements Comparator<Point> {

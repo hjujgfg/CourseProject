@@ -25,6 +25,11 @@ public class Segment {
 	public float countB() {		
 		return stop.y - (countK() * stop.x);
 	}
+	public float length() {
+		float xx = stop.x - start.x;
+		float yy = stop.y - stop.y;
+		return (float)Math.sqrt(xx * xx + yy * yy);
+	}
 	public Point findIntersection(Segment s) {
 		Point intersection = new Point();
 		intersection.x = (s.countB() - this.countB()) / (this.countK() - s.countK());
@@ -42,8 +47,8 @@ public class Segment {
 	   
     }   
     boolean onSegment(Point pi, Point pj, Point pk) {
-        if (min(pi.x, pj.x) < pk.x && pk.x < max(pi.x, pj.x) 
-                && min(pi.y,pj.y) < pk.y && pk.y < max(pi.y,pj.y)) {
+        if (min(pi.x, pj.x) <= pk.x && pk.x <= max(pi.x, pj.x) 
+                && min(pi.y,pj.y) <= pk.y && pk.y <= max(pi.y,pj.y)) {
             return true;
         } else {
             return false;
