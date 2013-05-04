@@ -26,7 +26,7 @@ public class PainterView extends View {
 		super(context);
 		// TODO Auto-generated constructor stub
 		paint = new Paint();
-		this.setOnTouchListener(ontouchlistener2);
+		this.setOnTouchListener(ontouchlistener);
 		startX = startY = stopX = stopY = 0;
 		points = new ArrayList<Point>();
 		Bitmap.Config conf = Bitmap.Config.ARGB_8888;
@@ -42,6 +42,7 @@ public class PainterView extends View {
 		tempIntersectingPoints = new ArrayList<Point>();
 		redoPoints = new ArrayList<Point>();
 		redoSegs = new ArrayList<Segment>();
+		approximizedPoints = new Point[0];
 		lastAction = 0;
 	}
 	int pointCounter;
@@ -96,20 +97,33 @@ public class PainterView extends View {
 				}
 			}
 		} else intersectingPoints.clear();
+		//drawPoints(canvas, paint);
+		drawSegs(segs, canvas, paint);
 		drawPoints(canvas, paint);
+		drawApproximizedPoints(canvas, paint);
 		drawIntersetingPoints(intersectingPoints, canvas, paint);
 	}
 	protected void drawSegs(ArrayList<Segment> segs, Canvas canvas, Paint paint) {
-		paint.setColor(Color.GRAY);
-		for (Segment s : segs) {
+		paint.setColor(Color.GRAY);		
+		for (Segment s : segs) {			
 			canvas.drawLine(s.start.x, s.start.y, s.stop.x, s.stop.y, paint);			
-		}
+		}		
 		paint.setColor(Color.BLACK);
 	}
 	protected void drawPoints(ArrayList<Point> arr, Canvas canvas, Paint paint) {
 		paint.setColor(Color.YELLOW);
 		for (Point x : arr) {
 			canvas.drawCircle(x.x, x.y, 10, paint);
+		}
+		paint.setColor(Color.BLACK);
+	}
+	protected void drawApproximizedPoints(Canvas canvas, Paint paint) {
+		if (approximizedPoints.length < 2) return;
+		paint.setColor(Color.RED);
+		if (approximizedPoints == null || approximizedPoints.length == 0) return; 
+		for (int i = 0; i < approximizedPoints.length - 1; i ++) {
+			canvas.drawLine(approximizedPoints[i].x, approximizedPoints[i].y, 
+					approximizedPoints[i + 1].x, approximizedPoints[i + 1].y, paint);						
 		}
 		paint.setColor(Color.BLACK);
 	}
@@ -137,14 +151,14 @@ public class PainterView extends View {
 			paint.setColor(Color.BLACK);
 			canvas.drawLine(points.get(i).x, points.get(i).y, 
 					points.get(i+1).x, points.get(i+1).y, paint);	
-			paint.setColor(Color.YELLOW);
-			canvas.drawCircle(points.get(i).x, points.get(i).y, 17, paint);
+			//paint.setColor(Color.YELLOW);
+			//canvas.drawCircle(points.get(i).x, points.get(i).y, 17, paint);
 		}
 		
 		/*paint.setColor(Color.GREEN);
 		canvas.drawCircle(points.get(0).x, points.get(0).y, 1, paint);*/
-		paint.setColor(Color.YELLOW);
-		canvas.drawCircle(points.get(points.size() - 1).x, points.get(points.size() - 1).y, 17, paint);
+		//paint.setColor(Color.YELLOW);
+		//canvas.drawCircle(points.get(points.size() - 1).x, points.get(points.size() - 1).y, 17, paint);
 		/*paint.setColor(Color.RED);		
 		if (approximizedPoints != null && approximizedPoints.length != 0) {			
 			for (int i = 0; i < approximizedPoints.length - 1; i ++) {
@@ -179,7 +193,8 @@ public class PainterView extends View {
 					i ++;
 					Log.i("PP", x.toString() + " i = " + i);
 				}
-				approximizedPoints = Approximizer.approximize(2f, temp);	
+				approximizedPoints = Approximizer.approximize(3f, temp);	
+				refreshSegs(approximizedPoints);
 				touched = false;				
 				//points.add(hangingPoint);
 			}
@@ -268,6 +283,12 @@ public class PainterView extends View {
 		for (int i = 0; i < points.size() - 1; i ++) {
 			segs.add(new Segment(points.get(i), points.get(i+1)));
 		}
+	}
+	public void refreshSegs(Point[] arr) {
+		segs.clear();
+		for (int i = 0; i < arr.length - 1; i ++) {
+			segs.add(new Segment(arr[i], arr[i+1]));
+		}		
 	}
 	public void undo() {
 		if (points.size() == 0) return;

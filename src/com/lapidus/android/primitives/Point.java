@@ -47,9 +47,9 @@ public class Point implements Cloneable {
 	}
 	public Point() {
 		// TODO Auto-generated constructor stub
-		x = -1;
-		y = -1;
-		z = -1;
+		x = 0;
+		y = 0;
+		z = 0;
 		index = -1;
 		collides = false;
 		collisionIndex = -1;
@@ -59,7 +59,7 @@ public class Point implements Cloneable {
 	}
 	public String toString()
 	{
-	    return this.x + ":" + this.y;
+	    return this.x + ":" + this.y + ":" + this.z;
 	}
 	public float distanceSquared(Point other)
 	{

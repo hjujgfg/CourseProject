@@ -89,17 +89,25 @@ public class Painter extends Activity {
 		if (item.getItemId() == 4) {
 			view.invalidate();
 			Engine.path = new ArrayList<Point>();
+			ArrayList<Point> tmp = new ArrayList<Point>();
+			for (int i = 0; i < view.approximizedPoints.length; i++) {
+				tmp.add(view.approximizedPoints[i]);
+			}
 			int ind;
 			for (Point x : view.intersectingPoints) {
-				ind = view.points.indexOf(x.S1().start);
-				view.points.add(ind + 1, new Point(x.x, x.y, 5));
-				ind = view.points.indexOf(x.S2().start);
-				view.points.add(ind + 1, new Point(x.x, x.y, -5));
+				ind = tmp.indexOf(x.S1().start);
+				tmp.get(ind).z = 2;
+				tmp.get(ind + 1).z = 2;
+				tmp.add(ind + 1, new Point(x.x, x.y, 6));
+				ind = tmp.indexOf(x.S2().start);
+				tmp.get(ind).z = 0;
+				tmp.get(ind + 1).z = 0;
+				//tmp.add(ind + 1, new Point(x.x, x.y, 0));
 			}
 			/*for (int i = 0; i < view.approximizedPoints.length; i++) {
 				Engine.path.add(new Point(view.approximizedPoints[i].x, view.approximizedPoints[i].y));
 			}*/
-			for (Point x : view.points) {
+			for (Point x : tmp) {
 				Engine.path.add(new Point(x.x, x.y, x.z));
 			}
 			//Engine.path = (ArrayList<Point>) view.points.clone();

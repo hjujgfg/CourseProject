@@ -94,7 +94,7 @@ public class Engine extends Activity {
 	private int screenWidth, screenHeight;	
 	
 	private String mytag = "MyTag";
-	private SimpleVector ellipsoid = new SimpleVector(2, 2, 2);
+	private SimpleVector ellipsoid = new SimpleVector(1, 1, 1);
 	public static boolean bb; 
 	public Engine() {
 		renderer = new MyRenderer();
@@ -503,27 +503,27 @@ public class Engine extends Activity {
 				newods.addTriangle(sv[0], sv[1], sv[2]);
 				newods.addTriangle(sv[2], sv[3], sv[0]);
 				
-				tb1 = new SimpleVector(t1.x, t1.y - 5, t1.z);
+				tb1 = new SimpleVector(t1.x, t1.y - 3, t1.z);
 				leftBorder.addTriangle(t1, sv[1], tb1);
-				tb2 = new SimpleVector(sv[1].x, sv[1].y - 5, sv[1].z);
+				tb2 = new SimpleVector(sv[1].x, sv[1].y - 3, sv[1].z);
 				leftBorder.addTriangle(sv[1], tb2, tb1);
 				leftBorder.addTriangle(sv[1], sv[2], tb2);
-				tb1 = new SimpleVector(sv[2].x, sv[2].y - 5, sv[2].z);
+				tb1 = new SimpleVector(sv[2].x, sv[2].y - 3, sv[2].z);
 				leftBorder.addTriangle(sv[2], tb1, tb2);
 				
-				tb1 = new SimpleVector(t2.x, t2.y - 2, t2.z);
+				tb1 = new SimpleVector(t2.x, t2.y - 3, t2.z);
 				rightBorder.addTriangle(t2, sv[0], tb1);
-				tb2 = new SimpleVector(sv[0].x, sv[0].y - 2, sv[0].z);
+				tb2 = new SimpleVector(sv[0].x, sv[0].y - 3, sv[0].z);
 				rightBorder.addTriangle(sv[0], tb2, tb1);
 				rightBorder.addTriangle(sv[0], sv[3], tb2);
-				tb1 = new SimpleVector(sv[3].x, sv[3].y - 2, sv[3].z);
+				tb1 = new SimpleVector(sv[3].x, sv[3].y - 3, sv[3].z);
 				rightBorder.addTriangle(sv[3], tb1, tb2);
 				t2 = sv[3];
 				t1 = sv[2];
 			}
-			//leftBorder.invert();
-			rightBorder.invert();
-			newods.invert();
+			leftBorder.invert();
+			//rightBorder.invert();
+			//newods.invert();
 		}
 		public void processPoints(Point a, Point b, Point c, boolean needrec, SimpleVector[] sv) {
 			int q;
@@ -540,7 +540,7 @@ public class Engine extends Activity {
 			Point[] arr = new Point[4];
 			Point t1, t2;
 			float angle = a.anglePoint(b, c);
-			float l = 21 / angle;
+			float l = 12 / angle;
 			Segment s1 = new Segment(a, b);
 			Segment s2 = new Segment(b, c);
 			float k = s1.countK();			
@@ -558,7 +558,7 @@ public class Engine extends Activity {
 				tmp = xl.x + d / android.util.FloatMath.sqrt(kl * kl + 1) ;
 				tmpp = kl * tmp + bl;
 				t2 = new Point(tmp, tmpp, b.z);									
-				if (b.y > a.y) {
+				if (b.y < a.y) {
 					arr[q] = t1;
 					arr[q + 1] = t2;					
 				} else {
@@ -579,7 +579,7 @@ public class Engine extends Activity {
 				tmp = xl.x + d / android.util.FloatMath.sqrt(kl * kl + 1);
 				tmpp = kl * tmp + bl;
 				t2 = new Point(tmp, tmpp, b.z);									
-				if (b.y > a.y) {
+				if (b.y < a.y) {
 					arr[q] = t1;
 					arr[q+1] = t2;					
 				} else {
@@ -608,15 +608,15 @@ public class Engine extends Activity {
 			if (k == 0) {
 				
 				if (b.x > a.x) {
-					t1 = new Point(b.x - l, b.y + d, b.z);
-					t2 = new Point(b.x - l, b.y - d, b.z);
+					t1 = new Point(b.x - l, b.y - d, b.z);
+					t2 = new Point(b.x - l, b.y + d, b.z);
 					arr[q] = t1;
 					arr[q+1] = t2;
 				} else if (b.x <= a.x){
 					t1 = new Point(b.x + l, b.y + d, b.z);
 					t2 = new Point(b.x + l, b.y - d, b.z);
-					arr[q] = t2;
-					arr[q+1] = t1;
+					arr[q] = t1;
+					arr[q+1] = t2;
 				}
 				t1 = null;
 				t2 = null;
