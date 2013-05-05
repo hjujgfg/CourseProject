@@ -40,6 +40,9 @@ public class Segment {
 		s.stop.z = -10;
 		return intersection;
 	}
+	public float angle(Segment s) {
+		return this.start.anglePoint(this.stop, s.stop);
+	}
 	float direction(Point pi, Point pj, Point pk) {
 	    //(pk - pi) * (pj - pi)
 	    return (((pk.x - pi.x) * (pj.y - pi.y)) - 

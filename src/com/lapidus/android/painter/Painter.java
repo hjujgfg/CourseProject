@@ -28,7 +28,9 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 public class Painter extends Activity {
@@ -37,9 +39,17 @@ public class Painter extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		view = new PainterView(getApplicationContext());
-		setContentView(view);
-		b = new Button(view.getContext());
-		
+		setContentView(R.layout.activity_painter);
+		ImageButton button = (ImageButton)findViewById(R.id.button);
+		view = (PainterView) findViewById(R.id.view);
+		button.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Toast t = Toast.makeText(getApplicationContext(), "shit", Toast.LENGTH_SHORT);
+				t.show();
+			}
+		});
 	}
 	PainterView view;
 	Button b;
@@ -96,9 +106,11 @@ public class Painter extends Activity {
 			int ind;
 			for (Point x : view.intersectingPoints) {
 				ind = tmp.indexOf(x.S1().start);
+				//tmp.get(ind - 1).z = 2;
 				tmp.get(ind).z = 2;
-				tmp.get(ind + 1).z = 2;
-				tmp.add(ind + 1, new Point(x.x, x.y, 6));
+				//tmp.get(ind - 1).z = 2;
+				//tmp.get(ind + 2).z = 2;
+				tmp.add(ind + 1, new Point(x.x, x.y, 4));
 				ind = tmp.indexOf(x.S2().start);
 				tmp.get(ind).z = 0;
 				tmp.get(ind + 1).z = 0;

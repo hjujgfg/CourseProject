@@ -61,6 +61,10 @@ public class Point implements Cloneable {
 	{
 	    return this.x + ":" + this.y + ":" + this.z;
 	}
+	public void smoothAngle(Point b, Point c) {
+		b.x = ((this.x + c.x + b.x) / 3);
+		b.y = ((this.y + c.y + b.y) / 3);
+	}
 	public float distanceSquared(Point other)
 	{
 	    return (this.x - other.x) * (this.x - other.x) + (this.y - other.y) * (this.y - other.y);

@@ -14,6 +14,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.BitmapFactory;
+import android.graphics.Shader;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.renderscript.Mesh.Primitive;
@@ -38,6 +41,7 @@ import com.threed.jpct.Primitives;
 import com.threed.jpct.RGBColor;
 import com.threed.jpct.SimpleVector;
 import com.threed.jpct.Texture;
+import com.threed.jpct.TextureInfo;
 import com.threed.jpct.TextureManager;
 import com.threed.jpct.World;
 import com.threed.jpct.util.BitmapHelper;
@@ -94,7 +98,7 @@ public class Engine extends Activity {
 	private int screenWidth, screenHeight;	
 	
 	private String mytag = "MyTag";
-	private SimpleVector ellipsoid = new SimpleVector(1, 1, 1);
+	private SimpleVector ellipsoid = new SimpleVector(1.5, 1.5, 1.5);
 	public static boolean bb; 
 	public Engine() {
 		renderer = new MyRenderer();
@@ -315,12 +319,14 @@ public class Engine extends Activity {
 				Texture car4 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car_ref)), 64, 64));
 				Texture car5 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car_lit)), 64, 64));
 				Texture asphalt = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.asphalt)), 64, 64));
+				Texture green = new Texture(2, 2, RGBColor.GREEN);				
+				TextureManager.getInstance().addTexture("green", green);
 				TextureManager.getInstance().addTexture("texture", texture);
 				TextureManager.getInstance().addTexture("police_car3.tga", car3);
 				TextureManager.getInstance().addTexture("police_car.tga", car4);
 				TextureManager.getInstance().addTexture("police_car_lit.tga", car5);		
 				TextureManager.getInstance().addTexture("asphalt", asphalt);
-				
+				TextureInfo ti = new TextureInfo(TextureManager.getInstance().getTextureID("asphalt"));
 				nobj = Primitives.getSphere(10);
 				nobj.calcTextureWrapSpherical();
 				nobj.setTexture("texture");
@@ -364,16 +370,23 @@ public class Engine extends Activity {
 				t3.makeEqualLength(t1);
 				Log.i("CO" , "1 -3e " + t1.calcAngleFast(t3));
 				//Object3D[] suround = new Object3D[path.size()];			
-				if (bb) generateTrack();//generatePathSorted();
+				if (bb) generateTrack(ti);//generatePathSorted();
 				else generatePathUnsorted();
 				
 				//newods.scale(2f);
 				Log.i("CO", " newods " + newods.getCenter().toString() + " : " +newods.getTransformedCenter().toString());
 				leftBorder.strip();
 				leftBorder.build();
+				rightBorder.setTexture("green");
+				leftBorder.setTexture("green");
+				rightBorder.setEnvmapped(true);
+				leftBorder.calcTextureWrapSpherical();
 				rightBorder.strip();
 				rightBorder.build();
+				
 				newods.setTexture("asphalt");
+				//newods.setEnvmapped(true);
+				newods.calcTextureWrapSpherical();
 				newods.strip();
 				newods.build();
 				//loadedCar.translate(path.get(0).x, path.get(0).y, path.get(0).z);
@@ -486,7 +499,7 @@ public class Engine extends Activity {
 				newods.addTriangle(s3, s2, s4);									
 			}		
 		}
-		private void generateTrack () {
+		private void generateTrack (TextureInfo ti) {
 			normalizePath();
 			SimpleVector[] sv = new SimpleVector[4];
 			SimpleVector t1;
@@ -498,10 +511,10 @@ public class Engine extends Activity {
 			t2 = sv[3];			
 			for (int i = 1; i < path.size() - 1; i ++) {
 				processPoints(path.get(i-1), path.get(i), path.get(i + 1), true, sv);
-				newods.addTriangle(t2, sv[1], sv[0]);
-				newods.addTriangle(t2, t1, sv[1]);
-				newods.addTriangle(sv[0], sv[1], sv[2]);
-				newods.addTriangle(sv[2], sv[3], sv[0]);
+				newods.addTriangle(t2, sv[1], sv[0], ti);
+				newods.addTriangle(t2, t1, sv[1], ti);
+				newods.addTriangle(sv[0], sv[1], sv[2], ti);
+				newods.addTriangle(sv[2], sv[3], sv[0], ti);
 				
 				tb1 = new SimpleVector(t1.x, t1.y - 3, t1.z);
 				leftBorder.addTriangle(t1, sv[1], tb1);
@@ -540,9 +553,10 @@ public class Engine extends Activity {
 			Point[] arr = new Point[4];
 			Point t1, t2;
 			float angle = a.anglePoint(b, c);
-			float l = 12 / angle;
+			float l = 15 / angle;			
 			Segment s1 = new Segment(a, b);
 			Segment s2 = new Segment(b, c);
+			if (l > s1.length()) l = s1.length() / 2;
 			float k = s1.countK();			
 			float bb = s1.countB();
 			
@@ -591,12 +605,12 @@ public class Engine extends Activity {
 			} 
 			if (k == Float.MAX_VALUE) {
 				
-				if (b.y > a.y) {
+				if (b.y < a.y) {
 					t1 = new Point(b.x - d, b.y - l, b.z);
 					t2 = new Point(b.x + d, b.y - l, b.z);
 					arr[q] = t1;
 					arr[q+1] = t2;
-				} else if (b.y <= a.y){
+				} else if (b.y >= a.y){
 					t1 = new Point(b.x - d, b.y + l, b.z);
 					t2 = new Point(b.x + d, b.y + l, b.z);
 					arr[q] = t2;
@@ -624,11 +638,11 @@ public class Engine extends Activity {
 			try {
 				if (needrec == true) {
 					processPoints(c, b, a, false, sv);
-					sv[0] = new SimpleVector(arr[0].y, 100 + arr[0].z, arr[0].x);
-					sv[1] = new SimpleVector(arr[1].y, 100 + arr[1].z, arr[1].x);
+					sv[0] = new SimpleVector(arr[0].y, 100 - arr[0].z, arr[0].x);
+					sv[1] = new SimpleVector(arr[1].y, 100 - arr[1].z, arr[1].x);
 				} else {				
-					sv[2] = new SimpleVector(arr[2].y, 100 + arr[2].z, arr[2].x);
-					sv[3] = new SimpleVector(arr[3].y, 100 + arr[3].z, arr[3].x);
+					sv[2] = new SimpleVector(arr[2].y, 100 - arr[2].z, arr[2].x);
+					sv[3] = new SimpleVector(arr[3].y, 100 - arr[3].z, arr[3].x);
 				}
 			} catch (NullPointerException e) {
 				e.printStackTrace();

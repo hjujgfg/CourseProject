@@ -15,8 +15,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.util.AttributeSet;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -25,6 +25,17 @@ public class PainterView extends View {
 	public PainterView(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
+		init();
+	}
+	public PainterView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init();
+	}
+	public PainterView(Context context, AttributeSet attrs, int i) {
+		super(context, attrs, i);
+		init();
+	}
+	private void init() {
 		paint = new Paint();
 		this.setOnTouchListener(ontouchlistener);
 		startX = startY = stopX = stopY = 0;
@@ -74,29 +85,7 @@ public class PainterView extends View {
 		if (image != null) {			
 			canvas.drawBitmap(image, new Matrix(), paint);
 		}
-		if (segs.size() > 2) {					
-			intersectingPoints.clear();
-			for (int i = 0; i < segs.size(); i ++) {
-				for (int j = 0; j < segs.size(); j ++) {
-					n = false;												
-					if (j != (i - 1) && j != i && j != (i + 1)) {
-						n = segs.get(i).checkForIntersection(segs.get(j));
-						if (n == true) {
-							boolean pointExists = false;
-							for (Point x : intersectingPoints) {
-								if ((x.S1() == segs.get(j) && x.S2() == segs.get(i)) || (x.S1() == segs.get(j) && x.S2() == segs.get(i))) {
-									pointExists = true;
-								}
-							}
-							if (!pointExists) { 
-								intersectingPoints.add(segs.get(i).findIntersection(segs.get(j)));
-								intersectingPoints.get(intersectingPoints.size() - 1).addSegs(segs.get(i), segs.get(j));
-							}														
-						}
-					}							
-				}
-			}
-		} else intersectingPoints.clear();
+		refreshIntersectingPoints(intersectingPoints, segs);
 		//drawPoints(canvas, paint);
 		drawSegs(segs, canvas, paint);
 		drawPoints(canvas, paint);
@@ -104,10 +93,12 @@ public class PainterView extends View {
 		drawIntersetingPoints(intersectingPoints, canvas, paint);
 	}
 	protected void drawSegs(ArrayList<Segment> segs, Canvas canvas, Paint paint) {
-		paint.setColor(Color.GRAY);		
+		paint.setColor(Color.GRAY);
+		paint.setStrokeWidth(2f);
 		for (Segment s : segs) {			
 			canvas.drawLine(s.start.x, s.start.y, s.stop.x, s.stop.y, paint);			
 		}		
+		paint.setStrokeWidth(1f);
 		paint.setColor(Color.BLACK);
 	}
 	protected void drawPoints(ArrayList<Point> arr, Canvas canvas, Paint paint) {
@@ -193,9 +184,32 @@ public class PainterView extends View {
 					i ++;
 					Log.i("PP", x.toString() + " i = " + i);
 				}
-				approximizedPoints = Approximizer.approximize(3f, temp);	
+				approximizedPoints = Approximizer.approximize(2f, temp);	
 				refreshSegs(approximizedPoints);
-				touched = false;				
+				touched = false;	
+				refreshIntersectingPoints(intersectingPoints, segs);
+				removeSmallLoops(intersectingPoints, segs);
+				refreshPoints(segs, points);
+				temp = new Point[points.size()];
+				i = 0;
+				for (Point x : points) {					
+					temp[i] = x;
+					i ++;
+					Log.i("PP", x.toString() + " i = " + i);
+				}
+				approximizedPoints = Approximizer.approximize(1f, temp);
+				refreshSegs(approximizedPoints);
+				smoothAngles(segs, 2);
+				refreshPoints(segs, points);
+				temp = new Point[points.size()];
+				i = 0;
+				for (Point x : points) {					
+					temp[i] = x;
+					i ++;
+					Log.i("PP", x.toString() + " i = " + i);
+				}
+				approximizedPoints = Approximizer.approximize(2f, temp);
+				refreshSegs(approximizedPoints);
 				//points.add(hangingPoint);
 			}
 			if (MotionEvent.ACTION_DOWN == event.getAction()) {
@@ -286,9 +300,88 @@ public class PainterView extends View {
 	}
 	public void refreshSegs(Point[] arr) {
 		segs.clear();
-		for (int i = 0; i < arr.length - 1; i ++) {
+		for (int i = 0; i < arr.length - 1; i ++) {			
 			segs.add(new Segment(arr[i], arr[i+1]));
 		}		
+	}
+	public void refreshPoints(ArrayList<Segment> segs, ArrayList<Point> points) {
+		points.clear();
+		points.add(segs.get(0).start);
+		for (Segment s : segs) {
+			points.add(s.stop);
+		}
+	}
+	public void refreshIntersectingPoints(ArrayList<Point> intersectingPoints, ArrayList<Segment> segs) {
+		if (segs.size() > 2) {					
+			intersectingPoints.clear();
+			for (int i = 0; i < segs.size(); i ++) {
+				for (int j = 0; j < segs.size(); j ++) {
+					n = false;												
+					if (j != (i - 1) && j != i && j != (i + 1)) {
+						n = segs.get(i).checkForIntersection(segs.get(j));
+						if (n == true) {
+							boolean pointExists = false;
+							for (Point x : intersectingPoints) {
+								if ((x.S1() == segs.get(j) && x.S2() == segs.get(i)) || (x.S1() == segs.get(j) && x.S2() == segs.get(i))) {
+									pointExists = true;
+								}
+							}
+							if (!pointExists) { 
+								intersectingPoints.add(segs.get(i).findIntersection(segs.get(j)));
+								intersectingPoints.get(intersectingPoints.size() - 1).addSegs(segs.get(i), segs.get(j));
+							}														
+						}
+					}							
+				}
+			}
+		} else intersectingPoints.clear();
+	}
+	public void removeSmallLoops(ArrayList<Point> intersectingPoints, ArrayList<Segment> segs) {
+		Segment t1;
+		Segment t2; 
+		float loopLength = 0;
+		int f1, f2;
+		for (int i = 0; i < intersectingPoints.size(); i++) {
+			f1 = segs.indexOf(intersectingPoints.get(i).S1());
+			f2 = segs.indexOf(intersectingPoints.get(i).S2());
+			if (f1 != -1 && f2 != -1) {
+				loopLength = 0;
+				t1 = new Segment(intersectingPoints.get(i), intersectingPoints.get(i).S1().stop);
+				t2 = new Segment(intersectingPoints.get(i).S2().start, intersectingPoints.get(i));
+				loopLength += t1.length();
+				loopLength += t2.length();
+				
+				for (int j = f1 + 1; j < f2; j ++) {
+					loopLength += segs.get(j).length();
+				}
+				if (loopLength < 88) {
+					t1 = new Segment(intersectingPoints.get(i).S1().start, intersectingPoints.get(i));
+					t2 = new Segment(intersectingPoints.get(i), intersectingPoints.get(i).S1().stop);
+					for (int j = f2; j >= f1; j --) {
+						segs.remove(j);
+					}
+					segs.add(f1, t1);
+					segs.add(f1 + 1, t2);
+					//refreshIntersectingPoints(intersectingPoints, segs);
+				}
+			}			
+		}		
+		refreshIntersectingPoints(intersectingPoints, segs);
+	}
+	public void removeShortSegments(ArrayList<Segment> segs) {
+		float l = segs.get(0).length();
+		for (int i = 1; i < segs.size(); i ++) {
+			
+		}
+	}
+	public void smoothAngles(ArrayList<Segment> segs, int depth) {
+		if (depth == 0) return;
+		for (int i = 0; i < segs.size() - 1; i ++) {
+			if (Math.abs(segs.get(i).angle(segs.get(i + 1))) < Math.PI / 2) {
+				segs.get(i).start.smoothAngle(segs.get(i).stop, segs.get(i + 1).stop);
+			}
+		}
+		smoothAngles(segs, depth - 1);
 	}
 	public void undo() {
 		if (points.size() == 0) return;
