@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import com.lapidus.android.R;
 import com.lapidus.android.engine.Engine;
 import com.lapidus.android.primitives.Point;
+import com.lapidus.android.primitives.Segment;
 import com.lapidus.android.reader.Reader;
 
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -31,6 +33,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class Painter extends Activity {
@@ -40,7 +44,7 @@ public class Painter extends Activity {
 		super.onCreate(savedInstanceState);
 		view = new PainterView(getApplicationContext());
 		setContentView(R.layout.activity_painter);
-		ImageButton button = (ImageButton)findViewById(R.id.button);
+		ImageView button = (ImageView)findViewById(R.id.button);
 		view = (PainterView) findViewById(R.id.view);
 		button.setOnClickListener(new OnClickListener() {
 			
@@ -48,9 +52,24 @@ public class Painter extends Activity {
 				// TODO Auto-generated method stub
 				Toast t = Toast.makeText(getApplicationContext(), "shit", Toast.LENGTH_SHORT);
 				t.show();
+				final Dialog dialog = new Dialog(context);
+				dialog.setContentView(R.layout.options_layout);
+				dialog.setTitle("Options");
+				TextView tw1 = (TextView)dialog.findViewById(R.id.textView1);
+				tw1.setOnClickListener(new OnClickListener() {
+					
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						dialog.dismiss();
+					}
+				});
+				TextView tw2 = (TextView)findViewById(R.id.textView2);
+				TextView tw3 = (TextView)findViewById(R.id.textView3);
+				dialog.show();
 			}
 		});
 	}
+	final Context context = this;
 	PainterView view;
 	Button b;
 	private static final int DIALOG_LOAD_FILE = 1000;
@@ -77,13 +96,20 @@ public class Painter extends Activity {
 			startActivity(i);
 		}
 		if (item.getItemId() == 2) {
-			Bitmap image = getBitmapFromView(view);
+			//Bitmap image = getBitmapFromView(view);
+			Bitmap image = view.getPreparedBitmap();
+			if (image == null) {
+				Toast t = Toast.makeText(getApplicationContext(), "Nothing to save", Toast.LENGTH_SHORT);
+				t.show();
+				return true;
+			}
 			try {
 				File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj"+"/newimage.png" );
 				//f.mkdirs();
 				f.createNewFile();
 				FileOutputStream fos = new FileOutputStream(f);
 				image.compress(Bitmap.CompressFormat.PNG, 90, fos);
+				fos.close();
 				Toast t = Toast.makeText(getApplicationContext(), "saved", Toast.LENGTH_SHORT);
 				t.show();
 			} catch (Exception e) {
@@ -100,7 +126,17 @@ public class Painter extends Activity {
 			view.invalidate();
 			Engine.path = new ArrayList<Point>();
 			ArrayList<Point> tmp = new ArrayList<Point>();
-			for (int i = 0; i < view.approximizedPoints.length; i++) {
+			tmp.add(view.segs.get(0).start);
+			for (Segment x : view.segs) {
+				tmp.add(x.stop);
+				if (x.collides == true) {
+					x.start.z += 2;
+					x.stop.z = x.start.z + 4;
+				} else {
+					x.stop.z = x.start.z;
+				}
+			}
+			/*for (int i = 0; i < view.approximizedPoints.length; i++) {
 				tmp.add(view.approximizedPoints[i]);
 			}
 			int ind;
@@ -115,7 +151,7 @@ public class Painter extends Activity {
 				tmp.get(ind).z = 0;
 				tmp.get(ind + 1).z = 0;
 				//tmp.add(ind + 1, new Point(x.x, x.y, 0));
-			}
+			}*/
 			/*for (int i = 0; i < view.approximizedPoints.length; i++) {
 				Engine.path.add(new Point(view.approximizedPoints[i].x, view.approximizedPoints[i].y));
 			}*/

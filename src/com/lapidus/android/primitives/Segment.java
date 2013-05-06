@@ -2,17 +2,21 @@ package com.lapidus.android.primitives;
 
 public class Segment {
 	public Point start, stop;
+	public boolean collides;
 	public Segment() {
 		start = new Point();
 		stop = new Point();
+		collides = false;
 	}
 	public Segment(Point a) {
 		start = a;
 		stop = new Point();
+		collides = false;
 	}
 	public Segment(Point a, Point b) {
 		start = a;
 		stop = b; 
+		collides = false;
 	}
 	public Segment(float x1, float y1, float x2, float y2) {
 		start = new Point(x1, y1);

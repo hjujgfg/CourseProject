@@ -77,7 +77,7 @@ public class PainterView extends View {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);		
 		paint.setStyle(Paint.Style.FILL);
-		paint.setColor(Color.CYAN);
+		paint.setColor(Color.LTGRAY);
 		canvas.drawPaint(paint);
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setColor(Color.BLACK);
@@ -92,13 +92,30 @@ public class PainterView extends View {
 		drawApproximizedPoints(canvas, paint);
 		drawIntersetingPoints(intersectingPoints, canvas, paint);
 	}
+	public Bitmap getPreparedBitmap() {
+		if (segs == null || segs.size() < 1) return null;
+		Bitmap res;
+		Bitmap.Config conf = Bitmap.Config.ARGB_8888;
+		res = Bitmap.createBitmap(480, 800, conf);
+		Canvas canv = new Canvas(res);
+		Paint p = new Paint();
+		p.setStyle(Paint.Style.FILL);
+		p.setColor(Color.LTGRAY);
+		canv.drawPaint(p);
+		p.setStyle(Paint.Style.STROKE);		
+		p.setColor(Color.GREEN);
+		canv.drawCircle(segs.get(0).start.x, segs.get(0).start.y, 1, p);
+		p.setColor(Color.RED);
+		canv.drawCircle(segs.get(segs.size() - 1).stop.x, segs.get(segs.size() - 1).stop.y, 1, p);
+		drawSegs(segs, canv, p);
+		canvas.drawBitmap(res, new Matrix(), p);
+		return res;
+	}
 	protected void drawSegs(ArrayList<Segment> segs, Canvas canvas, Paint paint) {
-		paint.setColor(Color.GRAY);
-		paint.setStrokeWidth(2f);
+		paint.setColor(Color.BLACK);		
 		for (Segment s : segs) {			
 			canvas.drawLine(s.start.x, s.start.y, s.stop.x, s.stop.y, paint);			
-		}		
-		paint.setStrokeWidth(1f);
+		}				
 		paint.setColor(Color.BLACK);
 	}
 	protected void drawPoints(ArrayList<Point> arr, Canvas canvas, Paint paint) {
@@ -111,6 +128,7 @@ public class PainterView extends View {
 	protected void drawApproximizedPoints(Canvas canvas, Paint paint) {
 		if (approximizedPoints.length < 2) return;
 		paint.setColor(Color.RED);
+		paint.setStrokeWidth(2f);
 		if (approximizedPoints == null || approximizedPoints.length == 0) return; 
 		for (int i = 0; i < approximizedPoints.length - 1; i ++) {
 			canvas.drawLine(approximizedPoints[i].x, approximizedPoints[i].y, 
@@ -187,7 +205,7 @@ public class PainterView extends View {
 				approximizedPoints = Approximizer.approximize(2f, temp);	
 				refreshSegs(approximizedPoints);
 				touched = false;	
-				refreshIntersectingPoints(intersectingPoints, segs);
+				
 				removeSmallLoops(intersectingPoints, segs);
 				refreshPoints(segs, points);
 				temp = new Point[points.size()];
@@ -210,6 +228,7 @@ public class PainterView extends View {
 				}
 				approximizedPoints = Approximizer.approximize(2f, temp);
 				refreshSegs(approximizedPoints);
+				refreshIntersectingPoints(intersectingPoints, segs);
 				//points.add(hangingPoint);
 			}
 			if (MotionEvent.ACTION_DOWN == event.getAction()) {
@@ -329,6 +348,8 @@ public class PainterView extends View {
 							if (!pointExists) { 
 								intersectingPoints.add(segs.get(i).findIntersection(segs.get(j)));
 								intersectingPoints.get(intersectingPoints.size() - 1).addSegs(segs.get(i), segs.get(j));
+								segs.get(i).collides = true;
+								segs.get(j).collides = true;
 							}														
 						}
 					}							

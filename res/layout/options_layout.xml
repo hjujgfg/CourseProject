@@ -19,6 +19,7 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/textView1"
         android:text="Medium Text"
+        android:background="#07000000"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView

@@ -352,8 +352,7 @@ public class Engine extends Activity {
 				Log.i("CO", loadedCar.getCenter().toString());
 				//loadedCar.translate(-loadedCar.getCenter().x+8, -loadedCar.getCenter().y + 100, -loadedCar.getCenter().z);
 				//loadedCar.translate(loadedCar.getCenter().z, loadedCar.getCenter().x, loadedCar.getCenter().y);
-				loadedCar.strip();
-				loadedCar.build();	
+				
 				Object3D flore = new Object3D(4);
 				flore.addTriangle(new SimpleVector(-130, 100, -130), new SimpleVector(130, 100, -130), new SimpleVector(0, 100, 280));
 				t = Primitives.getPlane(5, 10);
@@ -372,7 +371,11 @@ public class Engine extends Activity {
 				//Object3D[] suround = new Object3D[path.size()];			
 				if (bb) generateTrack(ti);//generatePathSorted();
 				else generatePathUnsorted();
-				
+				float f = - carDirection.calcAngle(loadedCar.getZAxis());
+				loadedCar.rotateY(f);
+				Log.i("Car loc", "car dir " + carDirection.toString());
+				Log.i("Car loc", "car z " + loadedCar.getZAxis().toString());
+				Log.i("Car loc", "angle " + f);
 				//newods.scale(2f);
 				Log.i("CO", " newods " + newods.getCenter().toString() + " : " +newods.getTransformedCenter().toString());
 				leftBorder.strip();
@@ -389,6 +392,8 @@ public class Engine extends Activity {
 				newods.calcTextureWrapSpherical();
 				newods.strip();
 				newods.build();
+				loadedCar.strip();
+				loadedCar.build();	
 				//loadedCar.translate(path.get(0).x, path.get(0).y, path.get(0).z);
 				newods.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 				leftBorder.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
@@ -430,8 +435,8 @@ public class Engine extends Activity {
 				Log.i("CO", "centr " + loadedCar.getTransformedCenter().toString());				
 				Log.i(mytag, "car o ^ " + loadedCar.getXAxis().toString());
 				SimpleVector temp = loadedCar.getTransformedCenter();
-				temp.y -= 2;
-				temp.z -= 2;
+				temp.y -= 1.8;
+				temp.z -= 1.8;
 				Log.i("CO", "cam pos " + cam.getPosition().toString());
 				cam.setPosition(temp);
 				Log.i("CO", "cam pos " + cam.getPosition().toString());
@@ -447,6 +452,7 @@ public class Engine extends Activity {
 				sv.z -= 100;
 				sv.x -= 100;
 				sun.setPosition(sv);
+				yprev = loadedCar.getTransformedCenter().y;
 				MemoryHelper.compact();
 					
 				if (master == null) {
@@ -457,6 +463,7 @@ public class Engine extends Activity {
 		}
 		private void generatePathSorted() {
 			normalizePath();
+			carDirection = new SimpleVector(path.get(1).y, 0, path.get(1).x);
 			SimpleVector[] svv = new SimpleVector[4];
 			Log.i("CO", loadedCar.getTransformedCenter().toString() + ": " + loadedCar.getCenter());
 			for (int i = 0; i < path.size() - 1; i ++) {
@@ -501,6 +508,7 @@ public class Engine extends Activity {
 		}
 		private void generateTrack (TextureInfo ti) {
 			normalizePath();
+			carDirection = new SimpleVector(path.get(1).y, 0, path.get(1).x);
 			SimpleVector[] sv = new SimpleVector[4];
 			SimpleVector t1;
 			SimpleVector t2; 
@@ -761,6 +769,7 @@ public class Engine extends Activity {
 		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		}
 		boolean onGround = false;
+		float delta, yprev = 2;
 		public void onDrawFrame(GL10 gl) {
 			
 			/*if (touchTurn != 0) {
@@ -833,8 +842,17 @@ public class Engine extends Activity {
 			SimpleVector temp;
 			temp = cam.getPosition();
 			temp.matMul(cameraTransformMatrix);
-			cam.setPosition(temp);			
-			cam.moveCamera(new SimpleVector(cam.getDirection().x, 0, cam.getDirection().z), speed * 1.414f);			
+			//cam.setPosition(temp);	
+			delta = loadedCar.getTransformedCenter().y - yprev;
+			yprev = loadedCar.getTransformedCenter().y;
+			if (delta < 0) {
+				cam.moveCamera(new SimpleVector(cam.getDirection().x, -0.05, cam.getDirection().z), speed * 1.414f);
+			} else if (delta == 0) {
+				cam.moveCamera(new SimpleVector(cam.getDirection().x, 0, cam.getDirection().z), speed * 1.414f);
+			} else {
+				cam.moveCamera(new SimpleVector(cam.getDirection().x, 0.05, cam.getDirection().z), speed * 1.414f);
+			}
+						
 			cam.lookAt(loadedCar.getTransformedCenter());
 			sun.setPosition(cam.getPosition());
 			cameraTransformMatrix.setIdentity();
