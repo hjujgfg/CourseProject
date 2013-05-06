@@ -54,8 +54,8 @@ public class Segment {
 	   
     }   
     boolean onSegment(Point pi, Point pj, Point pk) {
-        if (min(pi.x, pj.x) < pk.x && pk.x < max(pi.x, pj.x) 
-                && min(pi.y,pj.y) < pk.y && pk.y < max(pi.y,pj.y)) {
+        if (min(pi.x, pj.x) <= pk.x && pk.x <= max(pi.x, pj.x) 
+                && min(pi.y,pj.y) <= pk.y && pk.y <= max(pi.y,pj.y)) {
             return true;
         } else {
             return false;

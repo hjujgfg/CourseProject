@@ -127,11 +127,14 @@ public class Painter extends Activity {
 			Engine.path = new ArrayList<Point>();
 			ArrayList<Point> tmp = new ArrayList<Point>();
 			tmp.add(view.segs.get(0).start);
-			for (Segment x : view.segs) {
+			Segment x;
+			for (int i = 0; i < view.segs.size() - 1; i ++) {
+				x = view.segs.get(i);
 				tmp.add(x.stop);
 				if (x.collides == true) {
 					x.start.z += 2;
-					x.stop.z = x.start.z + 4;
+					x.stop.z = x.start.z + 3;
+					view.segs.get(i - 1).start.z = x.start.z + 1;
 				} else {
 					x.stop.z = x.start.z;
 				}
@@ -155,8 +158,8 @@ public class Painter extends Activity {
 			/*for (int i = 0; i < view.approximizedPoints.length; i++) {
 				Engine.path.add(new Point(view.approximizedPoints[i].x, view.approximizedPoints[i].y));
 			}*/
-			for (Point x : tmp) {
-				Engine.path.add(new Point(x.x, x.y, x.z));
+			for (Point a : tmp) {
+				Engine.path.add(new Point(a.x, a.y, a.z));
 			}
 			//Engine.path = (ArrayList<Point>) view.points.clone();
 			Engine.bb = true;

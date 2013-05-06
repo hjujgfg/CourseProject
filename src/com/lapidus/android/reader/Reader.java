@@ -186,6 +186,7 @@ public class Reader extends Activity {
 				}
 				line.addNextPoint(tmp);
 				tmp.chkd = true;
+				tmp.setLine(line);
 				Log.i("RE", "just added " + track.lines.size() + " Po:" + tmp.toString());
 			}
 			if (sur[9].collisionIndex > 2) {
@@ -211,6 +212,9 @@ public class Reader extends Activity {
 			}
 		}
 		if (!(line.getPoints().size() == 1 && line.getFirst().collides == true)) {
+			if (line.getLast().equals(line.getPoints().get(line.points.size() - 1)) || line.getLast().collides == true) {
+				line.removeLast();
+			}
 			track.addLine(line);
 			v.postInvalidate();
 		}		

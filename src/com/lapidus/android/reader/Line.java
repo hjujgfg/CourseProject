@@ -21,4 +21,11 @@ public class Line {
 	public ArrayList<Point> getPoints() {
 		return points;
 	}
+	public void removeLast(){
+		if (points.size() < 1) return;
+		points.remove(points.size() - 1);
+	}
+	public void merge(Line l) {
+		points.addAll(l.getPoints());
+	}
 }

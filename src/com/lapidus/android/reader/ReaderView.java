@@ -104,6 +104,7 @@ public class ReaderView extends View {
 		
 		public boolean onTouch(View v, MotionEvent event) {
 			// TODO Auto-generated method stub
+			
 			return false;
 		}
 	};

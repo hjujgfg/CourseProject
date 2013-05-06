@@ -371,11 +371,7 @@ public class Engine extends Activity {
 				//Object3D[] suround = new Object3D[path.size()];			
 				if (bb) generateTrack(ti);//generatePathSorted();
 				else generatePathUnsorted();
-				float f = - carDirection.calcAngle(loadedCar.getZAxis());
-				loadedCar.rotateY(f);
-				Log.i("Car loc", "car dir " + carDirection.toString());
-				Log.i("Car loc", "car z " + loadedCar.getZAxis().toString());
-				Log.i("Car loc", "angle " + f);
+				
 				//newods.scale(2f);
 				Log.i("CO", " newods " + newods.getCenter().toString() + " : " +newods.getTransformedCenter().toString());
 				leftBorder.strip();
@@ -431,7 +427,11 @@ public class Engine extends Activity {
 				world.compileAllObjects();
 				cam = world.getCamera();
 				loadedCar.setOrientation(new SimpleVector(0, 0, -1), new SimpleVector(0, -1, 0));				
-				carDirection = loadedCar.getZAxis();
+				float f = - carDirection.calcAngle(loadedCar.getZAxis());
+				loadedCar.rotateY(-f);
+				Log.i("Car loc", "car dir " + carDirection.toString());
+				Log.i("Car loc", "car z " + loadedCar.getZAxis().toString());
+				Log.i("Car loc", "angle " + f);
 				Log.i("CO", "centr " + loadedCar.getTransformedCenter().toString());				
 				Log.i(mytag, "car o ^ " + loadedCar.getXAxis().toString());
 				SimpleVector temp = loadedCar.getTransformedCenter();

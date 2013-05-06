@@ -2,6 +2,8 @@ package com.lapidus.android.primitives;
 
 import java.util.Comparator;
 
+import com.lapidus.android.reader.Line;
+
 public class Point implements Cloneable {
 	public float x,y,z;
 	public int index;
@@ -9,6 +11,7 @@ public class Point implements Cloneable {
 	public int collisionIndex;
 	Segment s1, s2; 
 	public boolean chkd;
+	public Line line;
 	public static Comparator<Point> indexComp = new indexComparator();
 	public static Comparator<Point> xComp = new xComparator();
 	public static Comparator<Point> yComp = new yComparator();
@@ -104,6 +107,12 @@ public class Point implements Cloneable {
 	}
 	public Segment S2() {
 		return s2;
+	}
+	public void setLine(Line l) {
+		this.line = l;
+	}
+	public Line getLine() {
+		return line;
 	}
 	///Comparators
 	

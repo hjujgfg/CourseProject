@@ -131,9 +131,13 @@ public class PainterView extends View {
 		paint.setStrokeWidth(2f);
 		if (approximizedPoints == null || approximizedPoints.length == 0) return; 
 		for (int i = 0; i < approximizedPoints.length - 1; i ++) {
+			paint.setColor(Color.GREEN);
+			canvas.drawCircle(approximizedPoints[i].x, approximizedPoints[i].y, 2, paint);
+			paint.setColor(Color.RED);
 			canvas.drawLine(approximizedPoints[i].x, approximizedPoints[i].y, 
 					approximizedPoints[i + 1].x, approximizedPoints[i + 1].y, paint);						
 		}
+		paint.reset();
 		paint.setColor(Color.BLACK);
 	}
 	protected void drawIntersetingPoints(ArrayList<Point> arr, Canvas canvas, Paint paint) {
@@ -205,19 +209,8 @@ public class PainterView extends View {
 				approximizedPoints = Approximizer.approximize(2f, temp);	
 				refreshSegs(approximizedPoints);
 				touched = false;	
-				
+				refreshIntersectingPoints(intersectingPoints, segs);
 				removeSmallLoops(intersectingPoints, segs);
-				refreshPoints(segs, points);
-				temp = new Point[points.size()];
-				i = 0;
-				for (Point x : points) {					
-					temp[i] = x;
-					i ++;
-					Log.i("PP", x.toString() + " i = " + i);
-				}
-				approximizedPoints = Approximizer.approximize(1f, temp);
-				refreshSegs(approximizedPoints);
-				smoothAngles(segs, 2);
 				refreshPoints(segs, points);
 				temp = new Point[points.size()];
 				i = 0;
@@ -228,6 +221,20 @@ public class PainterView extends View {
 				}
 				approximizedPoints = Approximizer.approximize(2f, temp);
 				refreshSegs(approximizedPoints);
+				smoothAngles(segs, 4);
+				removeShortSegments(segs, 2);
+				refreshPoints(segs, points);
+				temp = new Point[points.size()];
+				i = 0;
+				for (Point x : points) {					
+					temp[i] = x;
+					i ++;
+					Log.i("PP", x.toString() + " i = " + i);
+				}
+				
+				approximizedPoints = Approximizer.approximize(2f, temp);
+				refreshSegs(approximizedPoints);
+				
 				refreshIntersectingPoints(intersectingPoints, segs);
 				//points.add(hangingPoint);
 			}
@@ -389,16 +396,35 @@ public class PainterView extends View {
 		}		
 		refreshIntersectingPoints(intersectingPoints, segs);
 	}
-	public void removeShortSegments(ArrayList<Segment> segs) {
+	public void removeShortSegments(ArrayList<Segment> segs, int depth) {
+		if (depth == 0) return;
 		float l = segs.get(0).length();
-		for (int i = 1; i < segs.size(); i ++) {
-			
+		Segment s;
+		Segment s1, s2;
+		ArrayList<Segment> removeInds = new ArrayList<Segment>();
+		for (int i = 1; i < segs.size() - 1; i ++) {
+			s = segs.get(i);
+			s1 = segs.get(i - 1);
+			s2 = segs.get(i + 1);
+			if (s.length() < 10) {
+				if (Math.abs(s.angle(s1)) < (2 * Math.PI / 3)) {
+					s1.stop = s.stop;
+					removeInds.add(s);
+				} else if (Math.abs(s.angle(s2)) < (2 * Math.PI / 3)) {
+					s2.start = s.start;
+					removeInds.add(s);
+				}
+			}
 		}
+		for (Segment i : removeInds) {
+			segs.remove(i);
+		}
+		removeShortSegments(segs, depth - 1);
 	}
 	public void smoothAngles(ArrayList<Segment> segs, int depth) {
 		if (depth == 0) return;
 		for (int i = 0; i < segs.size() - 1; i ++) {
-			if (Math.abs(segs.get(i).angle(segs.get(i + 1))) < Math.PI / 2) {
+			if (Math.abs(segs.get(i).angle(segs.get(i + 1))) < 2 * Math.PI / 3) {
 				segs.get(i).start.smoothAngle(segs.get(i).stop, segs.get(i + 1).stop);
 			}
 		}
