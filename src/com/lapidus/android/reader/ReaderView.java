@@ -4,21 +4,36 @@ import java.util.ArrayList;
 
 import com.lapidus.android.primitives.Point;
 
+import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.v4.app.ShareCompat.IntentBuilder;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class ReaderView extends View {
 
 	public ReaderView(Context context) {
 		super(context);		
 		// TODO Auto-generated constructor stub
+		init();
+	}
+	public ReaderView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init();
+	}
+	public ReaderView(Context context, AttributeSet attrs, int i) {
+		super(context, attrs, i);
+		init();
+	}
+	private void init() {
 		paint = new Paint();
 		this.setOnTouchListener(ontouchlistener);		
 		points = new ArrayList<Point>();				
@@ -26,14 +41,17 @@ public class ReaderView extends View {
 		cols = new ArrayList<Collision>();
 		pointsAreProcessed = false;
 		track = new Track();
+		thisView = this;
 	}
+	View thisView;
 	ArrayList<Point> points;
 	ArrayList<Collision> cols;
-	Track track; 
+	Track track;	
 	Point[] approximizedPoints;
 	boolean pointsAreProcessed; 
 	Paint paint;
 	Canvas canvas; 
+	Context context;
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);		
@@ -113,7 +131,21 @@ public class ReaderView extends View {
 				xx = event.getX() - x.center.x;
 				yy = event.getY() - x.center.y;
 				if (xx * xx < 256 && yy * yy < 256) {
-					TrackHolder.c = x;								
+					if (x.exitPoints.size() == 1) {
+						Toast t = Toast.makeText(getContext(), "endpoint", Toast.LENGTH_SHORT);
+						t.show();
+						return true;
+					}
+					TrackHolder.c = x;	
+					//Reader r = new Reader();
+					//r.startCollisionresolver();
+					Activity holder = (Activity) thisView.getContext();
+					
+					//Application a = (Application) thisView.getContext();
+					
+					Intent i = new Intent(holder, CollisionResolver.class);
+					holder.startActivity(i);
+					return true;
 					//IntentBuilder ib = IntentBuilder.from(Reader.s);
 				}
 			}

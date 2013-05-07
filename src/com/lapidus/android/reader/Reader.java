@@ -13,6 +13,7 @@ import com.lapidus.android.engine.Engine;
 import com.lapidus.android.primitives.Point;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,6 +22,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.telephony.NeighboringCellInfo;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.Window;
 import android.widget.TextView;
@@ -30,15 +32,18 @@ public class Reader extends Activity {
 	ReaderView view;
 	ArrayList<Collision> collisions;
 	ArrayList<Point> arr;
-	public Activity getActivity() {
-		return this.getParent();
+	static Context context;
+	public void startCollisionresolver() {
+		Intent i = new Intent(context, CollisionResolver.class);
+		startActivity(i);
 	}
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		view = new ReaderView(getApplicationContext());			
-		setContentView(view);
+		
+		setContentView(R.layout.reader_layout);
+		view = (ReaderView)findViewById(R.id.readerView);	
 		//Bitmap image = BitmapFactory.decodeFile("/Painter/res/drawable-hdpi/test.bmp");
 		
 		arr = new ArrayList<Point>();
@@ -84,7 +89,7 @@ public class Reader extends Activity {
 			t.show();
 		}
 		
-		
+		context = this;
 		view.track = new Track();
 		Thread t = new Thread(new Runnable() {
 			
