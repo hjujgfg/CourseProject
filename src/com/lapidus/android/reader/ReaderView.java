@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import com.lapidus.android.primitives.Point;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.support.v4.app.ShareCompat.IntentBuilder;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -104,7 +106,17 @@ public class ReaderView extends View {
 		
 		public boolean onTouch(View v, MotionEvent event) {
 			// TODO Auto-generated method stub
-			
+			ArrayList<Collision> tol = track.getCollisions();
+			TrackHolder.addTrack(track);
+			float xx, yy;
+			for (Collision x : tol) {
+				xx = event.getX() - x.center.x;
+				yy = event.getY() - x.center.y;
+				if (xx * xx < 256 && yy * yy < 256) {
+					TrackHolder.c = x;								
+					//IntentBuilder ib = IntentBuilder.from(Reader.s);
+				}
+			}
 			return false;
 		}
 	};

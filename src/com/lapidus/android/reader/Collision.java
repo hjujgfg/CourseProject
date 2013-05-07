@@ -1,16 +1,28 @@
 package com.lapidus.android.reader;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import com.lapidus.android.primitives.Point;
 public class Collision {
 	ArrayList<Point> collidingPoints; 
 	ArrayList<Point> exitPoints; 
 	Point center; 
+	int type;
+	final public static int TYPE_START = 0;
+	final public static int TYPE_STOP = 2;
+	final public static int TYPE_GENERAL = 1;
 	public Collision() {
 		collidingPoints = new ArrayList<Point>();
 		exitPoints = new ArrayList<Point>();
 		center = new Point();
+		type = -1;
+	}
+	public void setType(int i) {
+		type = i;
+	}
+	public int Type(){
+		return type;
 	}
 	public void addCollidingPoint(Point p) {
 		collidingPoints.add(p);
@@ -40,13 +52,29 @@ public class Collision {
 		calcCenter();
 	}
 	public void calcCenter() {
-		/*Point maxx, maxy, minx, miny;
+		Point maxx, maxy, minx, miny;
 		maxx = Collections.max(collidingPoints, Point.xComp);
 		maxy = Collections.max(collidingPoints, Point.yComp);
 		minx = Collections.min(collidingPoints, Point.xComp);
 		miny = Collections.min(collidingPoints, Point.yComp);
-		center = new Point((maxx.x - minx.x) / 2, (maxy.y - miny.y) / 2);*/
-		center = collidingPoints.get(0);
+		center = new Point(minx.x + ((maxx.x - minx.x) / 2), miny.y + ((maxy.y - miny.y) / 2));
+		//center = collidingPoints.get(0);
+	}
+	public float maxX() {
+		Point o = Collections.max(collidingPoints, Point.xComp);
+		return o.x;
+	}
+	public float maxY() {
+		Point o = Collections.max(collidingPoints, Point.yComp);
+		return o.y;
+	}
+	public float minX() {
+		Point o = Collections.min(collidingPoints, Point.xComp);
+		return o.x;
+	}
+	public float minY() {
+		Point o = Collections.min(collidingPoints, Point.yComp);
+		return o.y;
 	}
 	public float x() {
 		return center.x;

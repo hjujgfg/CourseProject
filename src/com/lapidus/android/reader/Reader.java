@@ -30,7 +30,9 @@ public class Reader extends Activity {
 	ReaderView view;
 	ArrayList<Collision> collisions;
 	ArrayList<Point> arr;
-	
+	public Activity getActivity() {
+		return this.getParent();
+	}
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -165,6 +167,10 @@ public class Reader extends Activity {
 			}
 		}			
 		//return cols;
+	}
+	public  void runCollisionResolver() {
+		Intent i = new Intent(this, CollisionResolver.class);
+		startActivity(i);
 	}
 	public static void doLine(Point start, ArrayList<Point> arr, Track track, ReaderView v) {
 		if (start.chkd == true) return;

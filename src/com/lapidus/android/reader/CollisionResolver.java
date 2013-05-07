@@ -11,7 +11,9 @@ public class CollisionResolver extends Activity {
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		view = new CollisionResolverView(this);
 		setContentView(view);
+		track = TrackHolder.getTrack();
+		view.c = track.collisions.get(TrackHolder.workingCollisionIndex);
 	}
 	CollisionResolverView view;
-	
+	Track track; 
 }

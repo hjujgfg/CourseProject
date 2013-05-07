@@ -128,7 +128,7 @@ public class Painter extends Activity {
 			ArrayList<Point> tmp = new ArrayList<Point>();
 			tmp.add(view.segs.get(0).start);
 			Segment x;
-			for (int i = 0; i < view.segs.size() - 1; i ++) {
+			for (int i = 1; i < view.segs.size() - 1; i ++) {
 				x = view.segs.get(i);
 				tmp.add(x.stop);
 				if (x.collides == true) {
@@ -139,6 +139,7 @@ public class Painter extends Activity {
 					x.stop.z = x.start.z;
 				}
 			}
+			tmp.get(0).z = 0;
 			/*for (int i = 0; i < view.approximizedPoints.length; i++) {
 				tmp.add(view.approximizedPoints[i]);
 			}

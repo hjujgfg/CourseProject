@@ -312,7 +312,7 @@ public class Engine extends Activity {
 				sun = new Light(world);
 				sun.setIntensity(250, 250, 250);
 				cameraRotationAngle = 0;
-				speed = 2;
+				speed = 1f;
 				// Create a texture out of the icon...:-)
 				Texture texture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.icon)), 64, 64));
 				Texture car3 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car3)), 64, 64));
@@ -428,9 +428,16 @@ public class Engine extends Activity {
 				cam = world.getCamera();
 				loadedCar.setOrientation(new SimpleVector(0, 0, -1), new SimpleVector(0, -1, 0));				
 				float f = - carDirection.calcAngle(loadedCar.getZAxis());
-				loadedCar.rotateY(-f);
+				if (carDirection.x > 0) {
+					loadedCar.rotateY((float) ((float)Math.PI + f));
+				} else {
+					loadedCar.rotateY((float) ((float)Math.PI - f));
+				}
+				
+				loadedCar.translate(-loadedCar.getTransformedCenter().x, 0, -loadedCar.getTransformedCenter().z);
 				Log.i("Car loc", "car dir " + carDirection.toString());
 				Log.i("Car loc", "car z " + loadedCar.getZAxis().toString());
+				Log.i("Car loc", "car centr " + loadedCar.getTransformedCenter().toString());
 				Log.i("Car loc", "angle " + f);
 				Log.i("CO", "centr " + loadedCar.getTransformedCenter().toString());				
 				Log.i(mytag, "car o ^ " + loadedCar.getXAxis().toString());
@@ -561,7 +568,7 @@ public class Engine extends Activity {
 			Point[] arr = new Point[4];
 			Point t1, t2;
 			float angle = a.anglePoint(b, c);
-			float l = 15 / angle;			
+			float l = 21 / angle;			
 			Segment s1 = new Segment(a, b);
 			Segment s2 = new Segment(b, c);
 			if (l > s1.length()) l = s1.length() / 2;
@@ -826,7 +833,7 @@ public class Engine extends Activity {
 					//speed -= 0.01;
 				}
 			} else if (onGround) {
-				if (speed < 0.6 && (ypos < 2 * screenHeight / 3 || ypos < 0))  {
+				if (speed < 1 && (ypos < 2 * screenHeight / 3 || ypos < 0))  {
 					speed += 0.05;
 				}
 			}
@@ -845,14 +852,19 @@ public class Engine extends Activity {
 			//cam.setPosition(temp);	
 			delta = loadedCar.getTransformedCenter().y - yprev;
 			yprev = loadedCar.getTransformedCenter().y;
-			if (delta < 0) {
+			/*if (delta < 0) {
 				cam.moveCamera(new SimpleVector(cam.getDirection().x, -0.05, cam.getDirection().z), speed * 1.414f);
 			} else if (delta == 0) {
 				cam.moveCamera(new SimpleVector(cam.getDirection().x, 0, cam.getDirection().z), speed * 1.414f);
 			} else {
 				cam.moveCamera(new SimpleVector(cam.getDirection().x, 0.05, cam.getDirection().z), speed * 1.414f);
+			}*/
+			float camYpos = cam.getPosition().y;
+			if (camYpos > loadedCar.getTransformedCenter().y - 15.8) {
+				cam.moveCamera(new SimpleVector(cam.getDirection().x, -0.05, cam.getDirection().z), speed * 1.414f);
+			} else {
+				cam.moveCamera(new SimpleVector(cam.getDirection().x, 0.05, cam.getDirection().z), speed * 1.414f);
 			}
-						
 			cam.lookAt(loadedCar.getTransformedCenter());
 			sun.setPosition(cam.getPosition());
 			cameraTransformMatrix.setIdentity();
