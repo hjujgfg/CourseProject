@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 
 import com.lapidus.android.R;
 import com.lapidus.android.engine.Engine;
@@ -137,6 +138,22 @@ public class Reader extends Activity {
 		if (p.collides == true) return;
 		Collision col = new Collision();
 		processCollision(arr, p, col, prev);
+		HashSet<Point> hs = new HashSet<Point>();
+		hs.addAll(col.exitPoints);
+		col.exitPoints.clear();
+		col.exitPoints.addAll(hs);
+		Point[] tr;
+		if (col.getExitsQuantity() % 2 == 1) {
+			for (Point x : col.exitPoints) {
+				tr = findNeighbors(x.x, x.y, arr);
+				Log.i("Read col", tr[9].collisionIndex + "^ " + col.center.toString());
+				if (tr[9].collisionIndex == 0) {
+					col.collidingPoints.add(x);
+					col.exitPoints.remove(x);
+					break;
+				}
+			}
+		}		
 		if (col.getExitsQuantity() == 2) {
 			Line l = new Line();
 			l.addNextPoint(col.exitPoints.get(0));
@@ -173,10 +190,7 @@ public class Reader extends Activity {
 		}			
 		//return cols;
 	}
-	public  void runCollisionResolver() {
-		Intent i = new Intent(this, CollisionResolver.class);
-		startActivity(i);
-	}
+	
 	public static void doLine(Point start, ArrayList<Point> arr, Track track, ReaderView v) {
 		if (start.chkd == true) return;
 		Line line = new Line();
@@ -232,7 +246,8 @@ public class Reader extends Activity {
 	}
 	private static void generateTrack(ArrayList<Point> arr, Track track, ReaderView v) {
 		Collections.sort(arr, Point.indexComp);	
-		doLine(arr.get(0), arr, track, v);		
+		doLine(arr.get(0), arr, track, v);
+		
 	}
 	public static void processCollision(ArrayList<Point> arr, Point p, Collision c, Point prev) {
 		Point[] sur = findNeighbors(p.x, p.y, arr);	

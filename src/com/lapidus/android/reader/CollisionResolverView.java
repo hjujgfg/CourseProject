@@ -10,6 +10,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -19,12 +22,30 @@ public class CollisionResolverView extends View {
 	public CollisionResolverView(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
-		init();
+		init(context);
 	}
-	private void init() {
+	public CollisionResolverView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init(context);
+	}
+	public CollisionResolverView(Context context, AttributeSet attrs, int i) {
+		super(context, attrs, i);
+		init(context);
+	}
+	public void setScreenDimensions(int w, int h) {
+		screenHeight = h;
+		screenWidth = w;
+	}
+	private void init(Context context) {
 		paint = new Paint();
 		canvas = new Canvas();
 		tmp = new ArrayList<Point>();
+		c = TrackHolder.c;
+		counter = 0;
+		/*DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+		int width = metrics.widthPixels;
+		int height = metrics.heightPixels;*/
+		
 		this.setOnTouchListener(new OnTouchListener() {
 			
 			public boolean onTouch(View v, MotionEvent event) {
@@ -34,12 +55,12 @@ public class CollisionResolverView extends View {
 					for (Point x : tmp) {
 						if (event.getX() >= x.x * avgX && event.getX() < x.x * avgX + avgX 
 								&& event.getY() >= x.y * avgY && event.getY() < x.y * avgY + avgY) {
-							touched = true;
-							x.chkd = true;
-							Toast t = Toast.makeText(getContext(), "shit", Toast.LENGTH_SHORT);
-							t.show();
-							invalidate();
-							break;
+							if (x.z > 0) {
+								touched = true;
+								x.chkd = true;	
+								x.collisionIndex = counter;
+								break;
+							}							
 						}
 					}
 				}
@@ -71,8 +92,12 @@ public class CollisionResolverView extends View {
 					for (Point x : tmp) {
 						if (event.getX() >= x.x * avgX && event.getX() < x.x * avgX + avgX 
 								&& event.getY() >= x.y * avgY && event.getY() < x.y * avgY + avgY) {
-							if (x.z > 0 && !x.collides) {
+							if (x.z > 0 && !x.collides && touched) {
 								x.collides = true;
+								touched = false;
+								needErasion = false;
+								x.collisionIndex = counter; 
+								counter ++;
 								break;
 							} else needErasion = true;
 						} else needErasion = true;
@@ -92,8 +117,12 @@ public class CollisionResolverView extends View {
 				return true;
 			}
 		});
+		invalidate();
 		needredrawcollision = true;
 	}
+	
+	
+	int counter;
 	Paint paint;
 	Canvas canvas; 
 	Collision c;
@@ -108,6 +137,10 @@ public class CollisionResolverView extends View {
 	@Override
 	protected void onDraw(Canvas canvas){
 		super.onDraw(canvas);
+		if (needredrawcollision) {
+			screenHeight = this.getHeight();
+			screenWidth = this.getWidth();
+		}
 		paint.setStyle(Paint.Style.FILL);
 		paint.setColor(Color.CYAN);
 		canvas.drawPaint(paint);
@@ -116,7 +149,10 @@ public class CollisionResolverView extends View {
 		if (needredrawcollision) drawCollision(canvas, paint);
 		drawCells(canvas, paint);
 		drawGrid(canvas, paint);
-		
+		canvas.drawText(c.exitPoints.size() + " ", 10, 10, paint);
+		for (Point x : c.exitPoints) {
+			//tmp.add(new Point(x.x, x.y, 1));			
+		}
 	}
 	private void drawCollision(Canvas canvas, Paint paint) {
 		needredrawcollision = false;
@@ -127,8 +163,10 @@ public class CollisionResolverView extends View {
 		}
 		for (Point x : c.exitPoints) {
 			tmp.add(new Point(x.x, x.y, 1));
+			tmp.get(tmp.size() - 1).index = c.exitPoints.indexOf(x);
 		}
-		for (Point p : c.collidingPoints) {
+		
+		/*for (Point p : c.collidingPoints) {
 			canvas.drawText(p.toString(), 10, 10 * j, paint);
 			j ++;
 		}
@@ -136,15 +174,14 @@ public class CollisionResolverView extends View {
 		for (Point p : c.exitPoints) {
 			canvas.drawText(p.toString(), 10, 10 * j, paint);
 			j ++;
-		}
-		//float avgX; //= screenWidth / (c.maxX() - c.minX());
-		//float avgY; //= screenHeight / (c.maxY() - c.minY());
+		}*/
+		
 		Point t1 = Collections.max(tmp, Point.xComp);
 		Point t2 = Collections.min(tmp, Point.xComp);
 		avgX = screenWidth / (Math.abs(t1.x -t2.x) + 1);
 		Point f1 = Collections.max(tmp, Point.yComp);
 		Point f2 = Collections.min(tmp, Point.yComp);
-		avgY = screenWidth / Math.abs(f1.y - f2.y);
+		avgY = screenHeight/ (Math.abs(f1.y - f2.y) + 1);
 		normalize(tmp, t2, f2);
 		boolean exit;
 		for (Point x : tmp) {
@@ -164,10 +201,13 @@ public class CollisionResolverView extends View {
 			canvas.drawLine(avgX * i, 0, avgX * i, screenHeight, paint);
 			//canvas.drawText(c.collidingPoints.size() + " " + avgX + " " + avgY, 150, 10, paint);
 		}
-		for (int i = 0; i < (int)(f1.y - f2.y); i ++) {
+		for (int i = 0; i < (int)(f1.y - f2.y) + 1; i ++) {
 			canvas.drawLine(0, avgY * i, screenWidth, avgY * i, paint);
-			canvas.drawText(c.exitPoints.size() + " " + avgX + " " + avgY, 150, 10, paint);
+			//canvas.drawText(c.exitPoints.size() + " " + avgX + " " + avgY, 150, 10, paint);
 		}
+		/*canvas.drawText(screenHeight + " ^ " + screenWidth, 150, 20, paint);
+		Toast t = Toast.makeText(getContext(), "draw grid", Toast.LENGTH_LONG);
+		t.show();*/
 	}
 	private void drawCells(Canvas canvas, Paint paint) {
 		for (Point x : tmp) {

@@ -2,10 +2,12 @@ package com.lapidus.android.reader;
 
 import java.util.ArrayList;
 
+import com.lapidus.android.R;
 import com.lapidus.android.primitives.Point;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -16,6 +18,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ReaderView extends View {
@@ -115,7 +119,6 @@ public class ReaderView extends View {
 		}
 		drawCollisions(canvas, paint, track.getCollisions());
 		paint.setColor(Color.BLACK);
-		canvas.drawCircle(0, 0, 30, paint);
 	}
 	protected void drawLine(Line l, Canvas canvas, Paint paint) {
 		drawProcessedPoints(l.getPoints(), canvas, paint);
@@ -139,13 +142,23 @@ public class ReaderView extends View {
 					TrackHolder.c = x;	
 					//Reader r = new Reader();
 					//r.startCollisionresolver();
-					Activity holder = (Activity) thisView.getContext();
+					final Dialog dialog = new Dialog(thisView.getContext());
+					dialog.setContentView(R.layout.collision_resolver_layout);
+					CollisionResolverView resView = (CollisionResolverView) dialog.findViewById(R.id.collisionResolverView1);
+					dialog.setTitle("Collision resolver");
+					/*int h = dialog.findViewById(R.layout.collision_resolver_layout).getHeight();
+					int w = dialog.findViewById(R.layout.collision_resolver_layout).getWidth();*/
+					int h = dialog.getWindow().getDecorView().getHeight();
+					int w = dialog.getWindow().getDecorView().getWidth();
+					//resView.setScreenDimensions(w, h);
 					
-					//Application a = (Application) thisView.getContext();
+					dialog.show();
 					
-					Intent i = new Intent(holder, CollisionResolver.class);
-					holder.startActivity(i);
-					return true;
+					return false;
+					//Activity holder = (Activity) thisView.getContext();														
+					//Intent i = new Intent(holder, CollisionResolver.class);
+					//holder.startActivity(i);
+					
 					//IntentBuilder ib = IntentBuilder.from(Reader.s);
 				}
 			}
