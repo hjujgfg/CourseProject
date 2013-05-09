@@ -2,10 +2,15 @@ package com.lapidus.android.reader;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 
 import com.lapidus.android.primitives.Point;
+import com.lapidus.android.primitives.Segment;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -42,85 +47,86 @@ public class CollisionResolverView extends View {
 		tmp = new ArrayList<Point>();
 		c = TrackHolder.c;
 		counter = 0;
+		vac = new boolean[c.exitPoints.size()];
+		for (int i = 0; i < vac.length; i ++) {
+			vac[i] = false;
+		}
 		/*DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		int width = metrics.widthPixels;
 		int height = metrics.heightPixels;*/
+		this.setOnTouchListener(touchListener);
 		
-		this.setOnTouchListener(new OnTouchListener() {
-			
-			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
-				
-				if (MotionEvent.ACTION_DOWN == event.getAction()) {
-					for (Point x : tmp) {
-						if (event.getX() >= x.x * avgX && event.getX() < x.x * avgX + avgX 
-								&& event.getY() >= x.y * avgY && event.getY() < x.y * avgY + avgY) {
-							if (x.z > 0) {
-								touched = true;
-								x.chkd = true;	
-								x.collisionIndex = counter;
-								break;
-							}							
-						}
-					}
-				}
-				if (MotionEvent.ACTION_MOVE == event.getAction()) {
-					boolean needErasion = false;
-					for (Point x : tmp) {
-						if (event.getX() >= x.x * avgX && event.getX() < x.x * avgX + avgX 
-								&& event.getY() >= x.y * avgY && event.getY() < x.y * avgY + avgY) {
-							if (hanging != null) {
-								if (areNeighbours(x, hanging)) {
-									x.chkd = true;
-									hanging = x;
-								} else needErasion = true;
-							} else {
-								x.chkd = true;
-								hanging = x;
-							}														
-						}
-					}
-					if (needErasion) {
-						for (Point x : tmp) {
-							x.chkd = false;
-						}
-					}
-				}
-				if (MotionEvent.ACTION_UP == event.getAction()) {
-					hanging = null;
-					boolean needErasion = false;
-					for (Point x : tmp) {
-						if (event.getX() >= x.x * avgX && event.getX() < x.x * avgX + avgX 
-								&& event.getY() >= x.y * avgY && event.getY() < x.y * avgY + avgY) {
-							if (x.z > 0 && !x.collides && touched) {
-								x.collides = true;
-								touched = false;
-								needErasion = false;
-								x.collisionIndex = counter; 
-								counter ++;
-								break;
-							} else needErasion = true;
-						} else needErasion = true;
-					}
-					if (needErasion) {
-						for (Point x : tmp) x.chkd = false;
-					}else {
-						for (Point x : tmp) {
-							if (x.chkd) {
-								x.chkd = false;
-								x.collides = true;
-							}
-						}
-					}										
-				}
-				invalidate();
-				return true;
-			}
-		});
 		invalidate();
 		needredrawcollision = true;
+		thisView = this;
+		connections = new ArrayList<Segment>();
 	}
+	Point a;
+	Point b;
+	ArrayList<Segment> connections; 
+	OnTouchListener touchListener = new OnTouchListener() {
+		
+		public boolean onTouch(View v, MotionEvent event) {
+			// TODO Auto-generated method stub
+			if (MotionEvent.ACTION_DOWN == event.getAction()) {
+				for (Point x : tmp) {
+					if (event.getX() >= x.x * avgX && event.getX() < x.x * avgX + avgX 
+							&& event.getY() >= x.y * avgY && event.getY() < x.y * avgY + avgY) {
+						if (x.z > 0) {
+							Iterator<Segment> iterator = connections.iterator();
+							while (iterator.hasNext()) {
+								Segment s = iterator.next();
+								if (s.start.connection.equals(x) || s.stop.connection.equals(x)) iterator.remove();
+							}
+							if (a == null) {
+								a = new Point(event.getX(), event.getY());
+								a.connection = x;							
+								b = new Point(event.getX(), event.getY());							
+							}							
+						}							
+					}					
+				}
+			}
+			if (MotionEvent.ACTION_MOVE == event.getAction()) {
+				if (b != null) {
+					b.x = event.getX();
+					b.y = event.getY();
+				} 
+			}
+			if (MotionEvent.ACTION_UP == event.getAction()) {
+				for (Point x : tmp) {
+					if (event.getX() >= x.x * avgX && event.getX() < x.x * avgX + avgX 
+							&& event.getY() >= x.y * avgY && event.getY() < x.y * avgY + avgY) {
+						if (x.z > 0 && !x.equals(a.connection)) {
+							Iterator<Segment> iterator = connections.iterator();
+							while (iterator.hasNext()) {
+								Segment s = iterator.next();
+								if (s.start.connection.equals(x) || s.stop.connection.equals(x)) iterator.remove();
+							}
+							b = new Point(event.getX(), event.getY());
+							b.connection = x;							
+							connections.add(new Segment(a, b));		
+							TrackHolder.updateNewLines(connections);
+						}							
+					}					
+				}
+				a = null;
+				b = null;
+			}
+			invalidate();
+			return true;
+		}
+	};
 	
+	private void eraseAtIndex(int ind) {
+		for (Point p : tmp) {
+			if (p.collisionIndex == ind) {
+				p.chkd = false;
+				p.collides = false;
+				p.collisionIndex = -1;
+			}
+		}
+	}
 	
 	int counter;
 	Paint paint;
@@ -133,7 +139,10 @@ public class CollisionResolverView extends View {
 	boolean touched;
 	Point hanging;
 	boolean needredrawcollision;
+	boolean[] vac;
 	ArrayList<Point> tmp;
+	View thisView;
+	Dialog d;
 	@Override
 	protected void onDraw(Canvas canvas){
 		super.onDraw(canvas);
@@ -150,9 +159,7 @@ public class CollisionResolverView extends View {
 		drawCells(canvas, paint);
 		drawGrid(canvas, paint);
 		canvas.drawText(c.exitPoints.size() + " ", 10, 10, paint);
-		for (Point x : c.exitPoints) {
-			//tmp.add(new Point(x.x, x.y, 1));			
-		}
+		drawConnections(canvas, paint);
 	}
 	private void drawCollision(Canvas canvas, Paint paint) {
 		needredrawcollision = false;
@@ -164,6 +171,7 @@ public class CollisionResolverView extends View {
 		for (Point x : c.exitPoints) {
 			tmp.add(new Point(x.x, x.y, 1));
 			tmp.get(tmp.size() - 1).index = c.exitPoints.indexOf(x);
+			tmp.get(tmp.size() - 1).connection = x;
 		}
 		
 		/*for (Point p : c.collidingPoints) {
@@ -231,7 +239,7 @@ public class CollisionResolverView extends View {
 		} else {
 			if (p.z > 0) paint.setColor(Color.GREEN);
 			else paint.setColor(Color.LTGRAY);
-			if (p.collides) {
+			if (p.collisionIndex > 0) {
 				paint.setColor(Color.WHITE);
 			}
 		}
@@ -242,6 +250,22 @@ public class CollisionResolverView extends View {
 		canvas.drawRect(p.x * avgX, p.y * avgY, p.x * avgX + avgX, p.y * avgY + avgY, paint);
 		paint.setColor(Color.BLACK);
 		paint.setStyle(Style.STROKE);
+	}
+	private void drawConnections(Canvas canvas, Paint paint) {
+		for (Segment s : connections) {
+			paint.setColor(Color.YELLOW);
+			canvas.drawRect(s.start.x - 10, s.start.y - 10, s.start.x + 10, s.start.y + 10, paint);
+			canvas.drawCircle(s.start.x, s.start.y, 2f, paint);
+			canvas.drawRect(s.stop.x - 10, s.stop.y - 10, s.stop.x + 10, s.stop.y + 10, paint);
+			canvas.drawCircle(s.stop.x, s.stop.y, 2f, paint);			
+			canvas.drawLine(s.start.x, s.start.y, s.stop.x, s.stop.y, paint);			
+		}
+		if (a != null && b != null) {
+			paint.setColor(Color.DKGRAY);
+			canvas.drawLine(a.x, a.y, b.x, b.y, paint);
+			canvas.drawCircle(a.x, a.y, 10, paint);
+			canvas.drawCircle(b.x, b.y, 10, paint);
+		}
 	}
 	private boolean areNeighbours(Point a, Point b) {
 		if (Math.abs(a.x - b.x) > 1) return false;

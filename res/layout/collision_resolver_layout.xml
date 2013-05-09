@@ -9,4 +9,16 @@
         android:layout_height="match_parent"
         android:layout_centerInParent="true" />
 
+    <ImageView
+        android:id="@+id/resolver_cross"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/app_name"
+        android:maxHeight="42dp"
+        android:maxWidth="42dp"
+        android:src="@drawable/cross" />
+
 </RelativeLayout>

@@ -7,6 +7,7 @@ import com.lapidus.android.primitives.Point;
 public class Collision {
 	ArrayList<Point> collidingPoints; 
 	ArrayList<Point> exitPoints; 
+	ArrayList<Line> resolvedLines;
 	Point center; 
 	int type;
 	final public static int TYPE_START = 0;
@@ -17,6 +18,7 @@ public class Collision {
 		exitPoints = new ArrayList<Point>();
 		center = new Point();
 		type = -1;
+		resolvedLines = new ArrayList<Line>();
 	}
 	public void setType(int i) {
 		type = i;
@@ -31,6 +33,12 @@ public class Collision {
 	public void addExitPoint(Point p) {
 		exitPoints.add(p);
 		calcCenter();
+	}
+	public void addResolvedLine(Line l) {
+		resolvedLines.add(l);
+	}
+	public void clearResolvedLines() {
+		resolvedLines.clear();
 	}
 	public void merge(Collision b) {
 		/*this.collidingPoints.addAll(b.collidingPoints);

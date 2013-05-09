@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.lapidus.android.R;
 import com.lapidus.android.primitives.Point;
+import com.lapidus.android.primitives.Segment;
 
 import android.app.Activity;
 import android.app.Application;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -146,12 +148,32 @@ public class ReaderView extends View {
 					dialog.setContentView(R.layout.collision_resolver_layout);
 					CollisionResolverView resView = (CollisionResolverView) dialog.findViewById(R.id.collisionResolverView1);
 					dialog.setTitle("Collision resolver");
+					ImageView exit = (ImageView) dialog.findViewById(R.id.resolver_cross);
+					final Collision collisionForBut = x;
+					exit.setOnClickListener(new OnClickListener() {
+						
+						public void onClick(View v) {
+							// TODO Auto-generated method stub
+							if (collisionForBut.resolvedLines.size() != 0) {
+								for (Line t : collisionForBut.resolvedLines) {
+									track.getLines().remove(t);
+								}
+								collisionForBut.clearResolvedLines();
+							}
+							for (Line l : TrackHolder.newLines) {
+								collisionForBut.addResolvedLine(l);
+								track.addLine(l);								
+							}
+							thisView.invalidate();
+							dialog.dismiss();
+						}
+					});
 					/*int h = dialog.findViewById(R.layout.collision_resolver_layout).getHeight();
 					int w = dialog.findViewById(R.layout.collision_resolver_layout).getWidth();*/
 					int h = dialog.getWindow().getDecorView().getHeight();
 					int w = dialog.getWindow().getDecorView().getWidth();
 					//resView.setScreenDimensions(w, h);
-					
+					resView.d = dialog;
 					dialog.show();
 					
 					return false;

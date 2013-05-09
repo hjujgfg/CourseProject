@@ -12,6 +12,7 @@ public class Point implements Cloneable {
 	Segment s1, s2; 
 	public boolean chkd;
 	public Line line;
+	public Point connection;
 	public static Comparator<Point> indexComp = new indexComparator();
 	public static Comparator<Point> xComp = new xComparator();
 	public static Comparator<Point> yComp = new yComparator();
