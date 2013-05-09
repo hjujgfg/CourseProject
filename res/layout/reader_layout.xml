@@ -10,4 +10,16 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true" />
 
+        <ImageView
+            android:id="@+id/reader_gear_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:maxWidth="42dp"
+            android:maxHeight="42dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/gear" />
+
     </RelativeLayout>

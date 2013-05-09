@@ -15,8 +15,8 @@ static ArrayList<Line> newLines = new ArrayList<Line>();
 		newLines = new ArrayList<Line>();
 		for (Segment s : segs) {
 			Line l = new Line();
-			Log.i("add line", s.start.connection.toString());
-			Log.i("add line", s.stop.connection.toString());
+			Log.i("add line", s.start.connection.connection.toString());
+			Log.i("add line", s.stop.connection.connection.toString());
 			l.addNextPoint(s.start.connection.connection);
 			l.addNextPoint(s.stop.connection.connection);
 			newLines.add(l);

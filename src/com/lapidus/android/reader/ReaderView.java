@@ -1,15 +1,18 @@
 package com.lapidus.android.reader;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import com.lapidus.android.R;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -48,10 +51,14 @@ public class ReaderView extends View {
 		pointsAreProcessed = false;
 		track = new Track();
 		thisView = this;
+		finalPoints = new ArrayList<Point>();
 	}
 	View thisView;
 	ArrayList<Point> points;
+	ArrayList<Point> finalPoints;
 	ArrayList<Collision> cols;
+	Line startLine;
+	Line endLine;
 	Track track;	
 	Point[] approximizedPoints;
 	boolean pointsAreProcessed; 
@@ -72,13 +79,22 @@ public class ReaderView extends View {
 		drawCollisions(canvas, paint, cols);
 		drawApproximizedPoints(canvas, paint);*/
 		canvas.drawText(track.getLines().size() + " = points size" , 50, 50, paint);
-		if (approximizedPoints != null) canvas.drawText(approximizedPoints.length + " = ap points size" , 50, 60, paint); 
+		if (approximizedPoints != null) canvas.drawText(approximizedPoints.length + " = ap points size" , 50, 60, paint);
+		drawPoints(finalPoints, canvas, paint);
 	}
 	protected void drawPoints(Canvas canvas, Paint paint) {
 		paint.setColor(Color.BLACK);
 		for (Point x : points) {
 			canvas.drawCircle(x.x, x.y, 1, paint);
 		}		
+		paint.setColor(Color.BLACK);
+	}
+	protected void drawPoints(ArrayList<Point> arr, Canvas canvas, Paint paint) {
+		if (arr.size() < 2 ) return;
+		paint.setColor(Color.GREEN);
+		for (int i = 0; i < arr.size() - 1; i ++) {
+			canvas.drawLine(arr.get(i).x, arr.get(i).y, arr.get(i + 1).x, arr.get(i + 1).y, paint);
+		}
 		paint.setColor(Color.BLACK);
 	}
 	protected void drawProcessedPoints (ArrayList<Point> points, Canvas canvas, Paint paint) {
@@ -107,6 +123,7 @@ public class ReaderView extends View {
 		}*/
 		for (int i = 0; i < cols.size(); i ++) {
 			canvas.drawCircle(cols.get(i).x(), cols.get(i).y(), 15, paint);
+			canvas.drawText(cols.get(i).center.toString(), cols.get(i).x() + 10, cols.get(i).y(), paint);
 		}
 		paint.setColor(Color.BLACK);
 	}
@@ -139,6 +156,37 @@ public class ReaderView extends View {
 					if (x.exitPoints.size() == 1) {
 						Toast t = Toast.makeText(getContext(), "endpoint", Toast.LENGTH_SHORT);
 						t.show();
+						final Collision tr = x;
+						new AlertDialog.Builder(getContext())
+						.setTitle("Определить точку")
+						.setMessage("Эта точка - старт или финиш?")
+						.setPositiveButton("Старт", new DialogInterface.OnClickListener() {
+							
+							public void onClick(DialogInterface dialog, int which) {
+								// TODO Auto-generated method stub
+								if (startLine != null) {
+									track.lines.remove(startLine);
+								}
+								startLine = new Line();
+								startLine.addNextPoint(tr.collidingPoints.get(0));
+								startLine.addNextPoint(tr.exitPoints.get(0));
+								track.lines.add(0, startLine);
+							}
+						})
+						.setNegativeButton("Финиш", new DialogInterface.OnClickListener() {
+							
+							public void onClick(DialogInterface dialog, int which) {
+								// TODO Auto-generated method stub
+								if (endLine != null) {
+									track.lines.remove(endLine);
+								}
+								endLine = new Line();
+								endLine.addNextPoint(tr.exitPoints.get(0));
+								endLine.addNextPoint(tr.collidingPoints.get(0));								
+								track.lines.add(track.lines.size() - 1, endLine);
+							}
+						})
+						.show();
 						return true;
 					}
 					TrackHolder.c = x;	
@@ -163,6 +211,28 @@ public class ReaderView extends View {
 							for (Line l : TrackHolder.newLines) {
 								collisionForBut.addResolvedLine(l);
 								track.addLine(l);								
+							}
+							finalPoints.clear();
+							finalPoints.addAll(track.lines.get(0).points);						
+							Point tmp = track.lines.get(0).getLast();
+							boolean bb = true;
+							while (bb) {
+								for (Line l : track.lines) {
+									if (l.getFirst().distanceSquared(tmp) <= 2 ) {
+										//l.points.remove(tmp);
+										finalPoints.addAll(l.points);
+										tmp = l.getLast();
+										bb = true;										
+									} else if (l.getLast().distanceSquared(tmp) <= 2) {
+										//l.points.remove(tmp);
+										Log.i("qw e", l.getLast().toString() + " 1^" + tmp.toString());
+										Collections.reverse(l.points);
+										Log.i("qw e", l.getLast().toString() + " 2^" + tmp.toString());
+										finalPoints.addAll(l.points);
+										tmp = l.getLast();
+										bb = true;
+									} else bb = false;
+								}
 							}
 							thisView.invalidate();
 							dialog.dismiss();

@@ -4,13 +4,11 @@ package com.lapidus.android.reader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
 import com.lapidus.android.R;
-import com.lapidus.android.engine.Engine;
 import com.lapidus.android.primitives.Point;
 
 import android.app.Activity;
@@ -21,11 +19,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
-import android.telephony.NeighboringCellInfo;
 import android.util.Log;
-import android.view.Display;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 public class Reader extends Activity {
@@ -46,7 +45,15 @@ public class Reader extends Activity {
 		setContentView(R.layout.reader_layout);
 		view = (ReaderView)findViewById(R.id.readerView);	
 		//Bitmap image = BitmapFactory.decodeFile("/Painter/res/drawable-hdpi/test.bmp");
-		
+		ImageView button = (ImageView)findViewById(R.id.reader_gear_button);
+		button.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				
+			}
+		});
 		arr = new ArrayList<Point>();
 		Bitmap image = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj"+"/newimage.png" );
 		StringBuilder sb = new StringBuilder();		
