@@ -83,6 +83,8 @@ public class Engine extends Activity {
 	private Object3D newods = null;
 	private Object3D leftBorder = null;
 	private Object3D rightBorder = null;
+	private Object3D end;
+	private Object3D start;
 	private SimpleVector sv1 = null;
 	private SimpleVector sv2 = null; 
 	private int fps = 0;
@@ -98,7 +100,7 @@ public class Engine extends Activity {
 	private int screenWidth, screenHeight;	
 	
 	private String mytag = "MyTag";
-	private SimpleVector ellipsoid = new SimpleVector(1.5, 1.5, 1.5);
+	private SimpleVector ellipsoid = new SimpleVector(1, 1, 1);
 	public static boolean bb; 
 	public Engine() {
 		renderer = new MyRenderer();
@@ -319,8 +321,10 @@ public class Engine extends Activity {
 				Texture car4 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car_ref)), 64, 64));
 				Texture car5 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car_lit)), 64, 64));
 				Texture asphalt = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.asphalt)), 64, 64));
-				Texture green = new Texture(2, 2, RGBColor.GREEN);				
+				Texture green = new Texture(2, 2, RGBColor.GREEN);		
+				Texture red = new Texture(2, 2, RGBColor.RED);
 				TextureManager.getInstance().addTexture("green", green);
+				TextureManager.getInstance().addTexture("red", red);
 				TextureManager.getInstance().addTexture("texture", texture);
 				TextureManager.getInstance().addTexture("police_car3.tga", car3);
 				TextureManager.getInstance().addTexture("police_car.tga", car4);
@@ -348,7 +352,7 @@ public class Engine extends Activity {
 				loadedCar = Object3D.mergeAll(loadedCars);	
 				//loadedCar.scale(0.05f);	
 				Log.i("CO", loadedCar.getCenter().toString());
-				loadedCar.setScale(0.005f);
+				loadedCar.setScale(0.003f);
 				Log.i("CO", loadedCar.getCenter().toString());
 				//loadedCar.translate(-loadedCar.getCenter().x+8, -loadedCar.getCenter().y + 100, -loadedCar.getCenter().z);
 				//loadedCar.translate(loadedCar.getCenter().z, loadedCar.getCenter().x, loadedCar.getCenter().y);
@@ -382,14 +386,16 @@ public class Engine extends Activity {
 				leftBorder.calcTextureWrapSpherical();
 				rightBorder.strip();
 				rightBorder.build();
-				
-				newods.setTexture("asphalt");
+				start.setTexture("green");
+				end.setTexture("red");
+				newods.setTexture("red");
 				//newods.setEnvmapped(true);
 				newods.calcTextureWrapSpherical();
 				newods.strip();
 				newods.build();
 				loadedCar.strip();
 				loadedCar.build();	
+				
 				//loadedCar.translate(path.get(0).x, path.get(0).y, path.get(0).z);
 				newods.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 				leftBorder.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
@@ -397,6 +403,7 @@ public class Engine extends Activity {
 				loadedCar.setCollisionMode(Object3D.COLLISION_CHECK_SELF);
 				flore.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 				cube.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
+				end.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 				/*loadedCar.addCollisionListener(new CollisionListener() {
 					
 					public boolean requiresPolygonIDs() {
@@ -416,6 +423,8 @@ public class Engine extends Activity {
 				newods.setCulling(false);
 				leftBorder.setCulling(false);
 				rightBorder.setCulling(false);
+				world.addObject(start);
+				world.addObject(end);
 				world.addObject(flore);
 				world.addObject(t);
 				world.addObject(cube);
@@ -523,7 +532,10 @@ public class Engine extends Activity {
 			SimpleVector tb2;
 			processPoints(path.get(1), path.get(0), new Point(-1, -1, -1), false, sv);
 			t1 = sv[2];
-			t2 = sv[3];			
+			t2 = sv[3];	
+			start = Primitives.getCube(3);
+			//start.translate(-start.getCenter().x, -start.getCenter().y, -start.getCenter().z);
+			start.translate(0, 100, 0);
 			for (int i = 1; i < path.size() - 1; i ++) {
 				processPoints(path.get(i-1), path.get(i), path.get(i + 1), true, sv);
 				newods.addTriangle(t2, sv[1], sv[0], ti);
@@ -549,13 +561,28 @@ public class Engine extends Activity {
 				t2 = sv[3];
 				t1 = sv[2];
 			}
+			processPoints(path.get(path.size() - 2), path.get(path.size() - 1), new Point(-1, -1, -1), false, sv);
+			newods.addTriangle(t2, sv[1], sv[0]);
+			newods.addTriangle(t2, t1, sv[1]);
+			tb1 = new SimpleVector(t1.x, t1.y - 3, t1.z);
+			
+			leftBorder.addTriangle(t1, sv[1], tb1);
+			tb2 = new SimpleVector(sv[1].x, sv[1].y - 3, sv[1].z);
+			leftBorder.addTriangle(sv[1], tb2, tb1);
+			tb1 = new SimpleVector(t2.x, t2.y - 3, t2.z);
+			
+			rightBorder.addTriangle(t2, sv[0], tb1);
+			tb2 = new SimpleVector(sv[0].x, sv[0].y - 3, sv[0].z);
+			rightBorder.addTriangle(sv[0], tb2, tb1);
 			leftBorder.invert();
+			end = Primitives.getCube(3);
+			end.translate(-path.get(path.size() - 1).y, - (100 - path.get(path.size() - 1).z), -path.get(path.size() - 1).x);
 			//rightBorder.invert();
 			//newods.invert();
 		}
 		public void processPoints(Point a, Point b, Point c, boolean needrec, SimpleVector[] sv) {
 			int q;
-			int d = 5;
+			int d = 3;
 			if (needrec == true) {
 				for (int i = 0; i < 4; i ++) {
 					sv[i] = null;
@@ -568,7 +595,7 @@ public class Engine extends Activity {
 			Point[] arr = new Point[4];
 			Point t1, t2;
 			float angle = a.anglePoint(b, c);
-			float l = 21 / angle;			
+			float l = 9 / angle;			
 			Segment s1 = new Segment(a, b);
 			Segment s2 = new Segment(b, c);
 			if (l > s1.length()) l = s1.length() / 2;
