@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import com.lapidus.android.R;
+import com.lapidus.android.painter.Painter;
 import com.lapidus.android.primitives.Point;
 
 import android.app.Activity;
@@ -43,6 +44,7 @@ public class Reader extends Activity {
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		
 		setContentView(R.layout.reader_layout);
+		context = this;
 		view = (ReaderView)findViewById(R.id.readerView);	
 		//Bitmap image = BitmapFactory.decodeFile("/Painter/res/drawable-hdpi/test.bmp");
 		ImageView button = (ImageView)findViewById(R.id.reader_gear_button);
@@ -50,8 +52,9 @@ public class Reader extends Activity {
 			
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				
-				
+				Intent i = new Intent(context, Painter.class);
+				Painter.externalPoints = view.finalPoints;
+				startActivity(i);
 			}
 		});
 		arr = new ArrayList<Point>();
@@ -97,7 +100,7 @@ public class Reader extends Activity {
 			t.show();
 		}
 		
-		context = this;
+		
 		view.track = new Track();
 		Thread t = new Thread(new Runnable() {
 			

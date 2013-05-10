@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.lapidus.android.primitives.Point;
-public class Collision {
+public class Collision implements Cloneable {
 	ArrayList<Point> collidingPoints; 
 	ArrayList<Point> exitPoints; 
 	ArrayList<Line> resolvedLines;
@@ -19,6 +19,24 @@ public class Collision {
 		center = new Point();
 		type = -1;
 		resolvedLines = new ArrayList<Line>();
+	}
+	@Override
+	public Collision clone() throws CloneNotSupportedException {
+		Collision res = (Collision)super.clone();
+		res.collidingPoints = new ArrayList<Point>();
+		for (Point x : collidingPoints) {
+			res.collidingPoints.add(x.clone());			
+		}
+		res.exitPoints = new ArrayList<Point>();
+		for (Point x : exitPoints) {
+			res.exitPoints.add(x.clone());
+		}
+		res.resolvedLines = new ArrayList<Line>();
+		for (Line x : resolvedLines) {
+			res.resolvedLines.add(x.clone());
+		}
+		res.center = center.clone();
+		return res;
 	}
 	public void setType(int i) {
 		type = i;

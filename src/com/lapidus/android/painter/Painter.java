@@ -68,10 +68,14 @@ public class Painter extends Activity {
 				dialog.show();
 			}
 		});
+		if (externalPoints != null) {
+			view.getExternalPoints(externalPoints);
+		}
 	}
 	final Context context = this;
 	PainterView view;
 	Button b;
+	public static ArrayList<Point> externalPoints;
 	private static final int DIALOG_LOAD_FILE = 1000;
 	private String[] mFileList;
 	private String mChosenFile;

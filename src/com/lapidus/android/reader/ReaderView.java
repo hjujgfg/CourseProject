@@ -91,7 +91,7 @@ public class ReaderView extends View {
 	}
 	protected void drawPoints(ArrayList<Point> arr, Canvas canvas, Paint paint) {
 		if (arr.size() < 2 ) return;
-		paint.setColor(Color.GREEN);
+		paint.setColor(Color.RED);
 		for (int i = 0; i < arr.size() - 1; i ++) {
 			canvas.drawLine(arr.get(i).x, arr.get(i).y, arr.get(i + 1).x, arr.get(i + 1).y, paint);
 		}
@@ -142,6 +142,48 @@ public class ReaderView extends View {
 	protected void drawLine(Line l, Canvas canvas, Paint paint) {
 		drawProcessedPoints(l.getPoints(), canvas, paint);
 	}
+	private void updateFinalPoints() {
+		if (startLine == null) return;
+		finalPoints.clear();
+		Track t = new Track();
+		try {
+			t = track.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finalPoints.clear();
+		finalPoints.addAll(t.lines.get(0).points);						
+		Point tmp = t.lines.get(0).getLast();
+		t.lines.remove(0);
+		boolean bb = true;
+		while (bb) {
+			bb = false;
+			for (Line l : t.lines) {
+				if (l.getFirst().x == tmp.x && l.getFirst().y == tmp.y) {
+					l.points.remove(tmp);
+					finalPoints.addAll(l.points);
+					tmp = l.getLast();
+					bb = true;
+					t.lines.remove(l);
+					break;									
+				} else if (l.getLast().x == tmp.x && l.getLast().y == tmp.y) {
+					l.points.remove(tmp);
+					Log.i("qw e", l.getLast().toString() + " 1^" + tmp.toString());
+					Collections.reverse(l.points);
+					Log.i("qw e", l.getLast().toString() + " 2^" + tmp.toString());
+					finalPoints.addAll(l.points);
+					tmp = l.getLast();
+					bb = true;
+					t.lines.remove(l);
+					break;
+				} 
+			}
+		}
+		Toast to = Toast.makeText(getContext(), finalPoints.size() + " ", Toast.LENGTH_LONG);
+		to.show();
+	}
+	
 	private OnTouchListener ontouchlistener = new OnTouchListener() {
 		
 		public boolean onTouch(View v, MotionEvent event) {
@@ -154,13 +196,14 @@ public class ReaderView extends View {
 				yy = event.getY() - x.center.y;
 				if (xx * xx < 256 && yy * yy < 256) {
 					if (x.exitPoints.size() == 1) {
-						Toast t = Toast.makeText(getContext(), "endpoint", Toast.LENGTH_SHORT);
-						t.show();
+						
 						final Collision tr = x;
-						new AlertDialog.Builder(getContext())
-						.setTitle("Определить точку")
-						.setMessage("Эта точка - старт или финиш?")
-						.setPositiveButton("Старт", new DialogInterface.OnClickListener() {
+						AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+						builder
+						.setTitle("Установить старт")
+						.setMessage("Старт?")
+						
+						.setPositiveButton("Установить", new DialogInterface.OnClickListener() {
 							
 							public void onClick(DialogInterface dialog, int which) {
 								// TODO Auto-generated method stub
@@ -171,23 +214,21 @@ public class ReaderView extends View {
 								startLine.addNextPoint(tr.collidingPoints.get(0));
 								startLine.addNextPoint(tr.exitPoints.get(0));
 								track.lines.add(0, startLine);
+								updateFinalPoints();
+								thisView.invalidate();
 							}
 						})
-						.setNegativeButton("Финиш", new DialogInterface.OnClickListener() {
+						.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
 							
 							public void onClick(DialogInterface dialog, int which) {
 								// TODO Auto-generated method stub
-								if (endLine != null) {
-									track.lines.remove(endLine);
-								}
-								endLine = new Line();
-								endLine.addNextPoint(tr.exitPoints.get(0));
-								endLine.addNextPoint(tr.collidingPoints.get(0));								
-								track.lines.add(track.lines.size() - 1, endLine);
+								dialog.dismiss();
 							}
-						})
-						.show();
-						return true;
+						});
+						AlertDialog dialog = builder.create();
+						dialog.show();						
+						
+						return false;
 					}
 					TrackHolder.c = x;	
 					//Reader r = new Reader();
@@ -212,28 +253,9 @@ public class ReaderView extends View {
 								collisionForBut.addResolvedLine(l);
 								track.addLine(l);								
 							}
-							finalPoints.clear();
-							finalPoints.addAll(track.lines.get(0).points);						
-							Point tmp = track.lines.get(0).getLast();
-							boolean bb = true;
-							while (bb) {
-								for (Line l : track.lines) {
-									if (l.getFirst().distanceSquared(tmp) <= 2 ) {
-										//l.points.remove(tmp);
-										finalPoints.addAll(l.points);
-										tmp = l.getLast();
-										bb = true;										
-									} else if (l.getLast().distanceSquared(tmp) <= 2) {
-										//l.points.remove(tmp);
-										Log.i("qw e", l.getLast().toString() + " 1^" + tmp.toString());
-										Collections.reverse(l.points);
-										Log.i("qw e", l.getLast().toString() + " 2^" + tmp.toString());
-										finalPoints.addAll(l.points);
-										tmp = l.getLast();
-										bb = true;
-									} else bb = false;
-								}
-							}
+							updateFinalPoints();
+								
+								
 							thisView.invalidate();
 							dialog.dismiss();
 						}

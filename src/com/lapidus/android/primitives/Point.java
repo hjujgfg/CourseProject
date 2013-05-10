@@ -61,6 +61,17 @@ public class Point implements Cloneable {
 		s1 = null;
 		s2 = null;
 	}
+	@Override
+	public Point clone() throws CloneNotSupportedException {
+		Point res = (Point)super.clone();
+		res.x = this.x;
+		res.y = this.y;
+		res.z = this.z;
+		res.index = this.index;
+		res.collides = this.collides;
+		res.collisionIndex = this.collisionIndex;
+		return res;		
+	}
 	public String toString()
 	{
 	    return this.x + ":" + this.y + ":" + this.z;

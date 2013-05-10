@@ -92,6 +92,13 @@ public class PainterView extends View {
 		drawApproximizedPoints(canvas, paint);
 		drawIntersetingPoints(intersectingPoints, canvas, paint);
 	}
+	public void getExternalPoints(ArrayList<Point> arr) {
+		points.clear();		
+		points = (ArrayList<Point>) arr.clone();
+		refreshSegs();
+		refreshIntersectingPoints(intersectingPoints, segs);	
+		invalidate();
+	}
 	public Bitmap getPreparedBitmap() {
 		if (segs == null || segs.size() < 1) return null;
 		Bitmap res;
