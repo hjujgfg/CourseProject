@@ -1,8 +1,5 @@
 package com.lapidus.android.engine;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -14,23 +11,15 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.BitmapFactory;
-import android.graphics.Shader;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.renderscript.Mesh.Primitive;
-import android.renderscript.Mesh.TriangleMeshBuilder;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Window;
-import android.widget.Toast;
 
 import com.lapidus.android.R;
 import com.threed.jpct.Camera;
-import com.threed.jpct.CollisionEvent;
-import com.threed.jpct.CollisionListener;
 import com.threed.jpct.FrameBuffer;
 import com.threed.jpct.Light;
 import com.threed.jpct.Loader;
@@ -48,14 +37,7 @@ import com.threed.jpct.util.BitmapHelper;
 import com.threed.jpct.util.MemoryHelper;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
-/**
- * A simple demo. This shows more how to use jPCT-AE than it shows how to write
- * a proper application for Android. It includes basic activity management to
- * handle pause and resume...
- * 
- * @author EgonOlsen
- * 
- */
+
 @TargetApi(13)
 public class Engine extends Activity {
 
@@ -378,14 +360,15 @@ public class Engine extends Activity {
 				
 				//newods.scale(2f);
 				Log.i("CO", " newods " + newods.getCenter().toString() + " : " +newods.getTransformedCenter().toString());
-				leftBorder.strip();
-				leftBorder.build();
+				
 				rightBorder.setTexture("green");
 				leftBorder.setTexture("green");
 				rightBorder.setEnvmapped(true);
 				leftBorder.calcTextureWrapSpherical();
 				rightBorder.strip();
 				rightBorder.build();
+				leftBorder.strip();
+				leftBorder.build();
 				start.setTexture("green");
 				end.setTexture("red");
 				newods.setTexture("red");

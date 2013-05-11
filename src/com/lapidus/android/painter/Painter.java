@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import com.lapidus.android.R;
 import com.lapidus.android.engine.Engine;
+import com.lapidus.android.engine.ObjectViewer;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
 import com.lapidus.android.reader.Reader;
@@ -46,8 +47,9 @@ public class Painter extends Activity {
 		setContentView(R.layout.activity_painter);
 		ImageView button = (ImageView)findViewById(R.id.button);
 		view = (PainterView) findViewById(R.id.view);
+		final Context ctx = this;
 		button.setOnClickListener(new OnClickListener() {
-			
+		
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				Toast t = Toast.makeText(getApplicationContext(), "shit", Toast.LENGTH_SHORT);
@@ -60,11 +62,97 @@ public class Painter extends Activity {
 					
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
-						dialog.dismiss();
+						view.invalidate();
+						Engine.path = new ArrayList<Point>();
+						ArrayList<Point> tmp = new ArrayList<Point>();
+						tmp.add(view.segs.get(0).start);
+						Segment x;
+						for (int i = 1; i < view.segs.size() - 1; i ++) {
+							x = view.segs.get(i);
+							tmp.add(x.stop);
+							if (x.collides == true) {
+								x.start.z += 2;
+								x.stop.z = x.start.z + 3;
+								view.segs.get(i - 1).start.z = x.start.z + 1;
+							} else {
+								x.stop.z = x.start.z;
+							}
+						}
+						tmp.get(0).z = 0;
+						
+						for (Point a : tmp) {
+							Engine.path.add(new Point(a.x, a.y, a.z));
+						}
+						//Engine.path = (ArrayList<Point>) view.points.clone();
+						Engine.bb = true;
+						Intent i = new Intent(ctx, Engine.class);
+						startActivity(i);
 					}
 				});
-				TextView tw2 = (TextView)findViewById(R.id.textView2);
-				TextView tw3 = (TextView)findViewById(R.id.textView3);
+				TextView tw2 = (TextView)dialog.findViewById(R.id.textView2);
+				tw2.setOnClickListener(new OnClickListener() {
+					
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						/*//loadFileList();
+						//onCreateDialog(1000);
+						Intent i = new Intent(context, Reader.class);
+						startActivity(i);*/
+						view.invalidate();
+						ObjectViewer.path = new ArrayList<Point>();
+						ArrayList<Point> tmp = new ArrayList<Point>();
+						tmp.add(view.segs.get(0).start);
+						Segment x;
+						for (int i = 1; i < view.segs.size() - 1; i ++) {
+							x = view.segs.get(i);
+							tmp.add(x.stop);
+							if (x.collides == true) {
+								x.start.z += 2;
+								x.stop.z = x.start.z + 3;
+								view.segs.get(i - 1).start.z = x.start.z + 1;
+							} else {
+								x.stop.z = x.start.z;
+							}
+						}
+						tmp.get(0).z = 0;
+						
+						for (Point a : tmp) {
+							ObjectViewer.path.add(new Point(a.x, a.y, a.z));
+						}
+						//Engine.path = (ArrayList<Point>) view.points.clone();
+						
+						Intent i = new Intent(ctx, ObjectViewer.class);
+						startActivity(i);
+						
+					}
+				});
+				TextView tw3 = (TextView)dialog.findViewById(R.id.textView3);
+				tw3.setOnClickListener(new OnClickListener() {
+					
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						
+						
+						Bitmap image = view.getPreparedBitmap();
+						if (image == null) {
+							Toast t = Toast.makeText(getApplicationContext(), "Nothing to save", Toast.LENGTH_SHORT);
+							t.show();
+							return;
+						}
+						try {
+							File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj"+"/newimage.png" );
+							//f.mkdirs();
+							f.createNewFile();
+							FileOutputStream fos = new FileOutputStream(f);
+							image.compress(Bitmap.CompressFormat.PNG, 90, fos);
+							fos.close();
+							Toast t = Toast.makeText(getApplicationContext(), "saved", Toast.LENGTH_SHORT);
+							t.show();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
 				dialog.show();
 			}
 		});

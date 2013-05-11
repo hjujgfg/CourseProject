@@ -31,6 +31,8 @@
         </activity>
         <activity
             android:name=".engine.Engine"></activity>
+        <activity
+            android:name=".engine.ObjectViewer"></activity>
             
     </application>
 
