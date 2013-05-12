@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import com.lapidus.android.R;
 import com.lapidus.android.engine.Engine;
 import com.lapidus.android.engine.ObjectViewer;
+import com.lapidus.android.engine.VehicleViewer;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
 import com.lapidus.android.reader.Reader;
@@ -131,9 +132,10 @@ public class Painter extends Activity {
 					
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
+						Intent i = new Intent(ctx, VehicleViewer.class);
+						startActivity(i);
 						
-						
-						Bitmap image = view.getPreparedBitmap();
+						/*Bitmap image = view.getPreparedBitmap();
 						if (image == null) {
 							Toast t = Toast.makeText(getApplicationContext(), "Nothing to save", Toast.LENGTH_SHORT);
 							t.show();
@@ -150,7 +152,7 @@ public class Painter extends Activity {
 							t.show();
 						} catch (Exception e) {
 							e.printStackTrace();
-						}
+						}*/
 					}
 				});
 				dialog.show();

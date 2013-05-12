@@ -302,16 +302,18 @@ public class Engine extends Activity {
 				Texture car3 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car3)), 64, 64));
 				Texture car4 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car_ref)), 64, 64));
 				Texture car5 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car_lit)), 64, 64));
-				Texture asphalt = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.asphalt)), 64, 64));
+				//Texture asphalt = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.asphalt)), 64, 64));
 				Texture green = new Texture(2, 2, RGBColor.GREEN);		
 				Texture red = new Texture(2, 2, RGBColor.RED);
 				TextureManager.getInstance().addTexture("green", green);
 				TextureManager.getInstance().addTexture("red", red);
+				Texture yellowc = new Texture(2, 2, new RGBColor(255, 255, 1));
+				TextureManager.getInstance().addTexture("yellowc", yellowc);
 				TextureManager.getInstance().addTexture("texture", texture);
 				TextureManager.getInstance().addTexture("police_car3.tga", car3);
 				TextureManager.getInstance().addTexture("police_car.tga", car4);
 				TextureManager.getInstance().addTexture("police_car_lit.tga", car5);		
-				TextureManager.getInstance().addTexture("asphalt", asphalt);
+				//TextureManager.getInstance().addTexture("asphalt", asphalt);
 				TextureInfo ti = new TextureInfo(TextureManager.getInstance().getTextureID("asphalt"));
 				nobj = Primitives.getSphere(10);
 				nobj.calcTextureWrapSpherical();
@@ -329,9 +331,13 @@ public class Engine extends Activity {
 				rightBorder = new Object3D(path.size() * 5);
 				//newods.addTriangle(new SimpleVector(-50, 0, -50), new SimpleVector(50, 0, -50), new SimpleVector(-50, 0, 0));
 				InputStream fis = null;
-				fis = getResources().openRawResource(R.raw.policecar);				
+				fis = getResources().openRawResource(R.raw.rotatcar);				
 				Object3D[] loadedCars = Loader.loadOBJ(fis, null, 1);				
 				loadedCar = Object3D.mergeAll(loadedCars);	
+				loadedCar.setTexture("yellowc");
+				loadedCar.calcTextureWrapSpherical();
+				loadedCar.rotateX((float)Math.PI / 2);
+				loadedCar.rotateY((float)Math.PI);
 				//loadedCar.scale(0.05f);	
 				Log.i("CO", loadedCar.getCenter().toString());
 				loadedCar.setScale(0.003f);
@@ -418,7 +424,17 @@ public class Engine extends Activity {
 				world.addObject(rightBorder);
 				world.compileAllObjects();
 				cam = world.getCamera();
-				loadedCar.setOrientation(new SimpleVector(0, 0, -1), new SimpleVector(0, -1, 0));				
+				/*loadedCar.rotateZ((float)Math.PI / 2);
+				loadedCar.rotateY((float)Math.PI / 2);*/
+				/*loadedCar.setOrientation(new SimpleVector(0, 1, 0) , new SimpleVector(0, -1, 0));
+				
+				loadedCar.rotateY((float)Math.PI);
+				loadedCar.rotateX((float)Math.PI / 2);*/
+				
+				//default for cops car
+				Log.i("bat", loadedCar.getZAxis().toString() + " = z axis");
+				 
+				loadedCar.setOrientation(new SimpleVector(0, 0, -1), new SimpleVector(0, -1, 0));
 				float f = - carDirection.calcAngle(loadedCar.getZAxis());
 				if (carDirection.x > 0) {
 					loadedCar.rotateY((float) ((float)Math.PI + f));
@@ -434,8 +450,8 @@ public class Engine extends Activity {
 				Log.i("CO", "centr " + loadedCar.getTransformedCenter().toString());				
 				Log.i(mytag, "car o ^ " + loadedCar.getXAxis().toString());
 				SimpleVector temp = loadedCar.getTransformedCenter();
-				temp.y -= 1.8;
-				temp.z -= 1.8;
+				temp.y -= 1.3;
+				temp.z -= 1.3;
 				Log.i("CO", "cam pos " + cam.getPosition().toString());
 				cam.setPosition(temp);
 				Log.i("CO", "cam pos " + cam.getPosition().toString());

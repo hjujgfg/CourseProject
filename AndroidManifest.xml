@@ -33,6 +33,8 @@
             android:name=".engine.Engine"></activity>
         <activity
             android:name=".engine.ObjectViewer"></activity>
+        <activity
+            android:name=".engine.VehicleViewer"></activity>
             
     </application>
 
