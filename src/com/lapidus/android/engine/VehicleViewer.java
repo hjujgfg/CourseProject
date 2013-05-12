@@ -13,15 +13,18 @@ import javax.microedition.khronos.opengles.GL10;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
 import android.view.Window;
+import android.widget.TextView;
 
 
 import com.threed.jpct.Camera;
@@ -42,6 +45,7 @@ import com.threed.jpct.util.BitmapHelper;
 import com.threed.jpct.util.MemoryHelper;
 import com.threed.jpct.util.SkyBox;
 import com.lapidus.android.R;
+import com.lapidus.android.painter.Painter;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
 public class VehicleViewer extends Activity {
@@ -91,8 +95,18 @@ public class VehicleViewer extends Activity {
 		LayoutInflater inflater = getLayoutInflater();
 		View tmpView;
 		tmpView = inflater.inflate(R.layout.main_menu_layout, null);
-		addContentView(tmpView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-				ViewGroup.LayoutParams.WRAP_CONTENT));
+		addContentView(tmpView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.MATCH_PARENT));
+		TextView single = (TextView)findViewById(R.id.single_button);
+		single.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent o = new Intent(getApplicationContext(), Painter.class);
+				startActivity(o);
+			}
+		});
+		single.setAlpha(50);
 		Display d = getWindowManager().getDefaultDisplay();
 		android.graphics.Point p = new android.graphics.Point();
 		d.getSize(p);

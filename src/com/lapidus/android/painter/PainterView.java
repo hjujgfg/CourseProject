@@ -85,6 +85,7 @@ public class PainterView extends View {
 		if (image != null) {			
 			canvas.drawBitmap(image, new Matrix(), paint);
 		}
+		
 		refreshIntersectingPoints(intersectingPoints, segs);
 		//drawPoints(canvas, paint);
 		drawSegs(segs, canvas, paint);
@@ -97,6 +98,7 @@ public class PainterView extends View {
 		points = (ArrayList<Point>) arr.clone();
 		refreshSegs();
 		refreshIntersectingPoints(intersectingPoints, segs);	
+		smoothAll();
 		invalidate();
 	}
 	public Bitmap getPreparedBitmap() {
@@ -203,46 +205,10 @@ public class PainterView extends View {
 					pp.collisionIndex = tmp;
 				}*/
 				points.add(pp);				
+				if (points.size() > 2) smoothAll();
 			}
 			if (MotionEvent.ACTION_UP == event.getAction()) {
-				approximizedPoints = new Point[points.size()];
-				Point[] temp = new Point[points.size()];
-				int i = 0;
-				for (Point x : points) {					
-					temp[i] = x;
-					i ++;
-					Log.i("PP", x.toString() + " i = " + i);
-				}
-				approximizedPoints = Approximizer.approximize(2f, temp);	
-				refreshSegs(approximizedPoints);
-				touched = false;	
-				refreshIntersectingPoints(intersectingPoints, segs);
-				removeSmallLoops(intersectingPoints, segs);
-				refreshPoints(segs, points);
-				temp = new Point[points.size()];
-				i = 0;
-				for (Point x : points) {					
-					temp[i] = x;
-					i ++;
-					Log.i("PP", x.toString() + " i = " + i);
-				}
-				approximizedPoints = Approximizer.approximize(2f, temp);
-				refreshSegs(approximizedPoints);
-				smoothAngles(segs, 4);
-				removeShortSegments(segs, 2);
-				refreshPoints(segs, points);
-				temp = new Point[points.size()];
-				i = 0;
-				for (Point x : points) {					
-					temp[i] = x;
-					i ++;
-					Log.i("PP", x.toString() + " i = " + i);
-				}
-				
-				approximizedPoints = Approximizer.approximize(2f, temp);
-				refreshSegs(approximizedPoints);
-				
-				refreshIntersectingPoints(intersectingPoints, segs);
+				smoothAll();
 				//points.add(hangingPoint);
 			}
 			if (MotionEvent.ACTION_DOWN == event.getAction()) {
@@ -252,6 +218,46 @@ public class PainterView extends View {
 			return true;
 		}
 	};
+	private void smoothAll() {
+		approximizedPoints = new Point[points.size()];
+		Point[] temp = new Point[points.size()];
+		int i = 0;
+		for (Point x : points) {					
+			temp[i] = x;
+			i ++;
+			Log.i("PP", x.toString() + " i = " + i);
+		}
+		approximizedPoints = Approximizer.approximize(2f, temp);	
+		refreshSegs(approximizedPoints);
+		touched = false;	
+		refreshIntersectingPoints(intersectingPoints, segs);
+		removeSmallLoops(intersectingPoints, segs);
+		refreshPoints(segs, points);
+		temp = new Point[points.size()];
+		i = 0;
+		for (Point x : points) {					
+			temp[i] = x;
+			i ++;
+			Log.i("PP", x.toString() + " i = " + i);
+		}
+		approximizedPoints = Approximizer.approximize(2f, temp);
+		refreshSegs(approximizedPoints);
+		smoothAngles(segs, 2);
+		removeShortSegments(segs, 2);
+		refreshPoints(segs, points);
+		temp = new Point[points.size()];
+		i = 0;
+		for (Point x : points) {					
+			temp[i] = x;
+			i ++;
+			Log.i("PP", x.toString() + " i = " + i);
+		}
+		
+		approximizedPoints = Approximizer.approximize(2f, temp);
+		refreshSegs(approximizedPoints);
+		
+		refreshIntersectingPoints(intersectingPoints, segs);
+	}
 	boolean n;
 	private OnTouchListener ontouchlistener2 = new OnTouchListener() {
 		

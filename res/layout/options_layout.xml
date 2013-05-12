@@ -1,35 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp"
+    android:orientation="vertical" 
+    android:layout_gravity="center">
+
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/painter_save_but"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:text="Medium Text"
+        android:layout_height="wrap_content"        
+        android:background="@drawable/button"
+        android:gravity="center|top"
+        android:paddingTop="6dp"
+        android:text="@string/save"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/painter_export_but"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/textView1"
-        android:text="Medium Text"
-        android:background="#07000000"
+        android:background="@drawable/button"
+        android:gravity="center|top"
+        android:paddingTop="6dp"
+        android:text="@string/export"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/painter_import_but"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:text="Medium Text"
+        android:background="@drawable/button"
+        android:gravity="center|top"
+        android:paddingTop="6dp"
+        android:text="@string/import_"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
-</RelativeLayout>
+    <TextView
+        android:id="@+id/painter_start_but"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button"
+        android:gravity="center|top"
+        android:paddingTop="6dp"
+        android:text="@string/start"
+        android:textAppearance="?android:attr/textAppearanceMedium" />    
+        
+    <TextView
+        android:id="@+id/painter_preview_but"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button"
+        android:gravity="center|top"
+        android:paddingTop="6dp"
+        android:text="@string/preview"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
+</LinearLayout>

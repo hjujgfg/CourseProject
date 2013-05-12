@@ -33,6 +33,8 @@ import com.threed.jpct.TextureManager;
 import com.threed.jpct.World;
 import com.threed.jpct.util.BitmapHelper;
 import com.threed.jpct.util.MemoryHelper;
+import com.threed.jpct.util.SkyBox;
+import com.lapidus.android.R;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
 
@@ -54,6 +56,7 @@ public class ObjectViewer extends Activity {
 	private Object3D start;
 	private int screenWidth, screenHeight;	
 	private int fps = 0;
+	private SkyBox sb;
 	public ObjectViewer() {
 		renderer = new ViewerRenderer();
 	}
@@ -129,9 +132,10 @@ public class ObjectViewer extends Activity {
 		public void onDrawFrame(GL10 gl) {
 			// TODO Auto-generated method stub
 			newods.rotateY((float)Math.PI/72);
-			leftBorder.rotateY((float)Math.PI/72);
-			rightBorder.rotateY((float)Math.PI/72);
-			fb.clear(back);					
+			/*leftBorder.rotateY((float)Math.PI/72);
+			rightBorder.rotateY((float)Math.PI/72);*/
+			fb.clear(back);			
+			sb.render(world, fb);
 			world.renderScene(fb);
 			world.draw(fb);
 			fb.display();
@@ -157,47 +161,64 @@ public class ObjectViewer extends Activity {
 
 				sun = new Light(world);
 				sun.setIntensity(250, 250, 250);
-				Texture green = new Texture(2, 2, RGBColor.GREEN);		
-				Texture red = new Texture(2, 2, RGBColor.RED);
-				TextureManager.getInstance().addTexture("green", green);
-				TextureManager.getInstance().addTexture("red", red);
+				Texture greenn = new Texture(2, 2, RGBColor.GREEN);		
+				Texture redd = new Texture(2, 2, RGBColor.RED);
+				addTexture("greenn", greenn);
+				addTexture("redd", redd);
+				Texture backgr = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.backgroundcolor)), 64, 64));
+				addTexture("front", backgr);
+				addTexture("right", backgr);
+				addTexture("back", backgr);
+				addTexture("left", backgr);
+				addTexture("up", backgr);
+				addTexture("down", backgr);
+				sb = new SkyBox("left", "front", "right", "back", "up", "down", 700f);
 				newods = new Object3D(path.size() * 5);
 				leftBorder = new Object3D(path.size() * 5);
 				rightBorder = new Object3D(path.size() * 5);
 				generateTrack();
-				rightBorder.setTexture("green");
-				leftBorder.setTexture("green");
+				rightBorder.setTexture("greenn");
+				leftBorder.setTexture("greenn");
 				rightBorder.setEnvmapped(true);
 				leftBorder.calcTextureWrapSpherical();
-				rightBorder.strip();
-				rightBorder.build();
-				leftBorder.strip();
-				leftBorder.build();
-				start.setTexture("green");
-				end.setTexture("red");
-				newods.setTexture("red");
+				newods.setTexture("redd");
 				//newods.setEnvmapped(true);
 				newods.calcTextureWrapSpherical();
+				newods = Object3D.mergeObjects(newods, leftBorder);
+				newods = Object3D.mergeObjects(newods, rightBorder);
+				/*rightBorder.strip();
+				rightBorder.build();
+				leftBorder.strip();
+				leftBorder.build();*/
+				start.setTexture("greenn");
+				end.setTexture("redd");
+				
 				newods.strip();
 				newods.build();
 				newods.setCulling(false);
 				leftBorder.setCulling(false);
 				rightBorder.setCulling(false);
+				sb.compile();
 				world.addObject(start);
 				world.addObject(end);
 				world.addObject(newods);						
-				world.addObject(leftBorder);
-				world.addObject(rightBorder);
+				/*world.addObject(leftBorder);
+				world.addObject(rightBorder);*/
 				world.compileAllObjects();
 				cam = world.getCamera();
 				cam.lookAt(newods.getTransformedCenter());
-				cam.setPosition(0, 10, 0);
+				cam.setPosition(0, 0, 0);
 				MemoryHelper.compact();
 				
 				if (master == null) {
 					Logger.log("Saving master Activity!");
-					master = ObjectViewer.this;
+					//master = ObjectViewer.this;
 				}
+			}
+		}
+		private void addTexture(String tex, Texture t) {
+			if (!TextureManager.getInstance().containsTexture(tex)) {
+				TextureManager.getInstance().addTexture(tex, t);
 			}
 		}
 		private void normalizePath () {

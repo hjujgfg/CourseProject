@@ -2,4 +2,12 @@
     <string name="app_name">CourseProject</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
+    <string name="single">Start Single</string>
+    <string name="multi">Start Multi</string>
+    <string name="save">Save</string>
+    <string name="import_">Import</string>
+    <string name="export">Export to PNG</string>
+    <string name="start">Start Game</string>
+    <string name="preview">Preview</string>
 </resources>
+

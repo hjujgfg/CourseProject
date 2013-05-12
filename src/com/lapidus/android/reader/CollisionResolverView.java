@@ -70,8 +70,8 @@ public class CollisionResolverView extends View {
 			// TODO Auto-generated method stub
 			if (MotionEvent.ACTION_DOWN == event.getAction()) {
 				for (Point x : tmp) {
-					if (event.getX() >= x.x * avgX && event.getX() < x.x * avgX + avgX 
-							&& event.getY() >= x.y * avgY && event.getY() < x.y * avgY + avgY) {
+					if (event.getX() > x.x * avgX && event.getX() < x.x * avgX + avgX 
+							&& event.getY() > x.y * avgY && event.getY() < x.y * avgY + avgY) {
 						if (x.z > 0) {
 							Iterator<Segment> iterator = connections.iterator();
 							while (iterator.hasNext()) {
@@ -95,8 +95,8 @@ public class CollisionResolverView extends View {
 			}
 			if (MotionEvent.ACTION_UP == event.getAction()) {
 				for (Point x : tmp) {
-					if (event.getX() >= x.x * avgX && event.getX() < x.x * avgX + avgX 
-							&& event.getY() >= x.y * avgY && event.getY() < x.y * avgY + avgY) {
+					if (event.getX() > x.x * avgX && event.getX() < x.x * avgX + avgX 
+							&& event.getY() > x.y * avgY && event.getY() < x.y * avgY + avgY) {
 						if (x.z > 0 && !x.equals(a.connection)) {
 							Iterator<Segment> iterator = connections.iterator();
 							while (iterator.hasNext()) {

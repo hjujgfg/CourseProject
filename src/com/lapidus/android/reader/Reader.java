@@ -33,6 +33,7 @@ public class Reader extends Activity {
 	ReaderView view;
 	ArrayList<Collision> collisions;
 	ArrayList<Point> arr;
+	public static String path;
 	static Context context;
 	public void startCollisionresolver() {
 		Intent i = new Intent(context, CollisionResolver.class);
@@ -45,7 +46,10 @@ public class Reader extends Activity {
 		
 		setContentView(R.layout.reader_layout);
 		context = this;
-		view = (ReaderView)findViewById(R.id.readerView);	
+		view = (ReaderView)findViewById(R.id.readerView);
+		if (path == "" || path == null) {
+			this.stopService(getIntent());
+		}
 		//Bitmap image = BitmapFactory.decodeFile("/Painter/res/drawable-hdpi/test.bmp");
 		ImageView button = (ImageView)findViewById(R.id.reader_gear_button);
 		button.setOnClickListener(new OnClickListener() {
@@ -58,7 +62,8 @@ public class Reader extends Activity {
 			}
 		});
 		arr = new ArrayList<Point>();
-		Bitmap image = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj"+"/newimage.png" );
+		//Bitmap image = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj"+"/newimage.png" );
+		Bitmap image = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj/" + path);
 		StringBuilder sb = new StringBuilder();		
 		for (int i = 0; i < image.getWidth(); i ++) {
 			for (int j = 0; j < image.getHeight(); j ++) {
