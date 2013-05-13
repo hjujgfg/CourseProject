@@ -1,8 +1,12 @@
 package com.lapidus.android.painter;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 
@@ -49,6 +53,7 @@ public class Painter extends Activity {
 		ImageView button = (ImageView)findViewById(R.id.button);
 		view = (PainterView) findViewById(R.id.view);
 		final Context ctx = this;
+		mPath = new File(getExternalFilesDir(null).getAbsolutePath());
 		button.setOnClickListener(new OnClickListener() {
 		
 			public void onClick(View v) {
@@ -122,9 +127,9 @@ public class Painter extends Activity {
 							return;
 						}
 						try {
-							File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj");//+"/newimage.png" );
+							File f = new File(getExternalFilesDir(null).getAbsolutePath());//+"/newimage.png" );
 							f.mkdirs();
-							f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj" + "/newimage.png" );
+							f = new File(getExternalFilesDir(null).getAbsolutePath() + "/newimage.png" );
 							f.createNewFile();
 							FileOutputStream fos = new FileOutputStream(f);
 							image.compress(Bitmap.CompressFormat.PNG, 90, fos);
@@ -174,6 +179,77 @@ public class Painter extends Activity {
 						startActivity(i);
 					}
 				});
+				TextView tw5 = (TextView)dialog.findViewById(R.id.painter_save_but);
+				tw5.setOnClickListener(new OnClickListener() {
+					
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						view.invalidate();
+						//File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj");
+						File f = new File(getExternalFilesDir(null).getAbsolutePath());
+						f.mkdirs();
+						f = new File(getExternalFilesDir(null).getAbsolutePath() + "/track.ser" );
+						Log.i("saving", getExternalFilesDir(null).getAbsolutePath());
+						try {
+							f.createNewFile();
+							FileOutputStream fos = new FileOutputStream(f);
+							ObjectOutputStream oos = new ObjectOutputStream(fos);
+							oos.writeObject(view.points);
+							oos.flush();
+							oos.close();
+							fos.close();
+							Toast t = Toast.makeText(getApplicationContext(), "saved", Toast.LENGTH_SHORT);
+							t.show();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							Toast t = Toast.makeText(getApplicationContext(), "not saved - exception", Toast.LENGTH_SHORT);
+							t.show();
+							e.printStackTrace();
+						}
+					}
+				});
+				TextView tw6 = (TextView)dialog.findViewById(R.id.painter_open_but);
+				tw6.setOnClickListener(new OnClickListener() {
+					
+					public void onClick(View arg0) {
+						// TODO Auto-generated method stub
+						view.invalidate();
+						File f = new File(getExternalFilesDir(null).getAbsolutePath());						
+						f = new File(getExternalFilesDir(null).getAbsolutePath() + "/track.ser" );
+						try {							
+							FileInputStream fis = new FileInputStream(f);
+							ObjectInputStream oos = new ObjectInputStream(fis);							
+							view.points = (ArrayList<Point>) oos.readObject();													
+							oos.close();
+							fis.close();
+							view.smoothAll();
+							view.invalidate();
+							Toast t = Toast.makeText(getApplicationContext(), "opened", Toast.LENGTH_SHORT);
+							t.show();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							Toast t = Toast.makeText(getApplicationContext(), "no file track.ser?", Toast.LENGTH_SHORT);
+							t.show();
+							e.printStackTrace();
+						} catch (ClassNotFoundException e) {
+							e.printStackTrace();
+						}
+					}
+				});
+				TextView tw7 = (TextView)dialog.findViewById(R.id.painter_clear_but);
+				tw7.setOnClickListener(new OnClickListener() {
+					
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						view.points.clear();
+						view.segs.clear();
+						view.approximizedPoints = null;
+						view.intersectingPoints.clear();
+						view.invalidate();
+						Toast t = Toast.makeText(getApplicationContext(), "Cleared", Toast.LENGTH_SHORT);
+						t.show();
+					}
+				});
 				dialog.show();
 			}
 		});
@@ -190,7 +266,7 @@ public class Painter extends Activity {
 	private String[] mFileList;
 	private String mChosenFile;
 	private static final String FTYPE = ".png";
-	private File mPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj");
+	private File mPath; //= new File(getExternalFilesDir(null).getAbsolutePath());
 	
 	
 	

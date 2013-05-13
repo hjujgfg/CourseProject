@@ -254,10 +254,14 @@ public class ReaderView extends View {
 								track.addLine(l);								
 							}
 							updateFinalPoints();
-								
+							
 								
 							thisView.invalidate();
 							dialog.dismiss();
+							if (startLine == null) {
+								Toast t = Toast.makeText(getContext(), "Touch one of the endpoints to set start", Toast.LENGTH_LONG);
+								t.show();
+							}
 						}
 					});
 					/*int h = dialog.findViewById(R.layout.collision_resolver_layout).getHeight();

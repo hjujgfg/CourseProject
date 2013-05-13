@@ -135,10 +135,9 @@ public class PainterView extends View {
 		paint.setColor(Color.BLACK);
 	}
 	protected void drawApproximizedPoints(Canvas canvas, Paint paint) {
-		if (approximizedPoints.length < 2) return;
+		if (approximizedPoints == null || approximizedPoints.length < 2 ) return;
 		paint.setColor(Color.RED);
-		paint.setStrokeWidth(2f);
-		if (approximizedPoints == null || approximizedPoints.length == 0) return; 
+		paint.setStrokeWidth(2f);		 
 		for (int i = 0; i < approximizedPoints.length - 1; i ++) {
 			paint.setColor(Color.GREEN);
 			canvas.drawCircle(approximizedPoints[i].x, approximizedPoints[i].y, 2, paint);
@@ -218,7 +217,7 @@ public class PainterView extends View {
 			return true;
 		}
 	};
-	private void smoothAll() {
+	protected void smoothAll() {
 		approximizedPoints = new Point[points.size()];
 		Point[] temp = new Point[points.size()];
 		int i = 0;

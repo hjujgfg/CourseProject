@@ -1,10 +1,16 @@
 package com.lapidus.android.primitives;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import com.lapidus.android.reader.Line;
 
-public class Point implements Cloneable {
+public class Point implements Cloneable, Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 12221L;
 	public float x,y,z;
 	public int index;
 	public boolean collides;

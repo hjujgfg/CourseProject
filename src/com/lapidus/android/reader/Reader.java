@@ -63,7 +63,8 @@ public class Reader extends Activity {
 		});
 		arr = new ArrayList<Point>();
 		//Bitmap image = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj"+"/newimage.png" );
-		Bitmap image = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj/" + path);
+		Bitmap image = BitmapFactory.decodeFile(getExternalFilesDir(null)+ "/" + path);
+		if (image == null) finish();
 		StringBuilder sb = new StringBuilder();		
 		for (int i = 0; i < image.getWidth(); i ++) {
 			for (int j = 0; j < image.getHeight(); j ++) {
@@ -89,7 +90,7 @@ public class Reader extends Activity {
 		view.approximizedPoints = Approximizer.approximize(2f, toArray(processedPoints));
 		view.points = processedPoints;*/
 		//ArrayList<Point> proc = processPointsFromBitmap(arr);
-		Collections.sort(arr, Point.indexComp);
+		/*Collections.sort(arr, Point.indexComp);
 		File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj"+"/arrcoords.txt" );
 		try {
 			FileWriter fw = new FileWriter(f);
@@ -103,7 +104,7 @@ public class Reader extends Activity {
 			e.printStackTrace();
 			Toast t = Toast.makeText(getApplicationContext(), "shitshitshit", Toast.LENGTH_SHORT);
 			t.show();
-		}
+		}*/
 		
 		
 		view.track = new Track();

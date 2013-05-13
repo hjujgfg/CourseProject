@@ -11,8 +11,13 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Application;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -57,7 +62,7 @@ public class Engine extends Activity {
 
 	private float xpos = -1;
 	private float ypos = -1;
-	
+	private SimpleVector endCollisionHolder;
 	private float cameraRotationAngle;
 	private Object3D loadedCar = null;
 	private SimpleVector carDirection = null; 
@@ -77,9 +82,9 @@ public class Engine extends Activity {
 	
 	private Matrix transformMatrix = new Matrix();
 	private Matrix cameraTransformMatrix = new Matrix();
-	
+	private Activity ctx; 
 	private int screenWidth, screenHeight;	
-	
+	private Handler handler;
 	private String mytag = "MyTag";
 	private SimpleVector ellipsoid = new SimpleVector(1, 1, 1);
 	public static boolean bb; 
@@ -116,7 +121,9 @@ public class Engine extends Activity {
 		android.graphics.Point p = new android.graphics.Point();
 		d.getSize(p);
 		screenHeight = p.y;
-		screenWidth = p.x;		
+		screenWidth = p.x;	
+		handler = new Handler();
+		ctx = this;
 	}
 
 	@Override
@@ -306,11 +313,12 @@ public class Engine extends Activity {
 				Log.i("CO", loadedCar.getCenter().toString());
 				loadedCar.setScale(0.002f);
 				Log.i("CO", loadedCar.getCenter().toString());
+				//loadedCar.translate(new SimpleVector(0, -loadedCar.getTransformedCenter().y, 0));
 				//loadedCar.translate(-loadedCar.getCenter().x+8, -loadedCar.getCenter().y + 100, -loadedCar.getCenter().z);
 				//loadedCar.translate(loadedCar.getCenter().z, loadedCar.getCenter().x, loadedCar.getCenter().y);
 				
 				Object3D flore = new Object3D(4);
-				flore.addTriangle(new SimpleVector(-130, 100, -130), new SimpleVector(130, 100, -130), new SimpleVector(0, 100, 280));
+				flore.addTriangle(new SimpleVector(-130, 102, -130), new SimpleVector(130, 102, -130), new SimpleVector(0, 102, 280));
 				
 				
 							
@@ -392,23 +400,29 @@ public class Engine extends Activity {
 					loadedCar.rotateY((float) ((float)Math.PI - f));
 				}
 				
-				loadedCar.translate(-loadedCar.getTransformedCenter().x, 0, -loadedCar.getTransformedCenter().z);
+				loadedCar.translate(-loadedCar.getTransformedCenter().x, -loadedCar.getTransformedCenter().y - 90, -loadedCar.getTransformedCenter().z);
 				Log.i("Car loc", "car dir " + carDirection.toString());
 				Log.i("Car loc", "car z " + loadedCar.getZAxis().toString());
 				Log.i("Car loc", "car centr " + loadedCar.getTransformedCenter().toString());
 				Log.i("Car loc", "angle " + f);
 				Log.i("CO", "centr " + loadedCar.getTransformedCenter().toString());				
 				Log.i(mytag, "car o ^ " + loadedCar.getXAxis().toString());
-				SimpleVector temp = loadedCar.getTransformedCenter();
-				temp.y -= 1.3;
-				temp.z -= 1.3;
+				//SimpleVector temp = loadedCar.getTransformedCenter();
+				SimpleVector temp = new SimpleVector(0, 20, 0);
+				
 				Log.i("CO", "cam pos " + cam.getPosition().toString());
-				cam.setPosition(temp);
+				//world.getCamera().setPosition(start.getTransformedCenter().x, start.getTransformedCenter().y - 10, start.getTransformedCenter().z);
+				cam.setOrientation(carDirection, new SimpleVector(0, -1, 0));
+				//cam.setPosition(0, 0, 0);
+				cam.moveCamera(Camera.CAMERA_MOVEDOWN, 85);
 				Log.i("CO", "cam pos " + cam.getPosition().toString());
-				cam.moveCamera(temp, 1f);
+				
+				//cam.setPositionToCenter(loadedCar);
+				//cam.moveCamera(temp, 5f);
 				//cam.transform(temp);
 				cam.lookAt(loadedCar.getTransformedCenter());
-				
+				endCollisionHolder = end.checkForCollisionSpherical(new SimpleVector(0, 1, 0), 3);
+				Log.i("finish", "deffault " + endCollisionHolder.toString());
 				Log.i("MyTag", " " + cam.getPosition().x + " " + cam.getPosition().y + " " + cam.getPosition().z);
 				SimpleVector sv = new SimpleVector(0,0,0);
 				transformMatrix.translate(1, 1, 1);
@@ -619,6 +633,9 @@ public class Engine extends Activity {
 		}
 		boolean onGround = false;
 		float delta, yprev = 2;
+		int d = 3;
+		boolean bb = true;
+		boolean finished = false;
 		public void onDrawFrame(GL10 gl) {
 			
 			/*if (touchTurn != 0) {
@@ -640,9 +657,11 @@ public class Engine extends Activity {
 			s.x -= 50; 
 			end.rotateY((float)Math.PI / 72);
 			end.rotateX((float)Math.PI / 72);
-			if (xpos > screenWidth / 2 && speed >= 0) {//&& ypos < 2 * screenHeight / 3 && ypos >= 0) {
+			start.rotateY((float)Math.PI / 72);
+			start.rotateX((float)Math.PI / 72);
+			if (xpos > screenWidth / 2 && speed >= 0 && onGround) {//&& ypos < 2 * screenHeight / 3 && ypos >= 0) {
 				cameraRotationAngle = (float)Math.PI / 90;				
-			} else if (xpos < 200 && xpos >= 0 && speed >= 0) {// && ypos < 2 * screenHeight / 3 && ypos >= 0) {
+			} else if (xpos < 200 && xpos >= 0 && speed >= 0 && onGround) {// && ypos < 2 * screenHeight / 3 && ypos >= 0) {
 				cameraRotationAngle = -(float)Math.PI / 90;				
 			} 
 			if (ypos > 2 * screenHeight / 3  && ypos >= 0 && speed >= 0) {
@@ -662,17 +681,18 @@ public class Engine extends Activity {
 			SimpleVector t = new SimpleVector(-loadedCar.getZAxis().x * speed, 0, -loadedCar.getZAxis().z * speed);			
 			//t.scalarMul(speed);
 			t = loadedCar.checkForCollisionEllipsoid(t, ellipsoid, 10);
-			loadedCar.translate(t);
+			if (onGround) loadedCar.translate(t);
 			//GRAVITY
 			t = loadedCar.checkForCollisionEllipsoid(new SimpleVector(0, 1, 0), ellipsoid, 1);
 			loadedCar.translate(t);
 			Log.i("GR", "corrected"  + t.toString());
-			/*t = end.checkForCollisionSpherical(new SimpleVector(0, 1, 0), 2);
-			if (t.x != 0 || t.y != 1 || t.z != 0) {				
-				Log.i("finish", "finished");
-			}*/
-			
-			if (t.y == 1 && !onGround) loadedCar.translate(t);
+			if (!onGround && t.y != 1) onGround = true;
+			if (onGround) {
+				if (speed < 1 && (ypos < 2 * screenHeight / 3 || ypos < 0))  {
+					speed += 0.05;
+				}
+			}
+			/*if (t.y == 1 && !onGround) loadedCar.translate(t);
 			else {
 				onGround = true;				
 			}
@@ -684,6 +704,40 @@ public class Engine extends Activity {
 				if (speed < 1 && (ypos < 2 * screenHeight / 3 || ypos < 0))  {
 					speed += 0.05;
 				}
+			}*/
+			
+			
+			
+			/*if (t.x != endCollisionHolder.x || t.y != endCollisionHolder.y || t.z != endCollisionHolder.z) {				
+				Log.i("finish", "finished " + t.toString());
+			}*/
+			SimpleVector m = loadedCar.getTransformedCenter();
+			if (Math.abs(m.x - end.getTransformedCenter().x) < 5 && Math.abs(m.y - end.getTransformedCenter().y) < 5 
+					&& Math.abs(m.z - end.getTransformedCenter().z) < 5 && !finished){
+				finished = true;
+				Log.i("finish", "finished " + m.toString());
+				
+				handler.post(new Runnable() {
+					
+					public void run() {
+						// TODO Auto-generated method stub
+						
+						AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+						builder.setTitle("Finish!");
+						builder
+						.setMessage("You have just finished!")
+						.setCancelable(false)
+						.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+							
+							public void onClick(DialogInterface dialog, int which) {
+								// TODO Auto-generated method stub
+								ctx.finish();
+							}
+						});
+						AlertDialog dialog = builder.create();
+						dialog.show();						
+					}
+				});
 			}
 			//loadedCar.translate(t);
 			//loadedCar.setCenter(loadedCar.getTransformedCenter());
@@ -708,10 +762,10 @@ public class Engine extends Activity {
 				cam.moveCamera(new SimpleVector(cam.getDirection().x, 0.05, cam.getDirection().z), speed * 1.414f);
 			}*/
 			float camYpos = cam.getPosition().y;
-			if (camYpos > loadedCar.getTransformedCenter().y - 15.8) {
-				cam.moveCamera(new SimpleVector(cam.getDirection().x, -0.05, cam.getDirection().z), speed * 1.414f);
+			if (camYpos > loadedCar.getTransformedCenter().y - 5.8) {
+				cam.moveCamera(new SimpleVector(cam.getDirection().x, -0.02f, cam.getDirection().z), speed * 1.414f);
 			} else {
-				cam.moveCamera(new SimpleVector(cam.getDirection().x, 0.05, cam.getDirection().z), speed * 1.414f);
+				cam.moveCamera(new SimpleVector(cam.getDirection().x, 0.02, cam.getDirection().z), speed * 1.414f);
 			}
 			cam.lookAt(loadedCar.getTransformedCenter());
 			sun.setPosition(cam.getPosition());

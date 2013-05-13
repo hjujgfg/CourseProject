@@ -9,5 +9,7 @@
     <string name="export">Export to PNG</string>
     <string name="start">Start Game</string>
     <string name="preview">Preview</string>
+    <string name="open">Open</string>
+    <string name="Clear">Clear</string>    
 </resources>
 
