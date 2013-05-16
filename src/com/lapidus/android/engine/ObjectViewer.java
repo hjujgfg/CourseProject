@@ -39,27 +39,47 @@ import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
 
 public class ObjectViewer extends Activity {
+	//сохраненный мир
 	private static ObjectViewer master = null;
-
+	//вид
 	private GLSurfaceView mGLView;
+	//рендерер
 	public ViewerRenderer renderer = null;
+	//буфер кадра 
 	private FrameBuffer fb = null;
+	//мир
 	private World world = null;
+	//цвет
 	private RGBColor back = new RGBColor(50, 50, 100);
-	private Light sun = null;	
-	private Camera cam = null; 
+	//освещение
+	private Light sun = null;
+	//камера
+	private Camera cam = null;
+	//маршрут
 	public static ArrayList<Point> path;
+	//трек
 	private Object3D newods = null;
+	//левая граница
 	private Object3D leftBorder = null;
+	//правая граница
 	private Object3D rightBorder = null;
+	//объект финиша
 	private Object3D end;
+	//объект старта
 	private Object3D start;
-	private int screenWidth, screenHeight;	
+	//размеры экрана
+	private int screenWidth, screenHeight;
+	//счетчик кадров в секунду
 	private int fps = 0;
+	//скайбокс
 	private SkyBox sb;
+	//конструктор
 	public ObjectViewer() {
 		renderer = new ViewerRenderer();
 	}
+	/**
+	 * наследуемый  метод создания активности
+	 */
 	protected void onCreate(Bundle savedInstanceState) {
 
 		Logger.log("onCreate");
@@ -92,6 +112,10 @@ public class ObjectViewer extends Activity {
 		screenHeight = p.y;
 		screenWidth = p.x;		
 	}
+	/**
+	 * копирование полей сохраненного мира в текущий
+	 * @param src - сохраненный мир
+	 */
 	private void copy(Object src) {
 		try {
 			Logger.log("Copying data from master Activity!");
@@ -123,12 +147,19 @@ public class ObjectViewer extends Activity {
 	protected boolean isFullscreenOpaque() {
 		return true;
 	}
+	/**
+	 * класс рендерер
+	 * @author Егор
+	 *
+	 */
 	private class ViewerRenderer implements GLSurfaceView.Renderer{
 		private long time = System.currentTimeMillis();
-
+		//конструктор
 		public ViewerRenderer() {
 		}
-
+		/**
+		 * наследуемы метод отрисовки кадра
+		 */
 		public void onDrawFrame(GL10 gl) {
 			// TODO Auto-generated method stub
 			newods.rotateY((float)Math.PI/72);
@@ -146,7 +177,9 @@ public class ObjectViewer extends Activity {
 			}
 			fps++;
 		}
-
+		/**
+		 * наследуемый метод обработки изменения экрана
+		 */
 		public void onSurfaceChanged(GL10 gl, int width, int height) {
 			// TODO Auto-generated method stub
 			if (fb != null) {
@@ -216,11 +249,19 @@ public class ObjectViewer extends Activity {
 				}
 			}
 		}
+		/**
+		 * добавить текстуру
+		 * @param tex - название текстуры
+		 * @param t - объект текстуры
+		 */
 		private void addTexture(String tex, Texture t) {
 			if (!TextureManager.getInstance().containsTexture(tex)) {
 				TextureManager.getInstance().addTexture(tex, t);
 			}
 		}
+		/**
+		 * нормализовать путь
+		 */
 		private void normalizePath () {
 			float xx = path.get(0).x;
 			float yy = path.get(0).y;
@@ -229,6 +270,10 @@ public class ObjectViewer extends Activity {
 				x.y -= yy;
 			}
 		}
+		/**
+		 * Метод генерации трека на основе координат поля path. Добавляет нобходимые треугольники 
+		 * в объекты трассы - newods и объекты границ трассы - leftborder, rightborder
+		 */
 		private void generateTrack () {
 			normalizePath();			
 			SimpleVector[] sv = new SimpleVector[4];
@@ -286,6 +331,16 @@ public class ObjectViewer extends Activity {
 			//rightBorder.invert();
 			//newods.invert();
 		}
+		/**
+		 * Метод расчета координат полигонов для дтрех последовательных точек 
+		 * @param a - первая точка
+		 * @param b - вторая точка
+		 * @param c - третья точка
+		 * @param needrec - переменная-индикатор необходимости рекурсивного запуска данного метода в обратном
+		 * направлении: true для точек внутри трека, false - для конечных точек
+		 * @param sv - массив для результирующих точек 
+		 * @param needL - переменная-индикатор необходимости сдвига перпендикуляра. false - для конечных точек
+		 */
 		public void processPoints(Point a, Point b, Point c, boolean needrec, SimpleVector[] sv) {
 			int q;
 			int d = 3;

@@ -35,10 +35,12 @@ import com.threed.jpct.Logger;
 
 import com.threed.jpct.Loader;
 import com.threed.jpct.Object3D;
+import com.threed.jpct.PolygonManager;
 import com.threed.jpct.Primitives;
 import com.threed.jpct.RGBColor;
 import com.threed.jpct.SimpleVector;
 import com.threed.jpct.Texture;
+import com.threed.jpct.TextureInfo;
 import com.threed.jpct.TextureManager;
 import com.threed.jpct.World;
 import com.threed.jpct.util.BitmapHelper;
@@ -49,23 +51,37 @@ import com.lapidus.android.painter.Painter;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
 public class VehicleViewer extends Activity {
+	//сохраненный мир
 	private static VehicleViewer master = null;
-
+	//вид
 	private GLSurfaceView mGLView;
+	//рендерер
 	public ViewerRenderer renderer = null;
+	//буфер кадра
 	private FrameBuffer fb = null;
+	//мир
 	private World world = null;
+	//цвет
 	private RGBColor back = new RGBColor(50, 50, 100);
-	private Light sun = null;	
-	private Camera cam = null; 
+	//освещение
+	private Light sun = null;
+	//камера
+	private Camera cam = null;
+	//путь
 	public static ArrayList<Point> path;
+	//Объект основной модели 
 	private Object3D car;
-	private int screenWidth, screenHeight;	
+	private int screenWidth, screenHeight;
+	//счетчик кадров в секунду
 	private int fps = 0;
+	//скайбокс
 	private SkyBox sb;
 	public VehicleViewer() {
 		renderer = new ViewerRenderer();
 	}
+	/**
+	 * наследуемый  метод создания активности
+	 */
 	protected void onCreate(Bundle savedInstanceState) {
 
 		Logger.log("onCreate");
@@ -113,6 +129,10 @@ public class VehicleViewer extends Activity {
 		screenHeight = p.y;
 		screenWidth = p.x;		
 	}
+	/**
+	 * копирование полей сохраненного мира в текущий
+	 * @param src - сохраненный мир
+	 */
 	private void copy(Object src) {
 		try {
 			Logger.log("Copying data from master Activity!");
@@ -144,12 +164,39 @@ public class VehicleViewer extends Activity {
 	protected boolean isFullscreenOpaque() {
 		return true;
 	}
+	/**
+	 * зациклить текстуру 
+	 * @param obj - объект на котором текстура находится
+	 * @param tileFactor - коэффициент 
+	 */
+	public static void tileTexture(Object3D obj, float tileFactor) {
+		PolygonManager pm = obj.getPolygonManager();
+
+		int end = pm.getMaxPolygonID();
+		for (int i = 0; i < end; i++) {
+			SimpleVector uv0 = pm.getTextureUV(i, 0);
+			SimpleVector uv1 = pm.getTextureUV(i, 1);
+			SimpleVector uv2 = pm.getTextureUV(i, 2);
+
+			uv0.scalarMul(1/tileFactor);
+			uv1.scalarMul(1/tileFactor);
+			uv2.scalarMul(1/tileFactor);
+
+			int id = pm.getPolygonTexture(i);
+
+			TextureInfo ti = new TextureInfo(id, uv0.x, uv0.y, uv1.x, uv1.y,
+					uv2.x, uv2.y);
+			pm.setPolygonTexture(i, ti);
+		}
+	}
 	private class ViewerRenderer implements GLSurfaceView.Renderer{
 		private long time = System.currentTimeMillis();
-
+		//конструктор 
 		public ViewerRenderer() {
 		}
-
+		/**
+		 * наследуемы метод отрисовки кадра
+		 */
 		public void onDrawFrame(GL10 gl) {
 			// TODO Auto-generated method stub
 			car.rotateY((float)Math.PI / 72);
@@ -165,7 +212,9 @@ public class VehicleViewer extends Activity {
 			}
 			fps++;
 		}
-
+		/**
+		 * наследуемый метод обработки изменения экрана
+		 */
 		public void onSurfaceChanged(GL10 gl, int width, int height) {
 			// TODO Auto-generated method stub
 			if (fb != null) {
@@ -188,7 +237,9 @@ public class VehicleViewer extends Activity {
 				Texture back = new Texture(2, 2, new RGBColor(50, 150, 0));
 				Texture up = new Texture(2, 2, new RGBColor(50, 150, 0));
 				Texture down = new Texture(2, 2, new RGBColor(50, 150, 0));
-				Texture backgr = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.backgroundcolor)), 64, 64));
+				Texture backgr = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.bluetexturecur)), 64, 64));
+				backgr.setClamping(false);
+				
 				TextureManager.getInstance().addTexture("yellow", yellow);
 				TextureManager.getInstance().addTexture("front", backgr);
 				TextureManager.getInstance().addTexture("left", backgr);
@@ -196,7 +247,10 @@ public class VehicleViewer extends Activity {
 				TextureManager.getInstance().addTexture("back", backgr);
 				TextureManager.getInstance().addTexture("up", backgr);
 				TextureManager.getInstance().addTexture("down", backgr);
-				sb= new SkyBox("left", "front", "right", "back", "up", "down", 700f);
+				sb= new SkyBox("left", "front", "right", "back", "up", "down", 200f);
+				Object3D skybox3DObj = sb.getWorld().getObjects().nextElement();
+				sb.setCenter(new SimpleVector(40, 20, 0));
+				tileTexture(skybox3DObj, 1f);
 				InputStream fis = null;
 				fis = getResources().openRawResource(R.raw.batwing);				
 				Object3D[] loadedCars = Loader.loadOBJ(fis, null, 1);				
@@ -214,6 +268,7 @@ public class VehicleViewer extends Activity {
 				cam.setOrientation(cam.getDirection(), new SimpleVector(0, -1, 0));
 				cam.lookAt(car.getTransformedCenter());
 				cam.setPosition(0, 0, 0);
+				//cam.rotateCameraY((float)Math.PI / 2);
 				MemoryHelper.compact();
 				
 				if (master == null) {
@@ -222,7 +277,7 @@ public class VehicleViewer extends Activity {
 				}
 			}
 		}
-
+		
 		public void onSurfaceCreated(GL10 arg0, EGLConfig arg1) {
 			// TODO Auto-generated method stub
 			

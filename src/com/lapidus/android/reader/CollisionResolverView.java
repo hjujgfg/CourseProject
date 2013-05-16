@@ -23,24 +23,35 @@ import android.view.View;
 import android.widget.Toast;
 
 public class CollisionResolverView extends View {
-	
+	//конструктор
 	public CollisionResolverView(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
 		init(context);
 	}
+	//конструктор
 	public CollisionResolverView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
 	}
+	//конструктор
 	public CollisionResolverView(Context context, AttributeSet attrs, int i) {
 		super(context, attrs, i);
 		init(context);
 	}
+	/**
+	 * установить размеры экрана
+	 * @param w - ширина 
+	 * @param h - высота 
+	 */
 	public void setScreenDimensions(int w, int h) {
 		screenHeight = h;
 		screenWidth = w;
 	}
+	/**
+	 * инициализация полей
+	 * @param context - контекст активности 
+	 */
 	private void init(Context context) {
 		paint = new Paint();
 		canvas = new Canvas();
@@ -61,9 +72,14 @@ public class CollisionResolverView extends View {
 		thisView = this;
 		connections = new ArrayList<Segment>();
 	}
+	// временнные точки 
 	Point a;
 	Point b;
+	// список соединенных линий 
 	ArrayList<Segment> connections; 
+	/**
+	 * обработчик касаний экрана
+	 */
 	OnTouchListener touchListener = new OnTouchListener() {
 		
 		public boolean onTouch(View v, MotionEvent event) {
@@ -117,7 +133,10 @@ public class CollisionResolverView extends View {
 			return true;
 		}
 	};
-	
+	/**
+	 * удаление точки по индексу
+	 * @param ind индекс
+	 */
 	private void eraseAtIndex(int ind) {
 		for (Point p : tmp) {
 			if (p.collisionIndex == ind) {
@@ -127,22 +146,37 @@ public class CollisionResolverView extends View {
 			}
 		}
 	}
-	
+	// счетчик соединений
 	int counter;
+	//перо
 	Paint paint;
-	Canvas canvas; 
+	//холст
+	Canvas canvas;
+	//коллизия
 	Collision c;
+	// размеры экрана
 	int screenHeight;
 	int screenWidth;
+	//размеры клетки
 	float avgX;
 	float avgY;
+	//касание 
 	boolean touched;
+	//временная точка
 	Point hanging;
+	//индикатор необходимости перерисовки коллизии
 	boolean needredrawcollision;
+	
 	boolean[] vac;
+	//временный список точек
 	ArrayList<Point> tmp;
+	//вид
 	View thisView;
+	//диалог 
 	Dialog d;
+	/**
+	 * наследуемы метод отрисовки 
+	 */
 	@Override
 	protected void onDraw(Canvas canvas){
 		super.onDraw(canvas);
@@ -161,6 +195,11 @@ public class CollisionResolverView extends View {
 		canvas.drawText(c.exitPoints.size() + " ", 10, 10, paint);
 		drawConnections(canvas, paint);
 	}
+	/**
+	 * отрисовать коллизию
+	 * @param canvas - холст 
+	 * @param paint - перо
+	 */
 	private void drawCollision(Canvas canvas, Paint paint) {
 		needredrawcollision = false;
 		int j = 0;
@@ -200,6 +239,11 @@ public class CollisionResolverView extends View {
 		drawGrid(canvas, paint);
 		
 	}
+	/**
+	 * отрисовать сетку
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	private void drawGrid(Canvas canvas, Paint paint) {
 		Point t1 = Collections.max(tmp, Point.xComp);
 		Point t2 = Collections.min(tmp, Point.xComp);
@@ -217,11 +261,22 @@ public class CollisionResolverView extends View {
 		Toast t = Toast.makeText(getContext(), "draw grid", Toast.LENGTH_LONG);
 		t.show();*/
 	}
+	/**
+	 * отрисовать клетки 
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	private void drawCells(Canvas canvas, Paint paint) {
 		for (Point x : tmp) {
 			drawCell(x, false, avgX, avgY, paint, canvas);
 		}
 	}
+	/**
+	 * нормализация списка точек
+	 * @param arr - список точек
+	 * @param minX - минимальный х
+	 * @param minY - минимальный у
+	 */
 	private void normalize(ArrayList<Point> arr, Point minX, Point minY) {
 		float f = minX.x;
 		for (Point p : arr) {
@@ -232,7 +287,15 @@ public class CollisionResolverView extends View {
 			p.y -= f;
 		}
 	}	
-	
+	/**
+	 * отрисовать клетку
+	 * @param p - точка клетки 
+	 * @param exit - индикатор выхода
+	 * @param avgX - размер ячейки 
+	 * @param avgY - размер ячейки
+	 * @param paint - перо
+	 * @param canvas - холст
+	 */
 	private void drawCell(Point p, boolean exit, float avgX, float avgY, Paint paint, Canvas canvas) {
 		if (p.chkd) {
 			paint.setColor(Color.BLUE);
@@ -251,6 +314,11 @@ public class CollisionResolverView extends View {
 		paint.setColor(Color.BLACK);
 		paint.setStyle(Style.STROKE);
 	}
+	/**
+	 * отрисовать соединение 
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	private void drawConnections(Canvas canvas, Paint paint) {
 		for (Segment s : connections) {
 			paint.setColor(Color.YELLOW);
@@ -267,6 +335,7 @@ public class CollisionResolverView extends View {
 			canvas.drawCircle(b.x, b.y, 10, paint);
 		}
 	}
+	
 	private boolean areNeighbours(Point a, Point b) {
 		if (Math.abs(a.x - b.x) > 1) return false;
 		if (Math.abs(a.y - b.y) > 1) return false;

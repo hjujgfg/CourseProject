@@ -30,15 +30,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 public class Reader extends Activity {
 	TextView tw;
+	//вид
 	ReaderView view;
+	//список соллизий
 	ArrayList<Collision> collisions;
+	//список точек
 	ArrayList<Point> arr;
+	//путь
 	public static String path;
+	//контекст активности
 	static Context context;
+	//запуск активности разрешения коллизии
 	public void startCollisionresolver() {
 		Intent i = new Intent(context, CollisionResolver.class);
 		startActivity(i);
 	}
+	/**
+	 * наследуемый метод создания активности
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -133,6 +142,11 @@ public class Reader extends Activity {
 		t.start();	*/	
 		
 	}
+	/**
+	 * привести список к массиву
+	 * @param a список точек 
+	 * @return массив точек
+	 */
 	public static Point[] toArray(ArrayList<Point> a) {
 		int i = 0;
 		Point[] res = new Point[a.size()];
@@ -150,6 +164,14 @@ public class Reader extends Activity {
 		menu.add(Menu.NONE, 1, Menu.NONE, "Process");
 		return true;
 	}
+	/**
+	 * Стартер обработки коллизии
+	 * @param p - точка начала колизии
+	 * @param prev - предыдущая точка
+	 * @param arr - список всех точек 
+	 * @param track - трек
+	 * @param v - вид для отрисовки из другого потока
+	 */
 	private static void collisionStarter (Point p, Point prev, ArrayList<Point> arr, Track track, ReaderView v) {
 		if (p.collides == true) return;
 		Collision col = new Collision();
@@ -206,7 +228,13 @@ public class Reader extends Activity {
 		}			
 		//return cols;
 	}
-	
+	/**
+	 * обработка линии
+	 * @param start - начало линии
+	 * @param arr - список всех точек
+	 * @param track - трек
+	 * @param v - вид для отрисовки из другого потока
+	 */
 	public static void doLine(Point start, ArrayList<Point> arr, Track track, ReaderView v) {
 		if (start.chkd == true) return;
 		Line line = new Line();
@@ -260,11 +288,24 @@ public class Reader extends Activity {
 			v.postInvalidate();
 		}		
 	}
+	/**
+	 * начать генерацию трека
+	 * @param arr - список всех точек
+	 * @param track - трек 
+	 * @param v - вид для отрисовки из другого потока
+	 */
 	private static void generateTrack(ArrayList<Point> arr, Track track, ReaderView v) {
 		Collections.sort(arr, Point.indexComp);	
 		doLine(arr.get(0), arr, track, v);
 		
 	}
+	/**
+	 * обработать коллизию 
+	 * @param arr - список всех точек 
+	 * @param p - начальная точка
+	 * @param c - коллизия
+	 * @param prev - предыдущаю точка
+	 */
 	public static void processCollision(ArrayList<Point> arr, Point p, Collision c, Point prev) {
 		Point[] sur = findNeighbors(p.x, p.y, arr);	
 		for (int i = 0; i < 8; i ++) {
@@ -338,6 +379,13 @@ public class Reader extends Activity {
 		}
 		return result;
 	}
+	/**
+	 * выбрать точку с наименьшим углом
+	 * @param a - текущая точка 
+	 * @param sur - точки-соседи
+	 * @param prev - предыдущаю точка
+	 * @return точку с наименьшим углом между prev, a, sur[i] 
+	 */
 	private static Point chooseSmoothest(Point a, Point[] sur, Point prev) {
 		float mul = Integer.MAX_VALUE; 
 		int index = -1;
@@ -360,15 +408,36 @@ public class Reader extends Activity {
 		
 		return null;
 	}
+	/**
+	 * векторное произведение 
+	 * @param p1 
+	 * @param p2
+	 * @param p3
+	 * @return вектороное произведение 
+	 */
 	private static float vectorMult(Point p1, Point p2, Point p3) {
 		return (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
 	}	
+	/**
+	 * наити точку в массиве
+	 * @param x х координата точки
+	 * @param y у координата точки 
+	 * @param arr - список точек
+	 * @return - объект точки с заданными координатами
+	 */
 	private static Point findPoint(float x, float y, ArrayList<Point> arr) {
 		for (Point p : arr) {
 			if (p.x == x && p.y == y) return p;
 		}
 		return null;
 	}
+	/**
+	 * найти соседей 
+	 * @param x - х координата точки
+	 * @param y - у координата точки
+	 * @param arr - список точек
+	 * @return - массив соседних точек
+	 */
 	private static Point[] findNeighbors(float x, float y, ArrayList<Point> arr) {
 		Point[] res = new Point[10];
 		int quantity;

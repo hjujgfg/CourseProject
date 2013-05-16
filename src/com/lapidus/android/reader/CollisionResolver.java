@@ -6,12 +6,18 @@ import android.view.Display;
 import android.view.Window;
 
 public class CollisionResolver extends Activity {
+	/**
+	 *  наследуемый метод создания активности 
+	 */
 	@Override 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		init();
 	}
+	/**
+	 * метод инициализации полей
+	 */
 	private void init() {
 		
 		view = new CollisionResolverView(this);
@@ -26,11 +32,16 @@ public class CollisionResolver extends Activity {
 		view.screenWidth = size.x;
 		view.invalidate();
 	}
+	/**
+	 * наследуемый метод возвращения к активности
+	 */
 	@Override
 	protected void onResume(){
 		super.onResume();
 		init();
 	}
+	//вид 
 	CollisionResolverView view;
+	//трек
 	Track track; 
 }

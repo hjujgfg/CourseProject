@@ -28,20 +28,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class ReaderView extends View {
-
+	//конструктор
 	public ReaderView(Context context) {
 		super(context);		
 		// TODO Auto-generated constructor stub
 		init();
 	}
+	//конструктор
 	public ReaderView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
 	}
+	//конструктор
 	public ReaderView(Context context, AttributeSet attrs, int i) {
 		super(context, attrs, i);
 		init();
 	}
+	/**
+	 * метод инициализации
+	 */
 	private void init() {
 		paint = new Paint();
 		this.setOnTouchListener(ontouchlistener);		
@@ -53,18 +58,32 @@ public class ReaderView extends View {
 		thisView = this;
 		finalPoints = new ArrayList<Point>();
 	}
+	//этот вид
 	View thisView;
+	//список точек
 	ArrayList<Point> points;
+	//список точек после обработки 
 	ArrayList<Point> finalPoints;
+	//список коллизий
 	ArrayList<Collision> cols;
+	//линия старта
 	Line startLine;
+	//конечная линия
 	Line endLine;
+	//трек
 	Track track;	
+	//массив аппроксимированных точек 
 	Point[] approximizedPoints;
-	boolean pointsAreProcessed; 
+	boolean pointsAreProcessed;
+	//перо
 	Paint paint;
-	Canvas canvas; 
+	//холст
+	Canvas canvas;
+	//контекст активности 
 	Context context;
+	/**
+	 * наследуемый метод отрисовки 
+	 */
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);		
@@ -82,6 +101,11 @@ public class ReaderView extends View {
 		if (approximizedPoints != null) canvas.drawText(approximizedPoints.length + " = ap points size" , 50, 60, paint);
 		drawPoints(finalPoints, canvas, paint);
 	}
+	/**
+	 * отрисовка точек
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	protected void drawPoints(Canvas canvas, Paint paint) {
 		paint.setColor(Color.BLACK);
 		for (Point x : points) {
@@ -89,6 +113,12 @@ public class ReaderView extends View {
 		}		
 		paint.setColor(Color.BLACK);
 	}
+	/**
+	 * перегрузка метода отрисовки точек 
+	 * @param arr - массив точек
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	protected void drawPoints(ArrayList<Point> arr, Canvas canvas, Paint paint) {
 		if (arr.size() < 2 ) return;
 		paint.setColor(Color.RED);
@@ -97,6 +127,12 @@ public class ReaderView extends View {
 		}
 		paint.setColor(Color.BLACK);
 	}
+	/**
+	 * отрисовка обработанных точек
+	 * @param points - список точек
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	protected void drawProcessedPoints (ArrayList<Point> points, Canvas canvas, Paint paint) {
 		paint.setColor(Color.DKGRAY);
 		for (int i = 0; i < points.size() - 1; i ++) {
@@ -106,6 +142,11 @@ public class ReaderView extends View {
 		}
 		paint.setColor(Color.BLACK);
 	}
+	/**
+	 * отрисовка аппроксимированных точек
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	protected void drawApproximizedPoints(Canvas canvas, Paint paint) {
 		paint.setColor(Color.RED);
 		if (approximizedPoints == null || approximizedPoints.length == 0) return; 
@@ -115,6 +156,12 @@ public class ReaderView extends View {
 		}
 		paint.setColor(Color.BLACK);
 	}
+	/**
+	 * отрисовка коллизии
+	 * @param canvas - холст
+	 * @param paint - перо
+	 * @param cols - список коллизий
+	 */
 	protected void drawCollisions(Canvas canvas, Paint paint, ArrayList<Collision> cols) {
 		paint.setColor(Color.YELLOW);
 		if (cols == null) return;
@@ -127,6 +174,12 @@ public class ReaderView extends View {
 		}
 		paint.setColor(Color.BLACK);
 	}
+	/**
+	 * отрисовка трека
+	 * @param track - трек
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	protected void drawTrack(Track track, Canvas canvas, Paint paint) {
 		if (track == null) return;
 		//generates concurentmodificationexception when multithreading
@@ -139,9 +192,18 @@ public class ReaderView extends View {
 		drawCollisions(canvas, paint, track.getCollisions());
 		paint.setColor(Color.BLACK);
 	}
+	/**
+	 * отрисовка линии
+	 * @param l - линия
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	protected void drawLine(Line l, Canvas canvas, Paint paint) {
 		drawProcessedPoints(l.getPoints(), canvas, paint);
 	}
+	/**
+	 * обновить точки после обработки 
+	 */
 	private void updateFinalPoints() {
 		if (startLine == null) return;
 		finalPoints.clear();
@@ -183,7 +245,9 @@ public class ReaderView extends View {
 		Toast to = Toast.makeText(getContext(), finalPoints.size() + " ", Toast.LENGTH_LONG);
 		to.show();
 	}
-	
+	/**
+	 * обработчик касаний экрана
+	 */
 	private OnTouchListener ontouchlistener = new OnTouchListener() {
 		
 		public boolean onTouch(View v, MotionEvent event) {

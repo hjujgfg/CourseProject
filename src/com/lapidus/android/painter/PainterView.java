@@ -21,7 +21,10 @@ import android.view.MotionEvent;
 import android.view.View;
 
 public class PainterView extends View {
-
+	/**
+	 * конструктор 
+	 * @param context - контекст родительской активности 
+	 */
 	public PainterView(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
@@ -35,6 +38,9 @@ public class PainterView extends View {
 		super(context, attrs, i);
 		init();
 	}
+	/**
+	 * метод инициализации полей
+	 */
 	private void init() {
 		paint = new Paint();
 		this.setOnTouchListener(ontouchlistener);
@@ -56,23 +62,37 @@ public class PainterView extends View {
 		approximizedPoints = new Point[0];
 		lastAction = 0;
 	}
+	//счетчик точек
 	int pointCounter;
+	//перо
 	Paint paint;
+	//изображение
 	Bitmap image;
+	//холст
 	Canvas canvas;
+	//список точек рисунка
 	ArrayList<Point> points;
-	ArrayList<Segment> segs; 
+	//список отрезков рисунка
+	ArrayList<Segment> segs;
+	
 	ArrayList<Point> redoPoints; 
 	ArrayList<Segment> redoSegs;
-	ArrayList<Point> intersectingPoints; 
+	//список точек пересечения
+	ArrayList<Point> intersectingPoints;	
 	ArrayList<Point> tempIntersectingPoints;
+	//временные объекты
 	Point tmp;
 	Point a, b;	 
+	//массив аппроксимированных точек
 	public Point[] approximizedPoints;
+	//координаты начала и конца трека
 	float startX, startY, stopX, stopY;
 	boolean shouldDrawBitmap;
 	boolean touched;
 	int lastAction; 
+	/**
+	 * Наследуемы метод отрисовки объектов
+	 */
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);		
@@ -93,6 +113,10 @@ public class PainterView extends View {
 		drawApproximizedPoints(canvas, paint);
 		drawIntersetingPoints(intersectingPoints, canvas, paint);
 	}
+	/**
+	 * метод получения и обработки списка зашруженных точек
+	 * @param arr - список точек 
+	 */
 	public void getExternalPoints(ArrayList<Point> arr) {
 		points.clear();		
 		points = (ArrayList<Point>) arr.clone();
@@ -101,6 +125,10 @@ public class PainterView extends View {
 		smoothAll();
 		invalidate();
 	}
+	/**
+	 * метод подготовки изображения к экспорту
+	 * @return созданное изображение
+	 */
 	public Bitmap getPreparedBitmap() {
 		if (segs == null || segs.size() < 1) return null;
 		Bitmap res;
@@ -120,6 +148,12 @@ public class PainterView extends View {
 		canvas.drawBitmap(res, new Matrix(), p);
 		return res;
 	}
+	/**
+	 * отрисовка отрезков
+	 * @param segs - список отрезков
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	protected void drawSegs(ArrayList<Segment> segs, Canvas canvas, Paint paint) {
 		paint.setColor(Color.BLACK);		
 		for (Segment s : segs) {			
@@ -127,6 +161,12 @@ public class PainterView extends View {
 		}				
 		paint.setColor(Color.BLACK);
 	}
+	/**
+	 * отрисовка точек
+	 * @param arr - список точек 
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	protected void drawPoints(ArrayList<Point> arr, Canvas canvas, Paint paint) {
 		paint.setColor(Color.YELLOW);
 		for (Point x : arr) {
@@ -134,6 +174,11 @@ public class PainterView extends View {
 		}
 		paint.setColor(Color.BLACK);
 	}
+	/**
+	 * отрисовка аппроксимированных точек
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	protected void drawApproximizedPoints(Canvas canvas, Paint paint) {
 		if (approximizedPoints == null || approximizedPoints.length < 2 ) return;
 		paint.setColor(Color.RED);
@@ -148,6 +193,12 @@ public class PainterView extends View {
 		paint.reset();
 		paint.setColor(Color.BLACK);
 	}
+	/**
+	 * отрисовка точек пересечения
+	 * @param arr - массив точек пересечения
+	 * @param canvas - холст
+	 * @param paint - перо
+	 */
 	protected void drawIntersetingPoints(ArrayList<Point> arr, Canvas canvas, Paint paint) {
 		paint.setColor(Color.BLUE);
 		paint.setStyle(Style.FILL_AND_STROKE);
@@ -160,6 +211,11 @@ public class PainterView extends View {
 		paint.setStyle(Style.STROKE);
 		paint.setColor(Color.BLACK);
 	}
+	/**
+	 * перегрузка метода отрисовки точек
+	 * @param canvas - холст 
+	 * @param paint - перо 
+	 */
 	protected void drawPoints(Canvas canvas, Paint paint) {
 		if (points.size() == 0) return;
 		paint.setColor(Color.YELLOW);
@@ -190,6 +246,9 @@ public class PainterView extends View {
 		paint.setColor(Color.BLACK);
 	}
 	Point pp;
+	/**
+	 * Обработчик событий касания экрана
+	 */
 	private OnTouchListener ontouchlistener = new OnTouchListener() {
 		
 		public boolean onTouch(View v, MotionEvent event) {
@@ -217,6 +276,9 @@ public class PainterView extends View {
 			return true;
 		}
 	};
+	/**
+	 * сглаживание маршрута
+	 */
 	protected void smoothAll() {
 		approximizedPoints = new Point[points.size()];
 		Point[] temp = new Point[points.size()];
@@ -330,18 +392,30 @@ public class PainterView extends View {
 			return true;
 		}
 	};
+	/**
+	 * метод обновления списка отрезков по списку точек
+	 */
 	public void refreshSegs() {
 		segs.clear();
 		for (int i = 0; i < points.size() - 1; i ++) {
 			segs.add(new Segment(points.get(i), points.get(i+1)));
 		}
 	}
+	/**
+	 * метод обновления отрезков по заданному массиву точек
+	 * @param arr - заданный массив точек
+	 */
 	public void refreshSegs(Point[] arr) {
 		segs.clear();
 		for (int i = 0; i < arr.length - 1; i ++) {			
 			segs.add(new Segment(arr[i], arr[i+1]));
 		}		
 	}
+	/**
+	 * мтеод обновления точек по заданному списку отрезков
+	 * @param segs - список отрезков
+	 * @param points - список обновляемых точек
+	 */
 	public void refreshPoints(ArrayList<Segment> segs, ArrayList<Point> points) {
 		points.clear();
 		points.add(segs.get(0).start);
@@ -349,6 +423,11 @@ public class PainterView extends View {
 			points.add(s.stop);
 		}
 	}
+	/**
+	 * метод расчета точек пересечения по заданному списку отрезков
+	 * @param intersectingPoints - список точек пересечежния
+	 * @param segs - список отрезков
+	 */
 	public void refreshIntersectingPoints(ArrayList<Point> intersectingPoints, ArrayList<Segment> segs) {
 		if (segs.size() > 2) {					
 			intersectingPoints.clear();
@@ -376,6 +455,11 @@ public class PainterView extends View {
 			}
 		} else intersectingPoints.clear();
 	}
+	/**
+	 * метод удаления коротких петель на маршруте
+	 * @param intersectingPoints - список точек пересечения
+	 * @param segs - список отрезков
+	 */
 	public void removeSmallLoops(ArrayList<Point> intersectingPoints, ArrayList<Segment> segs) {
 		Segment t1;
 		Segment t2; 
@@ -408,6 +492,11 @@ public class PainterView extends View {
 		}		
 		refreshIntersectingPoints(intersectingPoints, segs);
 	}
+	/**
+	 * метод удаления коротких отрезков
+	 * @param segs - список отрезков
+	 * @param depth - глубина рекурсии
+	 */
 	public void removeShortSegments(ArrayList<Segment> segs, int depth) {
 		if (depth == 0) return;
 		float l = segs.get(0).length();
@@ -433,6 +522,11 @@ public class PainterView extends View {
 		}
 		removeShortSegments(segs, depth - 1);
 	}
+	/**
+	 * метод сглаживания углов 
+	 * @param segs - список отрезков
+	 * @param depth - глубина рекурсии
+	 */
 	public void smoothAngles(ArrayList<Segment> segs, int depth) {
 		if (depth == 0) return;
 		for (int i = 0; i < segs.size() - 1; i ++) {
@@ -470,7 +564,10 @@ public class PainterView extends View {
 		}
 		return -1;
 	}*/
-	
+	/**
+	 * метод установки изображения
+	 * @param s - путь к файлу изображения
+	 */
 	public void setImage(String s) {
 		image = BitmapFactory.decodeFile(s);	
 		shouldDrawBitmap = true;

@@ -49,48 +49,78 @@ import com.lapidus.android.primitives.Segment;
 public class Engine extends Activity {
 
 	// Used to handle pause and resume...
+	//сохраненный мир
 	private static Engine master = null;
-
+	//объекты вида
 	private GLSurfaceView mGLView;
+	//Рендерер
 	public MyRenderer renderer = null;
+	//буфер кадра 
 	private FrameBuffer fb = null;
+	//Объект мира
 	private World world = null;
+	//ОБъект цвета
 	private RGBColor back = new RGBColor(50, 50, 100);
 
 	private float touchTurn = 0;
 	private float touchTurnUp = 0;
-
+	//глобальная х-координата точки касания экрана
 	private float xpos = -1;
+	//глобальная у-координата точки касания экрана
 	private float ypos = -1;
+	//координаты положения конечной точки трассы
 	private SimpleVector endCollisionHolder;
+	//угол вращения камеры
 	private float cameraRotationAngle;
+	//ОБъект основной модели
 	private Object3D loadedCar = null;
-	private SimpleVector carDirection = null; 
+	//вектор напрвления
+	private SimpleVector carDirection = null;
+	//объект трассы
 	private Object3D newods = null;
+	//левая граница трассы
 	private Object3D leftBorder = null;
+	//правая граница трассы
 	private Object3D rightBorder = null;
+	//объект финиша
 	private Object3D end;
+	//объект старта
 	private Object3D start;
+	
 	private SimpleVector sv1 = null;
 	private SimpleVector sv2 = null; 
+	//счетчик кадров в секунду
 	private int fps = 0;
-	private SkyBox skyBox; 
+	//Скайбокс
+	private SkyBox skyBox;
+	//освещение
 	private Light sun = null;
-	
+	//камера
 	private Camera cam = null; 
+	//скорость движения
 	private float speed;
-	
+	//матрица трансформаций
 	private Matrix transformMatrix = new Matrix();
 	private Matrix cameraTransformMatrix = new Matrix();
+	//хранитель данной активности
 	private Activity ctx; 
-	private int screenWidth, screenHeight;	
-	private Handler handler;
+	//размеры экрана
+	private int screenWidth, screenHeight;
+	//Обработчик для вызовов из неосновного треда
+	private Handler handler;	
 	private String mytag = "MyTag";
+	//вектор коллизий 
 	private SimpleVector ellipsoid = new SimpleVector(1, 1, 1);
+	
 	public static boolean bb; 
+	//конструктор
 	public Engine() {
 		renderer = new MyRenderer();
 	}
+	/**
+	 * Наследуемый метод, вызывается при создании экземпляра класса
+	 * инициализирует необходимые поля. 
+	 */
 	protected void onCreate(Bundle savedInstanceState) {
 
 		Logger.log("onCreate");
@@ -125,28 +155,43 @@ public class Engine extends Activity {
 		handler = new Handler();
 		ctx = this;
 	}
-
+	/**
+	 * Наследуемый метод, вызывается при паузе активности
+	 * @see android.app.Activity#onPause()
+	 */
 	@Override
 	protected void onPause() {
 		super.onPause();
 		mGLView.onPause();
 	}
-
+	/**
+	 * наследуемый метод, вызывается при воостановлении активности
+	 * 
+	 */
 	@Override
 	protected void onResume() {
 		super.onResume();
 		mGLView.onResume();		
 	}
-
+	/**
+	 * 
+	 * наследуемый метод, вызывается при окончательном завершении активности
+	 */
 	@Override
 	protected void onStop() {
 		super.onStop();
 	}
+	// Список точек трека
 	public static ArrayList<Point> path;
 	/*public static void copyPoints(ArrayList<Point> a) {
 		path = new ArrayList<Point>();
 		
 	}*/
+	/**
+	 * Копирует поля объекта в данный объект. Необходим для корректной обработки паузы.
+	 * @param src - сохраненный объект мира 
+	 */	
+	
 	private void copy(Object src) {
 		try {
 			Logger.log("Copying data from master Activity!");
@@ -165,6 +210,7 @@ public class Engine extends Activity {
 	  boolean inTouch = false;
 	  String result = "";
 	  int pointerIndex = 0;
+	  /// Обработчик касаний экрана
 	public boolean onTouchEvent(MotionEvent me) {
 		// событие
 	    int actionMask = me.getActionMasked();
@@ -238,14 +284,21 @@ public class Engine extends Activity {
 	protected boolean isFullscreenOpaque() {
 		return true;
 	}
-
+	/*
+	 * класс - рендерер трехмерной графики
+	 */
 	public class MyRenderer implements GLSurfaceView.Renderer {
 
 		private long time = System.currentTimeMillis();
-
+		//конструктор без параметров. Создает пустой объект
 		public MyRenderer() {
 		}
-
+		/**
+		 * наследуемый метод. вызывается при изменении экрана 
+		 * @param  gl - объект интерфейса GL10
+		 * @param w - ширина экрана
+		 * @param h - высота экрана
+		 */
 		public void onSurfaceChanged(GL10 gl, int w, int h) {
 			if (fb != null) {
 				fb.dispose();
@@ -263,9 +316,7 @@ public class Engine extends Activity {
 				speed = 1f;
 				// Create a texture out of the icon...:-)
 				Texture texture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.icon)), 64, 64));
-				Texture car3 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car3)), 64, 64));
-				Texture car4 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car_ref)), 64, 64));
-				Texture car5 = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.police_car_lit)), 64, 64));
+				
 				//Texture asphalt = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.asphalt)), 64, 64));
 				Texture green = new Texture(2, 2, RGBColor.GREEN);		
 				Texture red = new Texture(2, 2, RGBColor.RED);
@@ -282,7 +333,7 @@ public class Engine extends Activity {
 				if (!TextureManager.getInstance().containsTexture("texture")) {
 					TextureManager.getInstance().addTexture("texture", texture);
 				}
-				Texture backgr = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.backgroundcolor)), 64, 64));
+				Texture backgr = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.bluetexture)), 64, 64));
 								
 				addTexture("front", backgr);
 				addTexture("right", backgr);
@@ -292,6 +343,9 @@ public class Engine extends Activity {
 				addTexture("down", backgr);
 				skyBox = new SkyBox("left", "front", "right", "back", "up", "down", 700f);
 				skyBox.setCenter(new SimpleVector(0, 100, 0));
+				Object3D skybox3DObj = skyBox.getWorld().getObjects().nextElement();
+				skyBox.setCenter(new SimpleVector(40, 20, 0));
+				VehicleViewer.tileTexture(skybox3DObj, 1.5f);
 				/*TextureManager.getInstance().addTexture("police_car3.tga", car3);
 				TextureManager.getInstance().addTexture("police_car.tga", car4);
 				TextureManager.getInstance().addTexture("police_car_lit.tga", car5);*/		
@@ -311,7 +365,7 @@ public class Engine extends Activity {
 				loadedCar.rotateY((float)Math.PI);
 				//loadedCar.scale(0.05f);	
 				Log.i("CO", loadedCar.getCenter().toString());
-				loadedCar.setScale(0.002f);
+				loadedCar.setScale(0.001f);
 				Log.i("CO", loadedCar.getCenter().toString());
 				//loadedCar.translate(new SimpleVector(0, -loadedCar.getTransformedCenter().y, 0));
 				//loadedCar.translate(-loadedCar.getCenter().x+8, -loadedCar.getCenter().y + 100, -loadedCar.getCenter().z);
@@ -319,12 +373,10 @@ public class Engine extends Activity {
 				
 				Object3D flore = new Object3D(4);
 				flore.addTriangle(new SimpleVector(-130, 102, -130), new SimpleVector(130, 102, -130), new SimpleVector(0, 102, 280));
-				
-				
+						
 							
 				generateTrack();
-				
-				
+								
 
 				Log.i("CO", " newods " + newods.getCenter().toString() + " : " +newods.getTransformedCenter().toString());
 				flore.setTexture("green");
@@ -414,13 +466,14 @@ public class Engine extends Activity {
 				//world.getCamera().setPosition(start.getTransformedCenter().x, start.getTransformedCenter().y - 10, start.getTransformedCenter().z);
 				cam.setOrientation(carDirection, new SimpleVector(0, -1, 0));
 				//cam.setPosition(0, 0, 0);
-				cam.moveCamera(Camera.CAMERA_MOVEDOWN, 85);
+				cam.lookAt(loadedCar.getTransformedCenter());
+				cam.moveCamera(Camera.CAMERA_MOVEDOWN, 30);
 				Log.i("CO", "cam pos " + cam.getPosition().toString());
 				
 				//cam.setPositionToCenter(loadedCar);
 				//cam.moveCamera(temp, 5f);
 				//cam.transform(temp);
-				cam.lookAt(loadedCar.getTransformedCenter());
+				
 				endCollisionHolder = end.checkForCollisionSpherical(new SimpleVector(0, 1, 0), 3);
 				Log.i("finish", "deffault " + endCollisionHolder.toString());
 				Log.i("MyTag", " " + cam.getPosition().x + " " + cam.getPosition().y + " " + cam.getPosition().z);
@@ -439,11 +492,21 @@ public class Engine extends Activity {
 				}
 			}
 		}
+		/**
+		 * Метод добавления текстуры. проверяет наличие заданной текстуры в синглтоне TextureManager, при её
+		 * отсутствии добавляет данную текстуру. 
+		 * @param tex
+		 * @param t
+		 */
 		private void addTexture(String tex, Texture t) {
 			if (!TextureManager.getInstance().containsTexture(tex)) {
 				TextureManager.getInstance().addTexture(tex, t);
 			}
 		}
+		/**
+		 * Метод генерации трека на основе координат поля path. Добавляет нобходимые треугольники 
+		 * в объекты трассы - newods и объекты границ трассы - leftborder, rightborder
+		 */
 		private void generateTrack () {
 			normalizePath();
 			carDirection = new SimpleVector(path.get(1).y, 0, path.get(1).x);
@@ -452,14 +515,16 @@ public class Engine extends Activity {
 			SimpleVector t2; 
 			SimpleVector tb1;
 			SimpleVector tb2;
-			processPoints(path.get(1), path.get(0), new Point(-1, -1, -1), false, sv);
+			processPoints(path.get(1), path.get(0), new Point(-1, -1, -1), false, sv, false);
 			t1 = sv[2];
 			t2 = sv[3];	
 			start = Primitives.getCube(3);
-			//start.translate(-start.getCenter().x, -start.getCenter().y, -start.getCenter().z);
+			Segment tmp = new Segment(path.get(0), path.get(1));
+			float k = tmp.countK();
+			
 			start.translate(0, 100, 0);
 			for (int i = 1; i < path.size() - 1; i ++) {
-				processPoints(path.get(i-1), path.get(i), path.get(i + 1), true, sv);
+				processPoints(path.get(i-1), path.get(i), path.get(i + 1), true, sv, true);
 				newods.addTriangle(t2, sv[1], sv[0]);
 				newods.addTriangle(t2, t1, sv[1]);
 				newods.addTriangle(sv[0], sv[1], sv[2]);
@@ -483,7 +548,7 @@ public class Engine extends Activity {
 				t2 = sv[3];
 				t1 = sv[2];
 			}
-			processPoints(path.get(path.size() - 2), path.get(path.size() - 1), new Point(-1, -1, -1), false, sv);
+			processPoints(path.get(path.size() - 2), path.get(path.size() - 1), new Point(-1, -1, -1), false, sv, true);
 			newods.addTriangle(t2, sv[1], sv[0]);
 			newods.addTriangle(t2, t1, sv[1]);
 			tb1 = new SimpleVector(t1.x, t1.y - 3, t1.z);
@@ -502,7 +567,17 @@ public class Engine extends Activity {
 			//rightBorder.invert();
 			//newods.invert();
 		}
-		public void processPoints(Point a, Point b, Point c, boolean needrec, SimpleVector[] sv) {
+		/**
+		 * Метод расчета координат полигонов для дтрех последовательных точек 
+		 * @param a - первая точка
+		 * @param b - вторая точка
+		 * @param c - третья точка
+		 * @param needrec - переменная-индикатор необходимости рекурсивного запуска данного метода в обратном
+		 * направлении: true для точек внутри трека, false - для конечных точек
+		 * @param sv - массив для результирующих точек 
+		 * @param needL - переменная-индикатор необходимости сдвига перпендикуляра. false - для конечных точек
+		 */
+		public void processPoints(Point a, Point b, Point c, boolean needrec, SimpleVector[] sv, boolean needL) {
 			int q;
 			int d = 3;
 			if (needrec == true) {
@@ -516,11 +591,17 @@ public class Engine extends Activity {
 			
 			Point[] arr = new Point[4];
 			Point t1, t2;
-			float angle = a.anglePoint(b, c);
-			float l = 9 / angle;			
+			float l;
 			Segment s1 = new Segment(a, b);
 			Segment s2 = new Segment(b, c);
-			if (l > s1.length()) l = s1.length() / 2;
+			if (needL == true){
+				float angle = a.anglePoint(b, c);
+				l = 9 / angle;		
+				
+				if (l > s1.length()) l = s1.length() / 2;
+			} else {
+				l = 0;
+			}
 			float k = s1.countK();			
 			float bb = s1.countB();
 			
@@ -601,7 +682,7 @@ public class Engine extends Activity {
 			}
 			try {
 				if (needrec == true) {
-					processPoints(c, b, a, false, sv);
+					processPoints(c, b, a, false, sv, needL);
 					sv[0] = new SimpleVector(arr[0].y, 100 - arr[0].z, arr[0].x);
 					sv[1] = new SimpleVector(arr[1].y, 100 - arr[1].z, arr[1].x);
 				} else {				
@@ -619,7 +700,9 @@ public class Engine extends Activity {
 					
 		}
 		
-		
+		/**
+		 * Метод нормализации точек маршрута относительно первой точки
+		 */
 		private void normalizePath () {
 			float xx = path.get(0).x;
 			float yy = path.get(0).y;
@@ -628,7 +711,9 @@ public class Engine extends Activity {
 				x.y -= yy;
 			}
 		}
-		
+		/**
+		 * Наследуемый метод, вызывается при создании нового экрана
+		 */
 		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		}
 		boolean onGround = false;
@@ -636,6 +721,9 @@ public class Engine extends Activity {
 		int d = 3;
 		boolean bb = true;
 		boolean finished = false;
+		/**
+		 * наследуемый метод отрисовки кадра
+		 */
 		public void onDrawFrame(GL10 gl) {
 			
 			/*if (touchTurn != 0) {
@@ -762,10 +850,12 @@ public class Engine extends Activity {
 				cam.moveCamera(new SimpleVector(cam.getDirection().x, 0.05, cam.getDirection().z), speed * 1.414f);
 			}*/
 			float camYpos = cam.getPosition().y;
-			if (camYpos > loadedCar.getTransformedCenter().y - 5.8) {
+			if (camYpos > loadedCar.getTransformedCenter().y - 5.8 && onGround) {
 				cam.moveCamera(new SimpleVector(cam.getDirection().x, -0.02f, cam.getDirection().z), speed * 1.414f);
-			} else {
+			} else if (onGround) {
 				cam.moveCamera(new SimpleVector(cam.getDirection().x, 0.02, cam.getDirection().z), speed * 1.414f);
+			} else if (!onGround) {
+				cam.moveCamera(Camera.CAMERA_MOVEDOWN, 0.5f);
 			}
 			cam.lookAt(loadedCar.getTransformedCenter());
 			sun.setPosition(cam.getPosition());

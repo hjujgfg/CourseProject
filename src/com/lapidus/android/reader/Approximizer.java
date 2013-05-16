@@ -5,6 +5,12 @@ import java.util.Vector;
 import com.lapidus.android.primitives.Point;
 
 public class Approximizer {
+	/**
+	 * аппроксимация точек
+	 * @param tol глубина рекурсии
+	 * @param V - массив точек 
+	 * @return массив аппроксимированных точек
+	 */
 	public static Point[] approximize (float tol, Point [] V) {
 int n = V.length;
         
@@ -47,7 +53,15 @@ int n = V.length;
         sV.copyInto(out);
         return out;
 	}
-private static void simplifyDP2D(float tol, Point[] v, int j, int k, int [] mk){
+	/**
+	 * Упрощение линий
+	 * @param tol глубина рекурсии 
+	 * @param v массив точек 
+	 * @param j индекс начала 
+	 * @param k индекс конца
+	 * @param mk массив индексов
+	 */
+	private static void simplifyDP2D(float tol, Point[] v, int j, int k, int [] mk){
         
         if (k <= j+1) return;  //nothing to simplify
         

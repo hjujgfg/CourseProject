@@ -44,7 +44,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class Painter extends Activity {
-
+	/**
+	 * наследуемый метод, вызывается при создании активности 
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -258,18 +260,31 @@ public class Painter extends Activity {
 			view.invalidate();
 		}
 	}
+	// хранитель контекста
 	final Context context = this;
+	//вид рисования
 	PainterView view;
+	
 	Button b;
+	//список точек для загрузки из файла
 	public static ArrayList<Point> externalPoints;
+	
 	private static final int DIALOG_LOAD_FILE = 1000;
+	//список файлов в папке
 	private String[] mFileList;
+	//выбранный файл
 	private String mChosenFile;
+	//расширение файла
 	private static final String FTYPE = ".png";
+	//путь к папке
 	private File mPath; //= new File(getExternalFilesDir(null).getAbsolutePath());
 	
 	
-	
+	/**
+	 * статический метод создания изображения на основе рисунка на виде рисования
+	 * @param view - вид рисования
+	 * @return созданное изображение 
+	 */
 	public static Bitmap getBitmapFromView(View view) {
 	    Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),Bitmap.Config.ARGB_8888);
 	    Canvas canvas = new Canvas(returnedBitmap);
@@ -281,6 +296,9 @@ public class Painter extends Activity {
 	    view.draw(canvas);
 	    return returnedBitmap;
 	}
+	/**
+	 * Диалог выбора файла
+	 */
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		Dialog dialog = null;
@@ -309,6 +327,9 @@ public class Painter extends Activity {
 		dialog = builder.show();
 		return dialog;
 	}
+	/**
+	 * Обработчик нажатия кнопок
+	 */
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		/*if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -327,6 +348,9 @@ public class Painter extends Activity {
 		}*/		
 		return super.onKeyDown(keyCode, event);
 	}
+	/**
+	 * метод загрузки списка файлов 
+	 */
 	private void loadFileList() {
 	    try {
 	        mPath.mkdirs();
