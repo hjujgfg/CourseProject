@@ -4,6 +4,7 @@ import android.app.Activity;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.ConnectException;
 import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -47,6 +48,7 @@ import com.threed.jpct.util.BitmapHelper;
 import com.threed.jpct.util.MemoryHelper;
 import com.threed.jpct.util.SkyBox;
 import com.lapidus.android.R;
+import com.lapidus.android.net.ConnectionEstablisher;
 import com.lapidus.android.painter.Painter;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
@@ -118,8 +120,18 @@ public class VehicleViewer extends Activity {
 			
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
+				Painter.isMulti = false;
 				Intent o = new Intent(getApplicationContext(), Painter.class);
 				startActivity(o);
+			}
+		});
+		TextView multi = (TextView)findViewById(R.id.multi_button);
+		multi.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				Intent i = new Intent(getApplicationContext(), ConnectionEstablisher.class);
+				startActivity(i);
 			}
 		});
 		single.setAlpha(50);

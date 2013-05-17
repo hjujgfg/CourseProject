@@ -10,6 +10,8 @@
     <string name="start">Start Game</string>
     <string name="preview">Preview</string>
     <string name="open">Open</string>
-    <string name="Clear">Clear</string>    
+    <string name="Clear">Clear</string>
+    <string name="client">Client</string>
+    <string name="server">Server</string>        
 </resources>
 

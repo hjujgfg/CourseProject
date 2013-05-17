@@ -14,6 +14,7 @@ import com.lapidus.android.R;
 import com.lapidus.android.engine.Engine;
 import com.lapidus.android.engine.ObjectViewer;
 import com.lapidus.android.engine.VehicleViewer;
+import com.lapidus.android.net.ServerThreadSer;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
 import com.lapidus.android.reader.Reader;
@@ -95,10 +96,25 @@ public class Painter extends Activity {
 						for (Point a : tmp) {
 							Engine.path.add(new Point(a.x, a.y, a.z));
 						}
-						//Engine.path = (ArrayList<Point>) view.points.clone();
-						Engine.bb = true;
-						Intent i = new Intent(ctx, Engine.class);
-						startActivity(i);
+						if (isMulti == false) {
+							//Engine.path = (ArrayList<Point>) view.points.clone();
+							Engine.bb = true;
+							Intent i = new Intent(ctx, Engine.class);
+							startActivity(i);
+						} else {
+							ServerThreadSer.arr = new ArrayList<Point>();
+							for (Point xx : tmp) {
+								try {
+									ServerThreadSer.arr.add(xx.clone());
+								} catch (CloneNotSupportedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+							ServerThreadSer.context = context;
+							Thread t = new Thread(new ServerThreadSer());
+							t.start();
+						}
 					}
 				});
 				TextView tw2 = (TextView)dialog.findViewById(R.id.painter_import_but);
@@ -278,7 +294,8 @@ public class Painter extends Activity {
 	private static final String FTYPE = ".png";
 	//путь к папке
 	private File mPath; //= new File(getExternalFilesDir(null).getAbsolutePath());
-	
+	//индикатор много/одно - пользовательской игры
+	public static boolean isMulti;
 	
 	/**
 	 * статический метод создания изображения на основе рисунка на виде рисования
