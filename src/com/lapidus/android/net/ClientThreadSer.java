@@ -93,7 +93,7 @@ public class ClientThreadSer implements Runnable {
 			finally {
 				System.out.println("closing");
 				try {
-					socket.close();
+					if (socket != null)	socket.close();
 					//runningThreads.decrementAndGet();
 					System.out.flush();
 				}

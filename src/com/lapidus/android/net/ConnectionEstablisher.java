@@ -65,6 +65,7 @@ public class ConnectionEstablisher extends Activity {
 				// Set an EditText view to get user input 
 				final EditText input = new EditText(context);
 				alert.setView(input);
+				input.setText("192.168.1.103");
 
 				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {

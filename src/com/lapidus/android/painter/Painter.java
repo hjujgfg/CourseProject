@@ -84,9 +84,9 @@ public class Painter extends Activity {
 							x = view.segs.get(i);
 							tmp.add(x.stop);
 							if (x.collides == true) {
-								x.start.z += 2;
-								x.stop.z = x.start.z + 3;
-								view.segs.get(i - 1).start.z = x.start.z + 1;
+								x.start.z -= 2;
+								x.stop.z = x.start.z - 3;
+								view.segs.get(i - 1).start.z = x.start.z - 1;
 							} else {
 								x.stop.z = x.start.z;
 							}
@@ -115,6 +115,7 @@ public class Painter extends Activity {
 							Thread t = new Thread(new ServerThreadSer());
 							t.start();
 						}
+						dialog.dismiss();
 					}
 				});
 				TextView tw2 = (TextView)dialog.findViewById(R.id.painter_import_but);
