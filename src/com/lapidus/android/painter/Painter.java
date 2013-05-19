@@ -13,14 +13,12 @@ import java.util.ArrayList;
 import com.lapidus.android.R;
 import com.lapidus.android.engine.Engine;
 import com.lapidus.android.engine.ObjectViewer;
-import com.lapidus.android.engine.VehicleViewer;
 import com.lapidus.android.net.ServerThreadSer;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
 import com.lapidus.android.reader.Reader;
 
 import android.os.Bundle;
-import android.os.Environment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -34,12 +32,9 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -125,12 +120,13 @@ public class Painter extends Activity {
 						// TODO Auto-generated method stub
 						loadFileList();
 						onCreateDialog(1000);
-						Reader.path = mChosenFile;
+						Reader.path = mChosenFile;						
 						if (mChosenFile == "") {
 							Toast t = Toast.makeText(ctx, "No file chosen", Toast.LENGTH_LONG);
 							t.show();
 							return;
-						}																		
+						}							
+						dialog.dismiss();
 					}
 				});
 				TextView tw3 = (TextView)dialog.findViewById(R.id.painter_export_but);
@@ -155,6 +151,7 @@ public class Painter extends Activity {
 							fos.close();
 							Toast t = Toast.makeText(getApplicationContext(), "saved", Toast.LENGTH_SHORT);
 							t.show();
+							dialog.dismiss();
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -196,6 +193,7 @@ public class Painter extends Activity {
 						
 						Intent i = new Intent(ctx, ObjectViewer.class);
 						startActivity(i);
+						dialog.dismiss();
 					}
 				});
 				TextView tw5 = (TextView)dialog.findViewById(R.id.painter_save_but);
@@ -219,6 +217,7 @@ public class Painter extends Activity {
 							fos.close();
 							Toast t = Toast.makeText(getApplicationContext(), "saved", Toast.LENGTH_SHORT);
 							t.show();
+							dialog.dismiss();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							Toast t = Toast.makeText(getApplicationContext(), "not saved - exception", Toast.LENGTH_SHORT);
@@ -245,6 +244,7 @@ public class Painter extends Activity {
 							view.invalidate();
 							Toast t = Toast.makeText(getApplicationContext(), "opened", Toast.LENGTH_SHORT);
 							t.show();
+							dialog.dismiss();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							Toast t = Toast.makeText(getApplicationContext(), "no file track.ser?", Toast.LENGTH_SHORT);
@@ -267,6 +267,7 @@ public class Painter extends Activity {
 						view.invalidate();
 						Toast t = Toast.makeText(getApplicationContext(), "Cleared", Toast.LENGTH_SHORT);
 						t.show();
+						dialog.dismiss();
 					}
 				});
 				dialog.show();
@@ -349,21 +350,7 @@ public class Painter extends Activity {
 	 * Обработчик нажатия кнопок
 	 */
 	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		/*if (keyCode == KeyEvent.KEYCODE_BACK) {
-			if (view.points.size() == 0) {
-				view.invalidate();
-				return super.onKeyDown(keyCode, event);
-			}
-			if (view.points.size() > 0)	{
-				view.undo();
-			}			
-			view.invalidate();			
-			return true;
-		} else {
-			view.invalidate();
-			return super.onKeyDown(keyCode, event);
-		}*/		
+	public boolean onKeyDown(int keyCode, KeyEvent event) {			
 		return super.onKeyDown(keyCode, event);
 	}
 	/**

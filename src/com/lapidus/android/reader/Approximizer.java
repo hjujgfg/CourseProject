@@ -12,7 +12,7 @@ public class Approximizer {
 	 * @return массив аппроксимированных точек
 	 */
 	public static Point[] approximize (float tol, Point [] V) {
-int n = V.length;
+		int n = V.length;
         
         int i, k, m, pv;
         float tol2 = tol*tol;

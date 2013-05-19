@@ -25,6 +25,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -41,8 +42,10 @@ public class ConnectionEstablisher extends Activity {
 	Context context;
 	Socket client;
 	Socket socket;
+	Thread cthread; 
+	Thread sThread;
 	static int SERVERPORT = 8090;
-	static String serverIpAddress;
+	static String serverIpAddress = "192.168.1.103";
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -65,16 +68,17 @@ public class ConnectionEstablisher extends Activity {
 				// Set an EditText view to get user input 
 				final EditText input = new EditText(context);
 				alert.setView(input);
-				input.setText("192.168.1.103");
+				input.setText(serverIpAddress);
 
 				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
 				  String value = input.getText().toString();
 				  // Do something with value!
 				  	serverIpAddress = value;
-					Thread cthread = new Thread(new ClientThread());									
+					cthread = new Thread(new ClientThread());									
 					cthread.start();
 					isServer = false;
+					dialog.dismiss();
 				  }
 				});
 
@@ -96,8 +100,8 @@ public class ConnectionEstablisher extends Activity {
 				
 				AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
-				alert.setTitle("Title");
-				alert.setMessage("Message");
+				alert.setTitle("Run Server");
+				alert.setMessage("Enter this IP address on client");
 
 				// Set an EditText view to get user input 
 				final TextView input = new TextView(context);
@@ -108,9 +112,10 @@ public class ConnectionEstablisher extends Activity {
 				public void onClick(DialogInterface dialog, int whichButton) {
 				  String value = input.getText().toString();
 				  // Do something with value!
-				  	Thread sThread = new Thread(new ServerThread());
+				  	sThread = new Thread(new ServerThread());
 					sThread.start();	
 					isServer = true;
+					dialog.dismiss();
 				  }
 				});
 
@@ -125,6 +130,11 @@ public class ConnectionEstablisher extends Activity {
 			}
 		});		
 	}
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event){
+		
+		return super.onKeyDown(keyCode, event);		
+	}
 	private String getLocalIpAddress() {
 		WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -133,11 +143,10 @@ public class ConnectionEstablisher extends Activity {
 		return ip;
     }
 	private String intToIp(int i) {
-
-		   return ((i >> 24 ) & 0xFF ) + "." +
-		               ((i >> 16 ) & 0xFF) + "." +
-		               ((i >> 8 ) & 0xFF) + "." +
-		               ( i & 0xFF) ;
+		   return ( i & 0xFF) + "." +
+		   			((i >> 8 ) & 0xFF) + "." +
+		   			((i >> 16 ) & 0xFF) + "." +
+		   			((i >> 24 ) & 0xFF );
 		}
 	public class ServerThread implements Runnable {
 		 
@@ -218,9 +227,9 @@ public class ConnectionEstablisher extends Activity {
     			//Establishes the socket connection between the client & server
     			//name of the machine & the port number to which we want to connect
     			socket = new Socket(serverIpAddress, SERVERPORT);
-    			//if (printOutput) {
-    				System.out.print("Establishing connection.");
-    			//}
+    			
+    			System.out.print("Establishing connection.");
+    			
     			//opens a PrintWriter on the socket input autoflush mode
     			out = new PrintWriter(socket.getOutputStream(), true);
 

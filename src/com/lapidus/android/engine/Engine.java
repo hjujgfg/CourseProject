@@ -117,7 +117,7 @@ public class Engine extends Activity {
 	private Handler handler;	
 	private String mytag = "MyTag";
 	//вектор коллизий 
-	private SimpleVector ellipsoid = new SimpleVector(1, 1, 1);
+	private SimpleVector ellipsoid = new SimpleVector(0.3f, 0.3f, 0.3f);
 	
 	public static boolean bb; 
 	//конструктор
@@ -190,10 +190,7 @@ public class Engine extends Activity {
 	}
 	// Список точек трека
 	public static ArrayList<Point> path;
-	/*public static void copyPoints(ArrayList<Point> a) {
-		path = new ArrayList<Point>();
-		
-	}*/
+	
 	/**
 	 * Копирует поля объекта в данный объект. Необходим для корректной обработки паузы.
 	 * @param src - сохраненный объект мира 
@@ -282,9 +279,7 @@ public class Engine extends Activity {
 
 	    if (inTouch) {
 	      result += "pointerCount = " + pointerCount + "\n" + sb.toString();
-	    }
-	    //tv.setText(result);
-	   // Log.i("TE", result);
+	    }	    
 	    return true;
 	}
 
@@ -321,6 +316,8 @@ public class Engine extends Activity {
 				sun.setIntensity(250, 250, 250);
 				cameraRotationAngle = 0;
 				speed = 1f;
+				t = new SimpleVector(0, 0, 0);
+				t1 = new SimpleVector(0, 0, 0);
 				// Create a texture out of the icon...:-)
 				Texture texture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(getResources().getDrawable(R.drawable.icon)), 64, 64));
 				
@@ -352,16 +349,11 @@ public class Engine extends Activity {
 				skyBox.setCenter(new SimpleVector(0, 100, 0));
 				Object3D skybox3DObj = skyBox.getWorld().getObjects().nextElement();
 				skyBox.setCenter(new SimpleVector(40, 20, 0));
-				VehicleViewer.tileTexture(skybox3DObj, 1f);
-				/*TextureManager.getInstance().addTexture("police_car3.tga", car3);
-				TextureManager.getInstance().addTexture("police_car.tga", car4);
-				TextureManager.getInstance().addTexture("police_car_lit.tga", car5);*/		
-				//TextureManager.getInstance().addTexture("asphalt", asphalt);
+				VehicleViewer.tileTexture(skybox3DObj, 1f);				
 				
 				newods = new Object3D(path.size() * 5);
 				leftBorder = new Object3D(path.size() * 5);
-				rightBorder = new Object3D(path.size() * 5);
-				//newods.addTriangle(new SimpleVector(-50, 0, -50), new SimpleVector(50, 0, -50), new SimpleVector(-50, 0, 0));
+				rightBorder = new Object3D(path.size() * 5);				
 				InputStream fis = null;
 				fis = getResources().openRawResource(R.raw.rotatcar);				
 				Object3D[] loadedCars = Loader.loadOBJ(fis, null, 1);	
@@ -372,40 +364,18 @@ public class Engine extends Activity {
 					e.printStackTrace();
 				}
 				loadedCar = Object3D.mergeAll(loadedCars);	
-				loadedCar.setTexture("yellowc");
-				/*fis = getResources().openRawResource(R.raw.rotatcar);
-				Object3D[] loadedCars1 = Loader.loadOBJ(fis, null, 1);
-				loadedCar1 = Object3D.mergeAll(loadedCars1);*/
-				try {
-					fis.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				loadedCar.setTexture("yellowc");							
 				loadedCar.calcTextureWrapSpherical();
 				loadedCar.rotateX((float)Math.PI / 2);
-				loadedCar.rotateY((float)Math.PI);
-				/*loadedCar1.setTexture("texture");
-				loadedCar1.calcTextureWrapSpherical();
-				loadedCar1.rotateX((float)Math.PI / 2);
-				loadedCar1.rotateY((float)Math.PI);*/
-				
-				
+				loadedCar.rotateY((float)Math.PI);						
 	
 				Log.i("CO", loadedCar.getCenter().toString());
-				loadedCar.setScale(0.001f);
+				loadedCar.setScale(0.0007f);
 
-				Log.i("CO", loadedCar.getCenter().toString());
-				
-				Object3D flore = new Object3D(4);
-				flore.addTriangle(new SimpleVector(-130, 102, -130), new SimpleVector(130, 102, -130), new SimpleVector(0, 102, 280));
-						
-							
-				generateTrack();
-								
-
+				Log.i("CO", loadedCar.getCenter().toString());																					
+				generateTrack();								
 				Log.i("CO", " newods " + newods.getCenter().toString() + " : " +newods.getTransformedCenter().toString());
-				flore.setTexture("green");
+				
 				rightBorder.setTexture("green");
 				leftBorder.setTexture("green");
 				rightBorder.setEnvmapped(true);
@@ -417,10 +387,9 @@ public class Engine extends Activity {
 				start.setTexture("green");
 				end.setTexture("red");
 				newods.setTexture("red");
-				//newods.setEnvmapped(true);
 				newods.calcTextureWrapSpherical();
 				newods.strip();
-				newods.build();
+				newods.build();		
 				
 				loadedCar1 = loadedCar.cloneObject();
 				loadedCar1.scale(0.001f);
@@ -428,15 +397,14 @@ public class Engine extends Activity {
 				loadedCar1.strip();
 				loadedCar1.build();
 				loadedCar.strip();
-				loadedCar.build();	
+				loadedCar.build();				
 				
-				//loadedCar.translate(path.get(0).x, path.get(0).y, path.get(0).z);
 				newods.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 				leftBorder.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 				rightBorder.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 				loadedCar.setCollisionMode(Object3D.COLLISION_CHECK_SELF );
 				loadedCar1.setCollisionMode(Object3D.COLLISION_CHECK_SELF);
-				flore.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);				
+								
 				end.setCollisionMode(Object3D.COLLISION_CHECK_SELF);
 				start.setCollisionMode(Object3D.COLLISION_CHECK_OTHERS);
 				newods.setCulling(false);
@@ -445,7 +413,7 @@ public class Engine extends Activity {
 				skyBox.compile();
 				world.addObject(start);
 				world.addObject(end);
-				world.addObject(flore);				
+								
 				world.addObject(newods);				
 				world.addObject(loadedCar);
 				//(if (Painter.isMulti))
@@ -454,14 +422,7 @@ public class Engine extends Activity {
 				world.addObject(leftBorder);
 				world.addObject(rightBorder);
 				world.compileAllObjects();
-				cam = world.getCamera();
-				/*loadedCar.rotateZ((float)Math.PI / 2);
-				loadedCar.rotateY((float)Math.PI / 2);*/
-				/*loadedCar.setOrientation(new SimpleVector(0, 1, 0) , new SimpleVector(0, -1, 0));
-				
-				loadedCar.rotateY((float)Math.PI);
-				loadedCar.rotateX((float)Math.PI / 2);*/
-				
+				cam = world.getCamera();								
 				//default for cops car
 				Log.i("bat", loadedCar.getZAxis().toString() + " = z axis");
 				 
@@ -477,16 +438,13 @@ public class Engine extends Activity {
 				}
 				
 				loadedCar.translate(-loadedCar.getTransformedCenter().x, -loadedCar.getTransformedCenter().y - 95, -loadedCar.getTransformedCenter().z);
-				loadedCar1.translate(-loadedCar1.getTransformedCenter().x, -loadedCar1.getTransformedCenter().y - 30, -loadedCar1.getTransformedCenter().z);
+				loadedCar1.translate(-loadedCar1.getTransformedCenter().x, -loadedCar1.getTransformedCenter().y - 95, -loadedCar1.getTransformedCenter().z);
 				Log.i("Car loc", "car z " + loadedCar.getZAxis().toString());
 				Log.i("Car loc", "car1 z " + loadedCar1.getZAxis().toString());
 				Log.i("Car loc", "car centr " + loadedCar.getTransformedCenter().toString() + " ^^ " + loadedCar1.getTransformedCenter().toString());
 				
 				Log.i("CO", "centr " + loadedCar.getTransformedCenter().toString());				
-				Log.i(mytag, "car o ^ " + loadedCar.getXAxis().toString());
-				//SimpleVector temp = loadedCar.getTransformedCenter();
-				SimpleVector temp = new SimpleVector(0, 20, 0);
-				
+				Log.i(mytag, "car o ^ " + loadedCar.getXAxis().toString());											
 				Log.i("CO", "cam pos " + cam.getPosition().toString());
 				//world.getCamera().setPosition(start.getTransformedCenter().x, start.getTransformedCenter().y - 10, start.getTransformedCenter().z);
 				
@@ -495,11 +453,7 @@ public class Engine extends Activity {
 				cam.lookAt(new SimpleVector(0, 0, 0));
 				cam.moveCamera(Camera.CAMERA_MOVEOUT, 30);
 				
-				Log.i("CO", "cam pos " + cam.getPosition().toString());
-				
-				//cam.setPositionToCenter(loadedCar);
-				//cam.moveCamera(temp, 5f);
-				//cam.transform(temp);
+				Log.i("CO", "cam pos " + cam.getPosition().toString());								
 				
 				endCollisionHolder = end.checkForCollisionSpherical(new SimpleVector(0, 1, 0), 3);
 				Log.i("finish", "deffault " + endCollisionHolder.toString());
@@ -510,7 +464,7 @@ public class Engine extends Activity {
 				sv.z -= 100;
 				sv.x -= 100;
 				sun.setPosition(sv);
-				yprev = loadedCar.getTransformedCenter().y;
+				
 				MemoryHelper.compact();
 				if (Painter.isMulti) {
 					t = new SimpleVector(0, 0, 0);
@@ -560,10 +514,7 @@ public class Engine extends Activity {
 			processPoints(path.get(1), path.get(0), new Point(-1, -1, -1), false, sv, false);
 			t1 = sv[2];
 			t2 = sv[3];	
-			start = Primitives.getCube(3);
-			Segment tmp = new Segment(path.get(0), path.get(1));
-			float k = tmp.countK();
-			
+			start = Primitives.getCube(3);						
 			start.translate(0, 100, 0);
 			for (int i = 1; i < path.size() - 1; i ++) {
 				processPoints(path.get(i-1), path.get(i), path.get(i + 1), true, sv, true);
@@ -619,7 +570,7 @@ public class Engine extends Activity {
 		 * @param sv - массив для результирующих точек 
 		 * @param needL - переменная-индикатор необходимости сдвига перпендикуляра. false - для конечных точек
 		 */
-		public void processPoints(Point a, Point b, Point c, boolean needrec, SimpleVector[] sv, boolean needL) {
+		private void processPoints(Point a, Point b, Point c, boolean needrec, SimpleVector[] sv, boolean needL) {
 			int q;
 			int d = 3;
 			if (needrec == true) {
@@ -634,8 +585,7 @@ public class Engine extends Activity {
 			Point[] arr = new Point[4];
 			Point t1, t2;
 			float l;
-			Segment s1 = new Segment(a, b);
-			Segment s2 = new Segment(b, c);
+			Segment s1 = new Segment(a, b);			
 			if (needL == true){
 				float angle = a.anglePoint(b, c);
 				l = 9 / angle;		
@@ -758,26 +708,21 @@ public class Engine extends Activity {
 		 */
 		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		}
-		boolean onGround = false;
-		float delta, yprev = 2;
-		int d = 3;
-		boolean bb = true;
+		boolean onGround = false;		
 		boolean finished = false;
 		/**
 		 * наследуемый метод отрисовки кадра
 		 */
-		public void onDrawFrame(GL10 gl) {
-			
-			//loadedCar1.rotateAxis(loadedCar1.getZAxis(), (float)Math.PI / 72);			
+		public void onDrawFrame(GL10 gl) {									
 			SimpleVector s = loadedCar.getTransformedCenter();
 			s.x -= 50; 
 			end.rotateY((float)Math.PI / 72);
 			end.rotateX((float)Math.PI / 72);
 			start.rotateY((float)Math.PI / 72);
 			start.rotateX((float)Math.PI / 72);
-			if (xpos > screenWidth / 2 && speed >= 0 && onGround) {//&& ypos < 2 * screenHeight / 3 && ypos >= 0) {
+			if (xpos > screenWidth / 2 && speed >= 0 && onGround) {
 				cameraRotationAngle = (float)Math.PI / 90;				
-			} else if (xpos < 200 && xpos >= 0 && speed >= 0 && onGround) {// && ypos < 2 * screenHeight / 3 && ypos >= 0) {
+			} else if (xpos < 200 && xpos >= 0 && speed >= 0 && onGround) {
 				cameraRotationAngle = -(float)Math.PI / 90;				
 			} 
 			if (ypos > 2 * screenHeight / 3  && ypos >= 0 && speed >= 0) {
@@ -787,9 +732,7 @@ public class Engine extends Activity {
 				//if (xpos < screenWidth / 2) cameraRotationAngle = (float)Math.PI / 90;
 			}			
 			loadedCar.rotateY(cameraRotationAngle);
-			SimpleVector tm = new SimpleVector(-loadedCar.getZAxis().x * speed, 0, -loadedCar.getZAxis().z * speed);
-			//t1 = new SimpleVector(-loadedCar1.getZAxis().x * speed, 0, -loadedCar1.getZAxis().z * speed);
-			//t.scalarMul(speed);
+			SimpleVector tm = new SimpleVector(-loadedCar.getZAxis().x * speed, 0, -loadedCar.getZAxis().z * speed);			
 			tm = loadedCar.checkForCollisionEllipsoid(tm, ellipsoid, 10);
 			t.x = tm.x;
 			t.y = tm.y;
@@ -802,9 +745,11 @@ public class Engine extends Activity {
 			}
 			//GRAVITY
 			SimpleVector grav = loadedCar.checkForCollisionEllipsoid(new SimpleVector(0, 1, 0), ellipsoid, 1);
-			SimpleVector grav1 = loadedCar1.checkForCollisionEllipsoid(new SimpleVector(0, 1, 0), ellipsoid, 1);
 			loadedCar.translate(grav);
-			loadedCar1.translate(grav1);
+			if (Painter.isMulti) {
+				SimpleVector grav1 = loadedCar1.checkForCollisionEllipsoid(new SimpleVector(0, 1, 0), ellipsoid, 1);
+				loadedCar1.translate(grav1);
+			}								
 			Log.i("GR", "corrected"  + grav.toString());
 			if (!onGround && grav.y != 1) onGround = true;
 			if (onGround) {
@@ -840,25 +785,15 @@ public class Engine extends Activity {
 						dialog.show();						
 					}
 				});
-			}
-			//loadedCar.translate(t);
-			//loadedCar.setCenter(loadedCar.getTransformedCenter());
+			}			
 			Log.i(mytag, loadedCar.getTransformedCenter().toString() + " " + loadedCar.getCenter().toString());
 			SimpleVector backVect = loadedCar.getTransformedCenter();
-			backVect.scalarMul(-1.0f);					
-			cameraTransformMatrix.translate(backVect);
-			cameraTransformMatrix.rotateY(cameraRotationAngle / 2);
-			cameraTransformMatrix.translate(loadedCar.getTransformedCenter());
-			cameraRotationAngle = 0;
-			SimpleVector temp;
-			temp = cam.getPosition();
-			temp.matMul(cameraTransformMatrix);
-			//cam.setPosition(temp);	
-			delta = loadedCar.getTransformedCenter().y - yprev;
-			yprev = loadedCar.getTransformedCenter().y;
+			backVect.scalarMul(-1.0f);							
+			cameraRotationAngle = 0;			
+			
 			
 			float camYpos = cam.getPosition().y;
-			if (camYpos > loadedCar.getTransformedCenter().y - 5.8 && onGround) {
+			if (camYpos > loadedCar.getTransformedCenter().y - 3.8 && onGround) {
 				cam.moveCamera(new SimpleVector(cam.getDirection().x, -0.02f, cam.getDirection().z), speed * 1.414f);
 			} else if (onGround) {
 				cam.moveCamera(new SimpleVector(cam.getDirection().x, 0.02, cam.getDirection().z), speed * 1.414f);
@@ -867,19 +802,19 @@ public class Engine extends Activity {
 			}
 			cam.lookAt(loadedCar.getTransformedCenter());
 			sun.setPosition(cam.getPosition());
-			cameraTransformMatrix.setIdentity();
 			fb.clear(back);	
 			skyBox.render(world, fb);
 			world.renderScene(fb);
 			world.draw(fb);
 			fb.display();
 			Log.i("Socket test", t.toString() + " @@ " + t1.toString());
-			try {
+			
+			/*try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 			if (System.currentTimeMillis() - time >= 1000) {
 				Logger.log(fps + "fps");
 				Log.i("fps", fps + "fps");
@@ -888,21 +823,5 @@ public class Engine extends Activity {
 			}
 			fps++;
 		}
-	}
-	private class MyMultiRenderer extends MyRenderer {
-		@Override
-		public void onSurfaceChanged(GL10 gl, int w, int h){
-			super.onSurfaceChanged(gl, w, h);
-			
-		}
-		@Override
-		public void onDrawFrame(GL10 gl) {
-			
-			super.onDrawFrame(gl);
-			loadedCar1.rotateY(72);
-			loadedCar1.translate(t);
-			world.getCamera().lookAt(loadedCar1.getTransformedCenter());
-			world.getCamera().moveCamera(Camera.CAMERA_MOVEIN, 4);
-		}
-	}
+	}	
 }

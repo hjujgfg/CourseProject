@@ -223,26 +223,11 @@ public class PainterView extends View {
 			canvas.drawCircle(points.get(0).x, points.get(0).y, 17, paint);
 			return;
 		}
-		for (int i = 0; i < points.size() - 1; i ++) {
-			//if (i == 0) canvas.drawText(points.get(0).toString(), 40, 40, paint);
+		for (int i = 0; i < points.size() - 1; i ++) {			
 			paint.setColor(Color.BLACK);
 			canvas.drawLine(points.get(i).x, points.get(i).y, 
-					points.get(i+1).x, points.get(i+1).y, paint);	
-			//paint.setColor(Color.YELLOW);
-			//canvas.drawCircle(points.get(i).x, points.get(i).y, 17, paint);
-		}
-		
-		/*paint.setColor(Color.GREEN);
-		canvas.drawCircle(points.get(0).x, points.get(0).y, 1, paint);*/
-		//paint.setColor(Color.YELLOW);
-		//canvas.drawCircle(points.get(points.size() - 1).x, points.get(points.size() - 1).y, 17, paint);
-		/*paint.setColor(Color.RED);		
-		if (approximizedPoints != null && approximizedPoints.length != 0) {			
-			for (int i = 0; i < approximizedPoints.length - 1; i ++) {
-				canvas.drawLine(approximizedPoints[i].x, approximizedPoints[i].y, 
-						approximizedPoints[i + 1].x, approximizedPoints[i + 1].y, paint);						
-			}
-		}*/
+					points.get(i+1).x, points.get(i+1).y, paint);			
+		}				
 		paint.setColor(Color.BLACK);
 	}
 	Point pp;
@@ -319,79 +304,7 @@ public class PainterView extends View {
 		
 		refreshIntersectingPoints(intersectingPoints, segs);
 	}
-	boolean n;
-	private OnTouchListener ontouchlistener2 = new OnTouchListener() {
-		
-		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
-			if (MotionEvent.ACTION_DOWN == event.getAction()) {
-				for (Point x : points) {
-					if (Math.abs(x.x - event.getX()) < 17 && Math.abs(x.y - event.getY()) < 17) {
-						touched = true;
-						lastAction = 1;
-						b.x = x.x;
-						b.y = x.y;
-						a = x;
-						break;
-					}
-				}
-				if (touched == false) {
-					lastAction = 2;
-					points.add(new Point(event.getX(), event.getY()));
-				}
-				redoPoints.clear();
-				redoSegs.clear();
-			}
-			if (MotionEvent.ACTION_MOVE == event.getAction()) {
-				if (touched == true) {
-					a.x = event.getX();
-					a.y = event.getY();					
-				} else {
-					points.get(points.size() - 1).x = event.getX();
-					points.get(points.size() - 1).y = event.getY();
-					Segment tmp = new Segment(points.get(points.size() - 1), points.get(points.size() - 2));
-					tempIntersectingPoints = new ArrayList<Point>();
-					for (int i = 0; i < segs.size() - 1; i ++) {
-						n = false;
-						n = tmp.checkForIntersection(segs.get(i));
-						if (n == true) {
-							tempIntersectingPoints.add(tmp.findIntersection(segs.get(i)));
-						}
-					}
-				}				
-			}
-			if (MotionEvent.ACTION_UP == event.getAction()) {
-				touched = false;
-				tempIntersectingPoints = new ArrayList<Point>();
-				if (points.size() > 1) {
-					segs.add(new Segment(points.get(points.size() - 2), points.get(points.size() - 1)));
-				}
-				if (segs.size() > 2) {
-					/*for (int i = 0; i < segs.size() - 2; i ++) {
-						n = false;
-						n = segs.get(segs.size() - 1).checkForIntersection(segs.get(i));
-						if (n == true) { 
-							intersectingPoints.add(segs.get(segs.size() - 1).findIntersection(segs.get(i)));
-						}
-					}*/
-					intersectingPoints = new ArrayList<Point>();
-					for (int i = 0; i < segs.size(); i ++) {
-						for (int j = 0; j < segs.size(); j ++) {
-							n = false;												
-							if (j != (i - 1) && j != i && j != (i + 1)) {
-								n = segs.get(i).checkForIntersection(segs.get(j));
-								if (n == true) {
-									intersectingPoints.add(segs.get(i).findIntersection(segs.get(j)));
-								}
-							}							
-						}
-					}
-				}
-			}
-			invalidate();
-			return true;
-		}
-	};
+	boolean n;	
 	/**
 	 * метод обновления списка отрезков по списку точек
 	 */
@@ -550,20 +463,7 @@ public class PainterView extends View {
 		}
 		refreshSegs();
 		invalidate();
-	}
-	/*private class Point {
-		float x, y;		
-		Point (float x, float y) {
-			this.x = x;
-			this.y = y;
-		}
-	}*/
-	/*private int checkForIntersection(Point p) {
-		for (Point x : points ) {			
-			if (p.x == x.x && p.y == x.y) return x.index; 
-		}
-		return -1;
-	}*/
+	}	
 	/**
 	 * метод установки изображения
 	 * @param s - путь к файлу изображения
@@ -572,15 +472,5 @@ public class PainterView extends View {
 		image = BitmapFactory.decodeFile(s);	
 		shouldDrawBitmap = true;
 		invalidate();
-	}
-	
-	/**
-	 * @param args
-	 */
-	/*
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}*/
-
+	}	
 }

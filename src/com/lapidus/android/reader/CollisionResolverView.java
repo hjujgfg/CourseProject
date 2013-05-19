@@ -3,24 +3,17 @@ package com.lapidus.android.reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
-
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 public class CollisionResolverView extends View {
 	//конструктор
@@ -132,20 +125,7 @@ public class CollisionResolverView extends View {
 			invalidate();
 			return true;
 		}
-	};
-	/**
-	 * удаление точки по индексу
-	 * @param ind индекс
-	 */
-	private void eraseAtIndex(int ind) {
-		for (Point p : tmp) {
-			if (p.collisionIndex == ind) {
-				p.chkd = false;
-				p.collides = false;
-				p.collisionIndex = -1;
-			}
-		}
-	}
+	};	
 	// счетчик соединений
 	int counter;
 	//перо
@@ -202,7 +182,6 @@ public class CollisionResolverView extends View {
 	 */
 	private void drawCollision(Canvas canvas, Paint paint) {
 		needredrawcollision = false;
-		int j = 0;
 		tmp = new ArrayList<Point>();
 		for (Point x : c.collidingPoints) {
 			tmp.add(new Point(x.x, x.y, -1));
@@ -211,17 +190,8 @@ public class CollisionResolverView extends View {
 			tmp.add(new Point(x.x, x.y, 1));
 			tmp.get(tmp.size() - 1).index = c.exitPoints.indexOf(x);
 			tmp.get(tmp.size() - 1).connection = x;
-		}
+		}		
 		
-		/*for (Point p : c.collidingPoints) {
-			canvas.drawText(p.toString(), 10, 10 * j, paint);
-			j ++;
-		}
-		paint.setColor(Color.BLUE);
-		for (Point p : c.exitPoints) {
-			canvas.drawText(p.toString(), 10, 10 * j, paint);
-			j ++;
-		}*/
 		
 		Point t1 = Collections.max(tmp, Point.xComp);
 		Point t2 = Collections.min(tmp, Point.xComp);
@@ -250,16 +220,11 @@ public class CollisionResolverView extends View {
 		Point f1 = Collections.max(tmp, Point.yComp);
 		Point f2 = Collections.min(tmp, Point.yComp);
 		for (int i = 0; i < (int)(t1.x - t2.x)+1; i ++) {
-			canvas.drawLine(avgX * i, 0, avgX * i, screenHeight, paint);
-			//canvas.drawText(c.collidingPoints.size() + " " + avgX + " " + avgY, 150, 10, paint);
+			canvas.drawLine(avgX * i, 0, avgX * i, screenHeight, paint);			
 		}
 		for (int i = 0; i < (int)(f1.y - f2.y) + 1; i ++) {
-			canvas.drawLine(0, avgY * i, screenWidth, avgY * i, paint);
-			//canvas.drawText(c.exitPoints.size() + " " + avgX + " " + avgY, 150, 10, paint);
-		}
-		/*canvas.drawText(screenHeight + " ^ " + screenWidth, 150, 20, paint);
-		Toast t = Toast.makeText(getContext(), "draw grid", Toast.LENGTH_LONG);
-		t.show();*/
+			canvas.drawLine(0, avgY * i, screenWidth, avgY * i, paint);		
+		}		
 	}
 	/**
 	 * отрисовать клетки 
@@ -334,11 +299,5 @@ public class CollisionResolverView extends View {
 			canvas.drawCircle(a.x, a.y, 10, paint);
 			canvas.drawCircle(b.x, b.y, 10, paint);
 		}
-	}
-	
-	private boolean areNeighbours(Point a, Point b) {
-		if (Math.abs(a.x - b.x) > 1) return false;
-		if (Math.abs(a.y - b.y) > 1) return false;
-		return true;
 	}
 }

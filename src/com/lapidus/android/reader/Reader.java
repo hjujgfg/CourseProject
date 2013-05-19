@@ -1,9 +1,5 @@
 package com.lapidus.android.reader;
 
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,7 +15,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -27,7 +22,6 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 public class Reader extends Activity {
 	TextView tw;
 	//вид
@@ -41,10 +35,7 @@ public class Reader extends Activity {
 	//контекст активности
 	static Context context;
 	//запуск активности разрешения коллизии
-	public void startCollisionresolver() {
-		Intent i = new Intent(context, CollisionResolver.class);
-		startActivity(i);
-	}
+	
 	/**
 	 * наследуемый метод создания активности
 	 */
@@ -59,7 +50,6 @@ public class Reader extends Activity {
 		if (path == "" || path == null) {
 			this.stopService(getIntent());
 		}
-		//Bitmap image = BitmapFactory.decodeFile("/Painter/res/drawable-hdpi/test.bmp");
 		ImageView button = (ImageView)findViewById(R.id.reader_gear_button);
 		button.setOnClickListener(new OnClickListener() {
 			
@@ -71,10 +61,8 @@ public class Reader extends Activity {
 			}
 		});
 		arr = new ArrayList<Point>();
-		//Bitmap image = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj"+"/newimage.png" );
 		Bitmap image = BitmapFactory.decodeFile(getExternalFilesDir(null)+ "/" + path);
-		if (image == null) finish();
-		StringBuilder sb = new StringBuilder();		
+		if (image == null) finish();		
 		for (int i = 0; i < image.getWidth(); i ++) {
 			for (int j = 0; j < image.getHeight(); j ++) {
 				if (Color.BLACK == image.getPixel(i, j)) {
@@ -89,33 +77,8 @@ public class Reader extends Activity {
 				if (Color.RED == image.getPixel(i, j)) {
 					arr.add(new Point(i, j, 0, arr.size()));
 				}
-			}
-			//sb.append("\n");		
-		}
-		//HelloWorld.path = (ArrayList<Point>) arr.clone(); 
-		//HelloWorld.bb = false;
-		/*view.pointsAreProcessed = true;
-		ArrayList<Point> processedPoints = processPointsFromBitmap(arr);
-		view.approximizedPoints = Approximizer.approximize(2f, toArray(processedPoints));
-		view.points = processedPoints;*/
-		//ArrayList<Point> proc = processPointsFromBitmap(arr);
-		/*Collections.sort(arr, Point.indexComp);
-		File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/cprj"+"/arrcoords.txt" );
-		try {
-			FileWriter fw = new FileWriter(f);
-			for (Point x : arr) {
-				fw.write(x.toString() + "\n");
-				Log.i("AR", x.toString());
-			}
-			fw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			Toast t = Toast.makeText(getApplicationContext(), "shitshitshit", Toast.LENGTH_SHORT);
-			t.show();
-		}*/
-		
-		
+			}			
+		}					
 		view.track = new Track();
 		Thread t = new Thread(new Runnable() {
 			
@@ -125,21 +88,7 @@ public class Reader extends Activity {
 			}
 		});
 		t.start();
-		view.invalidate();
-		
-		
-		
-		/*view.points = arr;
-		collisions = view.cols;
-		Thread t = new Thread(new Runnable() {
-			
-			public void run() {
-				// TODO Auto-generated method stub				
-				findCollisions(arr, collisions, view);
-				view.postInvalidate();
-			}
-		});
-		t.start();	*/	
+		view.invalidate();		
 		
 	}
 	/**
@@ -205,29 +154,7 @@ public class Reader extends Activity {
 			track.addCollision(col);			
 			v.postInvalidate();
 		}		
-	}
-	private static void findCollisions (ArrayList<Point> arr, ArrayList<Collision> cols, ReaderView v) {
-		//ArrayList<Collision> cols = vi;
-		int o = 0;
-		Point[] sur; 
-		Collision tmp; 
-		for (Point x : arr) {
-			if (x.collides == false) {
-				o = 0;
-				sur = findNeighbors(x.x, x.y, arr);
-				o = sur[8].collisionIndex;
-				if (o > 2) {
-					//tmp = processCollision(arr, x, sur);
-					//if (tmp.getExitsQuantity() > 2) {
-						
-					//}
-					cols.add(processCollision(arr, x, sur));
-					v.postInvalidate();
-				}
-			}
-		}			
-		//return cols;
-	}
+	}	
 	/**
 	 * обработка линии
 	 * @param start - начало линии
@@ -235,7 +162,7 @@ public class Reader extends Activity {
 	 * @param track - трек
 	 * @param v - вид для отрисовки из другого потока
 	 */
-	public static void doLine(Point start, ArrayList<Point> arr, Track track, ReaderView v) {
+	private static void doLine(Point start, ArrayList<Point> arr, Track track, ReaderView v) {
 		if (start.chkd == true) return;
 		Line line = new Line();
 		line.addNextPoint(start);
@@ -306,7 +233,7 @@ public class Reader extends Activity {
 	 * @param c - коллизия
 	 * @param prev - предыдущаю точка
 	 */
-	public static void processCollision(ArrayList<Point> arr, Point p, Collision c, Point prev) {
+	private static void processCollision(ArrayList<Point> arr, Point p, Collision c, Point prev) {
 		Point[] sur = findNeighbors(p.x, p.y, arr);	
 		for (int i = 0; i < 8; i ++) {
 			if (sur[i] != null) {
@@ -334,90 +261,7 @@ public class Reader extends Activity {
 			}
 			if (sur[8].collisionIndex != sur[9].collisionIndex) c.addExitPoint(p);
 		}
-	}					
-	public static Collision processCollision(ArrayList<Point> arr, Point p, Point[] neighbors) {
-		Collision col = new Collision();
-		int o = -1;											
-		Point[] nextNeighbors;
-		col.addCollidingPoint(p);
-		p.collides = true;									
-		for (int i = 0; i < 8; i ++) {
-			if (neighbors[i] != null) {
-				o = -1;
-				nextNeighbors = findNeighbors(neighbors[i].x, neighbors[i].y, arr);
-				o = nextNeighbors[8].collisionIndex;
-				if (o <= 2) col.addExitPoint(neighbors[i]);
-				if (o > 2) {
-					if (neighbors[i].collides == false) {
-						col.merge(processCollision(arr, neighbors[i], nextNeighbors));
-					}					
-				}							
-			}
-		}		
-		return col; 
-	}
-	private static ArrayList<Point> processPointsFromBitmap(ArrayList<Point> arr) {
-		Collections.sort(arr, Point.indexComp);		
-		boolean bb = true; 
-		Point[] circum;
-		Point tmp; 
-		Integer quantity = 0;
-		ArrayList<Point> result = new ArrayList<Point>();
-		result.add(arr.get(0));
-		tmp = arr.get(0);
-		int counter; 
-		while (bb) {
-			circum = findNeighbors(tmp.x, tmp.y, arr);
-			tmp.chkd = true;
-			result.add(tmp);
-			tmp.index = result.size() - 1;
-			tmp = chooseSmoothest(tmp, circum, result.get(result.size() - 2));			
-			
-			if (tmp == null) {
-				bb = false; 
-			}
-		}
-		return result;
-	}
-	/**
-	 * выбрать точку с наименьшим углом
-	 * @param a - текущая точка 
-	 * @param sur - точки-соседи
-	 * @param prev - предыдущаю точка
-	 * @return точку с наименьшим углом между prev, a, sur[i] 
-	 */
-	private static Point chooseSmoothest(Point a, Point[] sur, Point prev) {
-		float mul = Integer.MAX_VALUE; 
-		int index = -1;
-		float tmp; 
-		boolean hasPoints = false; 
-		for (int i = 0; i < 8; i ++) {
-			if (sur[i] != null) hasPoints = true; 
-			if (sur[i] != null && sur[i].chkd == false) {
-				tmp = vectorMult(prev, a, sur[i]);
-				if (Math.abs(tmp) < Math.abs(mul)) { 
-					mul = tmp;
-					index = i;
-				}
-			}
-		}
-		if (mul != Integer.MAX_VALUE) {
-			return sur[index];
-		}
-		if (!hasPoints) return null; 
-		
-		return null;
-	}
-	/**
-	 * векторное произведение 
-	 * @param p1 
-	 * @param p2
-	 * @param p3
-	 * @return вектороное произведение 
-	 */
-	private static float vectorMult(Point p1, Point p2, Point p3) {
-		return (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
-	}	
+	}				
 	/**
 	 * наити точку в массиве
 	 * @param x х координата точки
@@ -465,18 +309,5 @@ public class Reader extends Activity {
 	public static ArrayList<Point> processPointsPrepared(ArrayList<Point> arr) {		
 		Collections.sort(arr, Point.indexComp);		
 		return null;
-	}
-	private static final int LEFT = 7;
-	private static final int LEFT_UP = 0;
-	private static final int UP = 1;
-	private static final int RIGHT_UP = 2;
-	private static final int RIGHT = 3;
-	private static final int RIGHT_DOWN = 4;
-	private static final int DOWN = 5;
-	private static final int LEFT_DOWN = 6;
-	private static final int NIN = -1;
-	private class Intersection {
-		
-	}	
-	
+	}		
 }

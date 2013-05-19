@@ -5,26 +5,18 @@ import java.util.Collections;
 
 import com.lapidus.android.R;
 import com.lapidus.android.primitives.Point;
-import com.lapidus.android.primitives.Segment;
-
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.support.v4.app.ShareCompat.IntentBuilder;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class ReaderView extends View {
@@ -264,10 +256,10 @@ public class ReaderView extends View {
 						final Collision tr = x;
 						AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 						builder
-						.setTitle("Установить старт")
-						.setMessage("Старт?")
+						.setTitle("Choose start point")
+						.setMessage("Set this point as start?")
 						
-						.setPositiveButton("Установить", new DialogInterface.OnClickListener() {
+						.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 							
 							public void onClick(DialogInterface dialog, int which) {
 								// TODO Auto-generated method stub
@@ -282,7 +274,7 @@ public class ReaderView extends View {
 								thisView.invalidate();
 							}
 						})
-						.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+						.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 							
 							public void onClick(DialogInterface dialog, int which) {
 								// TODO Auto-generated method stub
@@ -294,9 +286,7 @@ public class ReaderView extends View {
 						
 						return false;
 					}
-					TrackHolder.c = x;	
-					//Reader r = new Reader();
-					//r.startCollisionresolver();
+					TrackHolder.c = x;					
 					final Dialog dialog = new Dialog(thisView.getContext());
 					dialog.setContentView(R.layout.collision_resolver_layout);
 					CollisionResolverView resView = (CollisionResolverView) dialog.findViewById(R.id.collisionResolverView1);
@@ -327,21 +317,11 @@ public class ReaderView extends View {
 								t.show();
 							}
 						}
-					});
-					/*int h = dialog.findViewById(R.layout.collision_resolver_layout).getHeight();
-					int w = dialog.findViewById(R.layout.collision_resolver_layout).getWidth();*/
-					int h = dialog.getWindow().getDecorView().getHeight();
-					int w = dialog.getWindow().getDecorView().getWidth();
-					//resView.setScreenDimensions(w, h);
+					});					
 					resView.d = dialog;
 					dialog.show();
 					
-					return false;
-					//Activity holder = (Activity) thisView.getContext();														
-					//Intent i = new Intent(holder, CollisionResolver.class);
-					//holder.startActivity(i);
-					
-					//IntentBuilder ib = IntentBuilder.from(Reader.s);
+					return false;					
 				}
 			}
 			return false;
