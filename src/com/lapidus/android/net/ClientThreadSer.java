@@ -1,15 +1,11 @@
 package com.lapidus.android.net;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicLong;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -21,13 +17,26 @@ import com.lapidus.android.primitives.Point;
 
 
 
-
+/**
+ * Класс-клиента для приема сериализованного трека
+ * @author Егор
+ *
+ */
 public class ClientThreadSer implements Runnable {
+	/**полученные точки*/
 	public static ArrayList<Point> receivedPoints;
+	/**сокет для соединения*/
 	Socket socket;	
+	/**индикатор соединения*/
 	public static boolean connection;
+	/**обработчик для основного потока*/
 	Handler handler = new Handler();
+	/**контекст*/
 	public static Context context;
+	/**
+	 * наследуемый метод 
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run() {
 		// TODO Auto-generated method stub
 		connection = true;

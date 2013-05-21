@@ -12,12 +12,25 @@ import com.threed.jpct.SimpleVector;
 import android.util.Log;
 
 
-
+/**
+ * класс отвечает за непрерывную передачу координат модлей между двумя
+ * запущенными приложениями. 
+ * @author Егор
+ *
+ */
 public class ClientThreadRan implements Runnable {
+	/** сокет для устанвоки соединения*/
 	Socket socket;
+	/**индикатор соединения*/
 	public static boolean connected;
+	/**вектор напрвления основной модели*/
 	public static SimpleVector ss;
+	/**вектор направления модели противника*/
 	public static SimpleVector ss1;
+	/**
+	 * наследуемы метод интерфейса Runnable
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run() {
 		// TODO Auto-generated method stub
 		

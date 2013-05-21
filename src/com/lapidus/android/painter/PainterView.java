@@ -24,16 +24,30 @@ public class PainterView extends View {
 	/**
 	 * конструктор 
 	 * @param context - контекст родительской активности 
+	 * @see android.view.View#View(Context)
 	 */
 	public PainterView(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
 		init();
 	}
+	/**
+	 * конструктор 
+	 * @param context - контекст родительской активности 
+	 * @param attrs - аттрибуты xml тега
+	 * @see android.view.View#View(Context, AttributeSet))
+	 */
 	public PainterView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
 	}
+	/**
+	 * конструктор 
+	 * @param context - контекст родительской активности 
+	 * @param attrs - аттрибуты xml тега
+	 * @param i - стиль по умолчанию
+	 * @see android.view.View#View(Context, AttributeSet, int)))
+	 */
 	public PainterView(Context context, AttributeSet attrs, int i) {
 		super(context, attrs, i);
 		init();
@@ -56,38 +70,36 @@ public class PainterView extends View {
 		pointCounter = 0;
 		intersectingPoints = new ArrayList<Point>();
 		segs = new ArrayList<Segment>();
-		tempIntersectingPoints = new ArrayList<Point>();
-		redoPoints = new ArrayList<Point>();
-		redoSegs = new ArrayList<Segment>();
+		tempIntersectingPoints = new ArrayList<Point>();		
 		approximizedPoints = new Point[0];
 		lastAction = 0;
 	}
-	//счетчик точек
+	/**счетчик точек*/
 	int pointCounter;
-	//перо
+	/**перо*/
 	Paint paint;
-	//изображение
+	/**изображение*/
 	Bitmap image;
-	//холст
+	/**холст*/
 	Canvas canvas;
-	//список точек рисунка
+	/**список точек рисунка*/
 	ArrayList<Point> points;
-	//список отрезков рисунка
+	/**список отрезков рисунка*/
 	ArrayList<Segment> segs;
 	
-	ArrayList<Point> redoPoints; 
-	ArrayList<Segment> redoSegs;
-	//список точек пересечения
+	
+	/**список точек пересечения*/
 	ArrayList<Point> intersectingPoints;	
 	ArrayList<Point> tempIntersectingPoints;
-	//временные объекты
-	Point tmp;
-	Point a, b;	 
-	//массив аппроксимированных точек
+	/**временные объекты*/
+	Point tmp, a, b;	 
+	/**массив аппроксимированных точек*/
 	public Point[] approximizedPoints;
-	//координаты начала и конца трека
+	/**координаты начала и конца трека*/
 	float startX, startY, stopX, stopY;
+	/** индикатор необходимости перерисовки битмап изображения*/
 	boolean shouldDrawBitmap;
+	/**индикатор касания*/
 	boolean touched;
 	int lastAction; 
 	/**
@@ -100,12 +112,7 @@ public class PainterView extends View {
 		paint.setColor(Color.LTGRAY);
 		canvas.drawPaint(paint);
 		paint.setStyle(Paint.Style.STROKE);
-		paint.setColor(Color.BLACK);
-		//canvas.drawLine(startX, startY, stopX, stopY, paint);
-		if (image != null) {			
-			canvas.drawBitmap(image, new Matrix(), paint);
-		}
-		
+		paint.setColor(Color.BLACK);				
 		refreshIntersectingPoints(intersectingPoints, segs);
 		//drawPoints(canvas, paint);
 		drawSegs(segs, canvas, paint);
@@ -230,6 +237,7 @@ public class PainterView extends View {
 		}				
 		paint.setColor(Color.BLACK);
 	}
+	/**вспомогательная точка*/
 	Point pp;
 	/**
 	 * Обработчик событий касания экрана
@@ -241,18 +249,12 @@ public class PainterView extends View {
 			
 			if((stopX-event.getX())*(stopX-event.getX()) > 100 
 					&& (stopX-event.getX())*(stopX-event.getX()) > 100 ) {
-				pp = new Point(event.getX(), event.getY(), 0f, points.size());
-				/*int tmp = checkForIntersection(pp);
-				if (tmp != -1) {
-					pp.collides = true;
-					pp.collisionIndex = tmp;
-				}*/
+				pp = new Point(event.getX(), event.getY(), 0f, points.size());				
 				points.add(pp);				
 				if (points.size() > 2) smoothAll();
 			}
 			if (MotionEvent.ACTION_UP == event.getAction()) {
-				smoothAll();
-				//points.add(hangingPoint);
+				smoothAll();				
 			}
 			if (MotionEvent.ACTION_DOWN == event.getAction()) {
 				touched = true; 				
@@ -448,22 +450,7 @@ public class PainterView extends View {
 			}
 		}
 		smoothAngles(segs, depth - 1);
-	}
-	public void undo() {
-		if (points.size() == 0) return;
-		switch(lastAction) {
-		case 1 : 
-			a.x = b.x;
-			a.y = b.y;
-			break;
-		case 2 : 
-			redoPoints.add(points.get(points.size() - 1));
-			points.remove(points.size() - 1);
-			break;
-		}
-		refreshSegs();
-		invalidate();
-	}	
+	}		
 	/**
 	 * метод установки изображения
 	 * @param s - путь к файлу изображения

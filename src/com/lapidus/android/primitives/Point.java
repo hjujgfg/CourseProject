@@ -7,31 +7,35 @@ import com.lapidus.android.reader.Line;
 
 public class Point implements Cloneable, Serializable {
 	
-	//константа сериализации
+	/**константа сериализации*/
 	private static final long serialVersionUID = 12221L;
-	//координаты 
+	/**координаты */
 	public float x,y,z;
-	//индекс
+	/**индекс*/
 	public int index;
-	//индикатор коллизий
+	/**индикатор коллизий*/
 	public boolean collides;
-	//индекс коллизий
+	/**индекс коллизий*/
 	public int collisionIndex;
-	//смежные сегменты
+	/**смежные сегменты*/
 	Segment s1, s2;
-	//индикатор проверки 	
+	/**индикатор проверки 	*/
 	public boolean chkd;
-	//Линия, которой данная точка пренадлежит 
+	/**Линия, которой данная точка пренадлежит */
 	public Line line;
-	//связанная точка
+	/**связанная точка*/
 	public Point connection;
-	//Сравнение по индексу
+	/**Сравнение по индексу*/
 	public static Comparator<Point> indexComp = new indexComparator();
-	//сравнение по х-координате
+	/**сравнение по х-координате*/
 	public static Comparator<Point> xComp = new xComparator();
-	//сравнение по у-координате
+	/**сравнение по у-координате*/
 	public static Comparator<Point> yComp = new yComparator();
-	//конструктор 
+	/**
+	 * конструктор
+	 * @param x, y, z - координаты точки
+	 * @param index - индекс
+	 */
 	public Point (float x, float y, float z, int index) {
 		this.x = x;
 		this.y = y;
@@ -43,6 +47,10 @@ public class Point implements Cloneable, Serializable {
 		s1 = null;
 		s2 = null;
 	}
+	/**
+	 * конструктор
+	 * @param x, y - координаты точки
+	 */
 	public Point (float x, float y) {
 		this.x = x;
 		this.y = y;
@@ -54,6 +62,10 @@ public class Point implements Cloneable, Serializable {
 		s1 = null;
 		s2 = null;
 	}
+	/**
+	 * конструктор
+	 * @param x, y, z - координаты точки	
+	 */
 	public Point (float x, float y, float z) {
 		this.x = x;
 		this.y = y;
@@ -65,6 +77,9 @@ public class Point implements Cloneable, Serializable {
 		s1 = null;
 		s2 = null;
 	}
+	/**
+	 * конструктор по умолчанию
+	 */
 	public Point() {
 		// TODO Auto-generated constructor stub
 		x = 0;
@@ -78,7 +93,8 @@ public class Point implements Cloneable, Serializable {
 		s2 = null;
 	}
 	/**
-	 * наследуемы метод интерфейса Comparable
+	 * наследуемы метод интерфейса Cloneable
+	 * @see java.lang.Cloneable
 	 */
 	@Override
 	public Point clone() throws CloneNotSupportedException {

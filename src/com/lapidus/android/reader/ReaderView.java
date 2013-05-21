@@ -20,18 +20,33 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 public class ReaderView extends View {
-	//конструктор
+	/**
+	 * конструктор 
+	 * @param context - контекст родительской активности 
+	 * @see android.view.View#View(Context)
+	 */
 	public ReaderView(Context context) {
 		super(context);		
 		// TODO Auto-generated constructor stub
 		init();
 	}
-	//конструктор
+	/**
+	 * конструктор 
+	 * @param context - контекст родительской активности 
+	 * @param attrs - аттрибуты xml тега
+	 * @see android.view.View#View(Context, AttributeSet))
+	 */
 	public ReaderView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init();
 	}
-	//конструктор
+	/**
+	 * конструктор 
+	 * @param context - контекст родительской активности 
+	 * @param attrs - аттрибуты xml тега
+	 * @param i - стиль по умолчанию
+	 * @see android.view.View#View(Context, AttributeSet, int)))
+	 */
 	public ReaderView(Context context, AttributeSet attrs, int i) {
 		super(context, attrs, i);
 		init();
@@ -50,28 +65,28 @@ public class ReaderView extends View {
 		thisView = this;
 		finalPoints = new ArrayList<Point>();
 	}
-	//этот вид
+	/**этот вид*/
 	View thisView;
-	//список точек
+	/**список точек*/
 	ArrayList<Point> points;
-	//список точек после обработки 
+	/**список точек после обработки */
 	ArrayList<Point> finalPoints;
-	//список коллизий
+	/**список коллизий*/
 	ArrayList<Collision> cols;
-	//линия старта
+	/**линия старта*/
 	Line startLine;
-	//конечная линия
+	/**конечная линия*/
 	Line endLine;
-	//трек
+	/**трек*/
 	Track track;	
-	//массив аппроксимированных точек 
+	/**массив аппроксимированных точек */
 	Point[] approximizedPoints;
 	boolean pointsAreProcessed;
-	//перо
+	/**перо*/
 	Paint paint;
-	//холст
+	/**холст*/
 	Canvas canvas;
-	//контекст активности 
+	/**контекст активности */
 	Context context;
 	/**
 	 * наследуемый метод отрисовки 
@@ -327,5 +342,4 @@ public class ReaderView extends View {
 			return false;
 		}
 	};
-
 }

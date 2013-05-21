@@ -53,34 +53,31 @@ import com.lapidus.android.painter.Painter;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
 public class VehicleViewer extends Activity {
-	//сохраненный мир
+	/**сохраненный мир*/
 	private static VehicleViewer master = null;
-	//вид
+	/**вид*/
 	private GLSurfaceView mGLView;
-	//рендерер
+	/**рендерер*/
 	public ViewerRenderer renderer = null;
-	//буфер кадра
+	/**буфер кадра*/
 	private FrameBuffer fb = null;
-	//мир
+	/**мир*/
 	private World world = null;
-	//цвет
+	/**цвет*/
 	private RGBColor back = new RGBColor(50, 50, 100);
-	//освещение
+	/**освещение*/
 	private Light sun = null;
-	//камера
+	/**камера*/
 	private Camera cam = null;
-	//путь
+	/**путь*/
 	public static ArrayList<Point> path;
-	//Объект основной модели 
+	/**Объект основной модели*/ 
 	private Object3D car;
 	private int screenWidth, screenHeight;
-	//счетчик кадров в секунду
+	/**счетчик кадров в секунду*/
 	private int fps = 0;
-	//скайбокс
-	private SkyBox sb;
-	public VehicleViewer() {
-		renderer = new ViewerRenderer();
-	}
+	/**скайбокс*/
+	private SkyBox sb;	
 	/**
 	 * наследуемый  метод создания активности
 	 */
@@ -157,25 +154,34 @@ public class VehicleViewer extends Activity {
 			throw new RuntimeException(e);
 		}
 	}
+	/**
+	 * Наследуемый метод, вызывается при паузе активности
+	 * @see android.app.Activity#onPause()
+	 */
 	@Override
 	protected void onPause() {
 		super.onPause();
 		mGLView.onPause();
 	}
-
+	/**
+	 * наследуемый метод, вызывается при воостановлении активности
+	 * @see android.app.Activity#onResume()
+	 */
 	@Override
 	protected void onResume() {
 		super.onResume();
 		mGLView.onResume();		
 	}
-
+	/**
+	 * 
+	 * наследуемый метод, вызывается при окончательном завершении активности
+	 * @see android.app.Activity#onStop()
+	 */
 	@Override
 	protected void onStop() {
 		super.onStop();
 	}
-	protected boolean isFullscreenOpaque() {
-		return true;
-	}
+	
 	/**
 	 * зациклить текстуру 
 	 * @param obj - объект на котором текстура находится
@@ -201,6 +207,11 @@ public class VehicleViewer extends Activity {
 			pm.setPolygonTexture(i, ti);
 		}
 	}
+	/**
+	 * класс рендерер, отвечает за отрисовку 
+	 * @author Егор
+	 *
+	 */
 	private class ViewerRenderer implements GLSurfaceView.Renderer{
 		private long time = System.currentTimeMillis();
 		//конструктор 
@@ -289,8 +300,7 @@ public class VehicleViewer extends Activity {
 				}
 			}
 		}
-		
-		public void onSurfaceCreated(GL10 arg0, EGLConfig arg1) {
+		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 			// TODO Auto-generated method stub
 			
 		}

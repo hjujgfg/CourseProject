@@ -3,9 +3,9 @@ package com.lapidus.android.reader;
 import java.util.ArrayList;
 
 public class Track implements Cloneable {
-	//список линий
+	/**список линий*/
 	ArrayList<Line> lines;
-	//список коллизий
+	/**список коллизий*/
 	ArrayList<Collision> collisions; 
 	/**
 	 * конструктор 

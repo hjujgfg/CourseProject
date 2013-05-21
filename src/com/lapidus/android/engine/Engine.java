@@ -49,81 +49,93 @@ import com.lapidus.android.net.ServerThreadRan;
 import com.lapidus.android.painter.Painter;
 import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
-
+/**
+ * Класс Engine предназначен для запуска активности трехмерной игры. 
+ * Он строит объект трассы, выполняет логику игры и, используя внутренний класс, визуализирует сцену 
+ * @author Егор
+ *
+ */
 @TargetApi(13)
 public class Engine extends Activity {
 
 	// Used to handle pause and resume...
-	//сохраненный мир
+	/**
+	 * сохраненный мир
+	 */
 	private static Engine master = null;
-	//объекты вида
+	/**
+	 * объекты вида
+	 */
 	private GLSurfaceView mGLView;
-	//Рендерер
+	/**
+	 * Рендерер
+	 */
 	public MyRenderer renderer = null;
-	//буфер кадра 
+	/**
+	 * буфер кадра 
+	 */
 	private FrameBuffer fb = null;
-	//Объект мира
+	/**
+	 * Объект мира
+	 */
 	private World world = null;
-	//ОБъект цвета
+	/**
+	 * ОБъект цвета
+	 */
 	private RGBColor back = new RGBColor(50, 50, 100);
-
-	private float touchTurn = 0;
-	private float touchTurnUp = 0;
-	//глобальная х-координата точки касания экрана
+	/**
+	 * глобальная х-координата точки касания экрана
+	 */
 	private float xpos = -1;
-	//глобальная у-координата точки касания экрана
+	/**
+	 * глобальная у-координата точки касания экрана
+	 */
 	private float ypos = -1;
-	//координаты положения конечной точки трассы
+	/**координаты положения конечной точки трассы*/
 	private SimpleVector endCollisionHolder;
-	//угол вращения камеры
+	/**угол вращения камеры*/
 	private float cameraRotationAngle;
-	//ОБъект основной модели
+	/**Объект основной модели*/
 	private Object3D loadedCar = null;
+	/**объект ммодели соперника в режиме многопользовательской игры*/
 	private Object3D loadedCar1 = null;
-	//вектор напрвления
+	/**вектор направления*/
 	private SimpleVector carDirection = null;
-	//объект трассы
+	/**объект трассы*/
 	private Object3D newods = null;
-	//левая граница трассы
+	/**левая граница трассы*/
 	private Object3D leftBorder = null;
-	//правая граница трассы
+	/**правая граница трассы*/
 	private Object3D rightBorder = null;
-	//объект финиша
+	/**объект финиша*/
 	private Object3D end;
-	//объект старта
+	/**объект старта*/
 	private Object3D start;
+	/**вектор направления основной модели*/
 	public static SimpleVector t;
+	/**вектор направления модели соперника*/
 	public static SimpleVector t1;
-	private SimpleVector sv1 = null;
-	private SimpleVector sv2 = null; 
-	//счетчик кадров в секунду
+	/**счетчик кадров в секунду*/
 	private int fps = 0;
-	//Скайбокс
+	/**Скайбокс*/
 	private SkyBox skyBox;
-	//освещение
+	/**освещение*/
 	private Light sun = null;
-	//камера
+	/**камера*/
 	private Camera cam = null; 
-	//скорость движения
+	/**скорость движения*/
 	private float speed;
-	//матрица трансформаций
-	private Matrix transformMatrix = new Matrix();
-	private Matrix cameraTransformMatrix = new Matrix();
-	//хранитель данной активности
+	/**матрица трансформаций*/
+	private Matrix transformMatrix = new Matrix();	
+	/**хранитель данной активности*/
 	private Activity ctx; 
-	//размеры экрана
+	/**размеры экрана*/
 	private int screenWidth, screenHeight;
-	//Обработчик для вызовов из неосновного треда
+	/**Обработчик для вызовов из неосновного треда*/
 	private Handler handler;	
 	private String mytag = "MyTag";
-	//вектор коллизий 
-	private SimpleVector ellipsoid = new SimpleVector(0.3f, 0.3f, 0.3f);
-	
-	public static boolean bb; 
-	//конструктор
-	public Engine() {
-		renderer = new MyRenderer();
-	}
+	/**вектор коллизий*/ 
+	private SimpleVector ellipsoid = new SimpleVector(0.3f, 0.3f, 0.3f);	
 	/**
 	 * Наследуемый метод, вызывается при создании экземпляра класса
 	 * инициализирует необходимые поля. 
@@ -173,7 +185,7 @@ public class Engine extends Activity {
 	}
 	/**
 	 * наследуемый метод, вызывается при воостановлении активности
-	 * 
+	 * @see android.app.Activity#onResume()
 	 */
 	@Override
 	protected void onResume() {
@@ -183,6 +195,7 @@ public class Engine extends Activity {
 	/**
 	 * 
 	 * наследуемый метод, вызывается при окончательном завершении активности
+	 * @see android.app.Activity#onStop()
 	 */
 	@Override
 	protected void onStop() {
@@ -282,19 +295,14 @@ public class Engine extends Activity {
 	    }	    
 	    return true;
 	}
-
-	protected boolean isFullscreenOpaque() {
-		return true;
-	}
+	
 	/*
 	 * класс - рендерер трехмерной графики
 	 */
 	private class MyRenderer implements GLSurfaceView.Renderer {
 
 		private long time = System.currentTimeMillis();
-		//конструктор без параметров. Создает пустой объект
-		public MyRenderer() {
-		}
+		
 		/**
 		 * наследуемый метод. вызывается при изменении экрана 
 		 * @param  gl - объект интерфейса GL10
@@ -712,6 +720,7 @@ public class Engine extends Activity {
 		boolean finished = false;
 		/**
 		 * наследуемый метод отрисовки кадра
+		 * @see android.opengl.GLSurfaceView.Renderer#onResume()
 		 */
 		public void onDrawFrame(GL10 gl) {									
 			SimpleVector s = loadedCar.getTransformedCenter();

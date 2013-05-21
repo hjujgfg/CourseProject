@@ -42,6 +42,7 @@ import android.widget.Toast;
 public class Painter extends Activity {
 	/**
 	 * наследуемый метод, вызывается при создании активности 
+	 * @see android.app.Activity#onCreate(Bundle)
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -91,9 +92,7 @@ public class Painter extends Activity {
 						for (Point a : tmp) {
 							Engine.path.add(new Point(a.x, a.y, a.z));
 						}
-						if (isMulti == false) {
-							//Engine.path = (ArrayList<Point>) view.points.clone();
-							Engine.bb = true;
+						if (isMulti == false) {											
 							Intent i = new Intent(ctx, Engine.class);
 							startActivity(i);
 						} else {
@@ -278,25 +277,25 @@ public class Painter extends Activity {
 			view.invalidate();
 		}
 	}
-	// хранитель контекста
+	/** хранитель контекста*/
 	final Context context = this;
-	//вид рисования
+	/**вид рисования*/
 	PainterView view;
 	
 	Button b;
-	//список точек для загрузки из файла
+	/**список точек для загрузки из файла*/
 	public static ArrayList<Point> externalPoints;
 	
 	private static final int DIALOG_LOAD_FILE = 1000;
-	//список файлов в папке
+	/**список файлов в папке*/
 	private String[] mFileList;
-	//выбранный файл
+	/**выбранный файл*/
 	private String mChosenFile;
-	//расширение файла
+	/**расширение файла*/
 	private static final String FTYPE = ".png";
-	//путь к папке
-	private File mPath; //= new File(getExternalFilesDir(null).getAbsolutePath());
-	//индикатор много/одно - пользовательской игры
+	/**путь к папке*/
+	private File mPath; 
+	/**индикатор много/одно - пользовательской игры*/
 	public static boolean isMulti;
 	
 	/**

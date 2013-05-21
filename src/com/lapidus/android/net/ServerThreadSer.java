@@ -13,14 +13,24 @@ import android.sax.StartElementListener;
 
 import com.lapidus.android.engine.Engine;
 import com.lapidus.android.primitives.Point;
-
+/**класс сервера передачи сериальизванного трека*/
 public class ServerThreadSer implements Runnable {
+	/**индикатор соединения*/
 	boolean connection;
-	ObjectOutputStream oos; 
+	/**выходной поток*/
+	ObjectOutputStream oos;
+	/** список точек трека*/
 	public static ArrayList<Point> arr;
+	/**сокет клиента*/
 	Socket client; 
+	/**контекст*/
 	public static Context context;
+	/**обработчик для основного потока*/
 	Handler handler = new Handler();
+	/**
+	 * наследуемый метод 
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run() {
 		// TODO Auto-generated method stub
 		System.out.print("Accepted connection. ");

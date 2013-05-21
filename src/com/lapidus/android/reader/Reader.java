@@ -16,25 +16,22 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.ImageView;
-import android.widget.TextView;
 public class Reader extends Activity {
-	TextView tw;
-	//вид
+	
+	/**вид*/
 	ReaderView view;
-	//список соллизий
+	/**список соллизий*/
 	ArrayList<Collision> collisions;
-	//список точек
+	/**список точек*/
 	ArrayList<Point> arr;
-	//путь
+	/**путь*/
 	public static String path;
-	//контекст активности
-	static Context context;
-	//запуск активности разрешения коллизии
+	/**контекст активности*/
+	static Context context;	
 	
 	/**
 	 * наследуемый метод создания активности
@@ -104,15 +101,7 @@ public class Reader extends Activity {
 			i ++;
 		}
 		return res;
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu (Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		getMenuInflater().inflate(R.menu.activity_reader, menu);
-		menu.add(Menu.NONE, 1, Menu.NONE, "Process");
-		return true;
-	}
+	}	
 	/**
 	 * Стартер обработки коллизии
 	 * @param p - точка начала колизии
@@ -304,10 +293,5 @@ public class Reader extends Activity {
 		res[9] = new Point();
 		res[9].collisionIndex = nocolQuantity;
 		return res;
-	}	
-	
-	public static ArrayList<Point> processPointsPrepared(ArrayList<Point> arr) {		
-		Collections.sort(arr, Point.indexComp);		
-		return null;
 	}		
 }

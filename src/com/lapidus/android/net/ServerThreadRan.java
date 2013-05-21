@@ -11,15 +11,24 @@ import com.threed.jpct.SimpleVector;
 import android.os.Handler;
 import android.util.Log;
 
-
+/**класс-сервер для непрерывного обмена данными о положении моделей игроков*/
 public class ServerThreadRan implements Runnable{
-	ObjectOutputStream oos; 
-	ObjectInputStream ois; 
+	/**выходной поток*/
+	ObjectOutputStream oos;
+	/**входной поток*/
+	ObjectInputStream ois;
+	/**вектор напрвления основной модели*/
 	public static SimpleVector ss;
+	/**вектор напрвления модели соперника*/
 	public static SimpleVector ss1; 
-	
+	/**индикатор соединения*/
 	public static boolean connection;
+	/**сокет клиента*/
 	Socket client;
+	/**
+	 * наследуемый метод
+	 * @see java.lang.Runnable#run() 
+	 */	
 	public void run() {
 		// TODO Auto-generated method stub
 		System.out.print("Accepted connection. ");

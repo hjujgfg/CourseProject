@@ -14,20 +14,39 @@ import android.graphics.Paint.Style;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-
+/**
+ * класс визуализирует процесс импорта из png
+ * @author Егор
+ *
+ */
 public class CollisionResolverView extends View {
-	//конструктор
+	/**
+	 * конструктор 
+	 * @param context - контекст родительской активности 
+	 * @see android.view.View#View(Context)
+	 */
 	public CollisionResolverView(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
 		init(context);
 	}
-	//конструктор
+	/**
+	 * конструктор 
+	 * @param context - контекст родительской активности 
+	 * @param attrs - аттрибуты xml тега
+	 * @see android.view.View#View(Context, AttributeSet))
+	 */
 	public CollisionResolverView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
 	}
-	//конструктор
+	/**
+	 * конструктор 
+	 * @param context - контекст родительской активности 
+	 * @param attrs - аттрибуты xml тега
+	 * @param i - стиль по умолчанию
+	 * @see android.view.View#View(Context, AttributeSet, int)))
+	 */
 	public CollisionResolverView(Context context, AttributeSet attrs, int i) {
 		super(context, attrs, i);
 		init(context);
@@ -66,8 +85,7 @@ public class CollisionResolverView extends View {
 		connections = new ArrayList<Segment>();
 	}
 	// временнные точки 
-	Point a;
-	Point b;
+	Point a, b;
 	// список соединенных линий 
 	ArrayList<Segment> connections; 
 	/**
@@ -126,33 +144,31 @@ public class CollisionResolverView extends View {
 			return true;
 		}
 	};	
-	// счетчик соединений
+	/** счетчик соединений*/
 	int counter;
-	//перо
+	/**перо*/
 	Paint paint;
-	//холст
+	/**холст*/
 	Canvas canvas;
-	//коллизия
+	/**коллизия*/
 	Collision c;
-	// размеры экрана
-	int screenHeight;
-	int screenWidth;
-	//размеры клетки
-	float avgX;
-	float avgY;
-	//касание 
+	/** размеры экрана*/
+	int screenHeight, screenWidth;
+	/**размеры клетки*/
+	float avgX, avgY;
+	/**касание */
 	boolean touched;
-	//временная точка
+	/**временная точка*/
 	Point hanging;
-	//индикатор необходимости перерисовки коллизии
+	/**индикатор необходимости перерисовки коллизии*/
 	boolean needredrawcollision;
 	
 	boolean[] vac;
-	//временный список точек
+	/**временный список точек*/
 	ArrayList<Point> tmp;
-	//вид
+	/**вид*/
 	View thisView;
-	//диалог 
+	/**диалог */
 	Dialog d;
 	/**
 	 * наследуемы метод отрисовки 

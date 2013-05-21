@@ -32,20 +32,36 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.content.DialogInterface;
-
+/**класс активности установки соединения*/
 public class ConnectionEstablisher extends Activity {
+	/**индикатор сервера*/
 	public static boolean isServer;
+	/**обработчик для главного потока*/
 	Handler handler; 
+	/**индикатор соединения*/
 	boolean connection;
+	/**входная строка*/
 	String inString;
+	/**выходная строка*/
 	String outString;
+	/**контекст*/
 	Context context;
+	/**сокет клиента*/
 	Socket client;
+	/**скоет клиента на сервере*/
 	Socket socket;
+	/**клиентсткий тред*/
 	Thread cthread; 
+	/**серверный тред*/
 	Thread sThread;
+	/** порт */
 	static int SERVERPORT = 8090;
+	/** адрес по умолчанию */
 	static String serverIpAddress = "192.168.1.103";
+	/**
+	 * наследуемый метод, инициализирует поля
+	 * @see android.app.Activity#onCreate(Bundle)
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -130,11 +146,18 @@ public class ConnectionEstablisher extends Activity {
 			}
 		});		
 	}
+	/**
+	 * обработчик нажатия кнопки
+	 */
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event){
 		
 		return super.onKeyDown(keyCode, event);		
 	}
+	/**
+	 * получить IP-адрес
+	 * @return IP-адрес
+	 */
 	private String getLocalIpAddress() {
 		WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
 		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -142,14 +165,26 @@ public class ConnectionEstablisher extends Activity {
 		String ip = intToIp(ipAddress);
 		return ip;
     }
+	/**
+	 * преобразовать адрес к читаемому виду
+	 * @param i IP адрес
+	 * @return строковое отображение 
+	 */
 	private String intToIp(int i) {
 		   return ( i & 0xFF) + "." +
 		   			((i >> 8 ) & 0xFF) + "." +
 		   			((i >> 16 ) & 0xFF) + "." +
 		   			((i >> 24 ) & 0xFF );
 		}
+	/**
+	 * класс сервера для первоначальной установки соединения
+	 * @author Егор
+	 *
+	 */
 	public class ServerThread implements Runnable {
-		 
+		/**
+		 * @see java.lang.Runnable#run()
+		 */
         public void run() {
         	System.out.print("Accepted connection. ");
         	
@@ -216,8 +251,15 @@ public class ConnectionEstablisher extends Activity {
         	}
         }
     }
+	/**
+	 * класс клиента для установки первоначального соединения 
+	 * @author Егор
+	 *
+	 */
 	public class ClientThread implements Runnable {
-		 
+		 /**
+		  * @see java.lang.Runnable#run()
+		  */
         public void run() {
         	PrintWriter out = null;
     		BufferedReader input = null;

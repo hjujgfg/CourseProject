@@ -4,22 +4,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.lapidus.android.primitives.Point;
+/**
+ * класс пересечения
+ * @author Егор
+ *
+ */
 public class Collision implements Cloneable {
-	//список точек коллизии
+	/**список точек коллизии*/
 	ArrayList<Point> collidingPoints;
-	// список точек выходов
+	/** список точек выходов*/
 	ArrayList<Point> exitPoints;
-	// список линий разрешенной коллизии
+	/** список линий разрешенной коллизии*/
 	ArrayList<Line> resolvedLines;
-	//центр коллизии
+	/**центр коллизии*/
 	Point center; 
-	//тип коллизии
+	/**тип коллизии*/
 	int type;
-	// константа типа колиизии - начало 
+	/** константа типа колиизии - начало */
 	final public static int TYPE_START = 0;
-	// константа типа коллизии - конец
+	/** константа типа коллизии - конец*/
 	final public static int TYPE_STOP = 2;
-	// константа типа коллизии - общая
+	/** константа типа коллизии - общая*/
 	final public static int TYPE_GENERAL = 1;
 	/**
 	 * конструктор 
@@ -33,6 +38,7 @@ public class Collision implements Cloneable {
 	}
 	/**
 	 * наследуемый метод интерфейса Clonable
+	 * @see java.lang.Cloneable
 	 */
 	@Override
 	public Collision clone() throws CloneNotSupportedException {
@@ -131,7 +137,7 @@ public class Collision implements Cloneable {
 		//center = collidingPoints.get(0);
 	}
 	/**
-	 * 
+	 * Максимальная точка по Х
 	 * @return точка с максимульной х координатой
 	 */
 	public float maxX() {
@@ -139,15 +145,15 @@ public class Collision implements Cloneable {
 		return o.x;
 	}
 	/**
-	 * 
-	 * @return точка с максимульной н координатой
+	 * Максимальная точка по У
+	 * @return точка с максимульной У координатой
 	 */
 	public float maxY() {
 		Point o = Collections.max(collidingPoints, Point.yComp);
 		return o.y;
 	}
 	/**
-	 * 
+	 * Минимальная точка по Х
 	 * @return точка с минимальной х координатой
 	 */
 	public float minX() {
@@ -155,7 +161,7 @@ public class Collision implements Cloneable {
 		return o.x;
 	}
 /**
- * 
+ * минимальная точка по У
  * @return точка с минимальной у координатой
  */
 	public float minY() {
@@ -163,25 +169,22 @@ public class Collision implements Cloneable {
 		return o.y;
 	}
 	/**
-	 * 
+	 * получить Х центра коллизии
 	 * @return х центра коллизии
 	 */
 	public float x() {
 		return center.x;
 	}
 	/**
-	 * 
+	 * получить У центра коллизии
 	 * @return у центра коллизии
 	 */
 	public float y() {
 		return center.y;
-	}
+	}	
 	
-	public Point areAdjacent(Collision c) {
-		return null;
-	}
 	/**
-	 * 
+	 * количество точек выхода
 	 * @return количество точек выхода
 	 */
 	public int getExitsQuantity() {

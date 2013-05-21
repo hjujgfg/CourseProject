@@ -12,6 +12,7 @@ import javax.microedition.khronos.opengles.GL10;
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.text.AndroidCharacter;
 import android.util.Log;
 import android.view.Display;
 
@@ -39,46 +40,47 @@ import com.lapidus.android.primitives.Point;
 import com.lapidus.android.primitives.Segment;
 
 public class ObjectViewer extends Activity {
-	//сохраненный мир
+	/**сохраненный мир*/
 	private static ObjectViewer master = null;
-	//вид
+	/**вид*/
 	private GLSurfaceView mGLView;
-	//рендерер
+	/**рендерер*/
 	public ViewerRenderer renderer = null;
-	//буфер кадра 
+	/**буфер кадра*/ 
 	private FrameBuffer fb = null;
-	//мир
+	/**мир*/
 	private World world = null;
-	//цвет
+	/**цвет*/
 	private RGBColor back = new RGBColor(50, 50, 100);
-	//освещение
+	/**освещение*/
 	private Light sun = null;
-	//камера
+	/**камера*/
 	private Camera cam = null;
-	//маршрут
+	/**маршрут*/
 	public static ArrayList<Point> path;
-	//трек
+	/**трек*/
 	private Object3D newods = null;
-	//левая граница
+	/**левая граница*/
 	private Object3D leftBorder = null;
-	//правая граница
+	/**правая граница*/
 	private Object3D rightBorder = null;
-	//объект финиша
+	/**объект финиша*/
 	private Object3D end;
-	//объект старта
-	private Object3D start;
-	//размеры экрана
-	private int screenWidth, screenHeight;
-	//счетчик кадров в секунду
+	/**объект старта*/
+	private Object3D start;	
+	/**размеры экрана*/
+	int screenWidth, screenHeight;
+	/**счетчик кадров в секунду*/
 	private int fps = 0;
-	//скайбокс
+	/**скайбокс*/
 	private SkyBox sb;
-	//конструктор
+	/**конструктор*/
 	public ObjectViewer() {
 		renderer = new ViewerRenderer();
 	}
 	/**
 	 * наследуемый  метод создания активности
+	 * @see android.app.Activity#onCreate()
 	 */
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -128,27 +130,36 @@ public class ObjectViewer extends Activity {
 			throw new RuntimeException(e);
 		}
 	}
+	/**
+	 * Наследуемый метод, вызывается при паузе активности
+	 * @see android.app.Activity#onPause()
+	 */
 	@Override
 	protected void onPause() {
 		super.onPause();
 		mGLView.onPause();
 	}
-
+	/**
+	 * наследуемый метод, вызывается при воостановлении активности
+	 * @see android.app.Activity#onResume()
+	 */
 	@Override
 	protected void onResume() {
 		super.onResume();
 		mGLView.onResume();		
 	}
-
+	/**
+	 * 
+	 * наследуемый метод, вызывается при окончательном завершении активности
+	 * @see android.app.Activity#onStop()
+	 */
 	@Override
 	protected void onStop() {
 		super.onStop();
 	}
-	protected boolean isFullscreenOpaque() {
-		return true;
-	}
+	
 	/**
-	 * класс рендерер
+	 * класс рендерер, визуализирует сцену
 	 * @author Егор
 	 *
 	 */
@@ -178,7 +189,10 @@ public class ObjectViewer extends Activity {
 			fps++;
 		}
 		/**
-		 * наследуемый метод обработки изменения экрана
+		 * наследуемый метод. вызывается при изменении экрана 
+		 * @param  gl - объект интерфейса GL10
+		 * @param w - ширина экрана
+		 * @param h - высота экрана
 		 */
 		public void onSurfaceChanged(GL10 gl, int width, int height) {
 			// TODO Auto-generated method stub
@@ -214,15 +228,10 @@ public class ObjectViewer extends Activity {
 				leftBorder.setTexture("greenn");
 				rightBorder.setEnvmapped(true);
 				leftBorder.calcTextureWrapSpherical();
-				newods.setTexture("redd");
-				//newods.setEnvmapped(true);
+				newods.setTexture("redd");				
 				newods.calcTextureWrapSpherical();
 				newods = Object3D.mergeObjects(newods, leftBorder);
-				newods = Object3D.mergeObjects(newods, rightBorder);
-				/*rightBorder.strip();
-				rightBorder.build();
-				leftBorder.strip();
-				leftBorder.build();*/
+				newods = Object3D.mergeObjects(newods, rightBorder);				
 				start.setTexture("greenn");
 				end.setTexture("redd");
 				
@@ -260,7 +269,7 @@ public class ObjectViewer extends Activity {
 			}
 		}
 		/**
-		 * нормализовать путь
+		 * нормализовать путь относительно первой точки
 		 */
 		private void normalizePath () {
 			float xx = path.get(0).x;
@@ -460,7 +469,6 @@ public class ObjectViewer extends Activity {
 		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 			// TODO Auto-generated method stub
 			
-		}
-		
+		}		
 	}
 }

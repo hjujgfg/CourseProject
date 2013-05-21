@@ -3,10 +3,14 @@ package com.lapidus.android.reader;
 import java.util.ArrayList;
 
 import com.lapidus.android.primitives.Point;
-
+/**
+ * класс хранит точки одной кривой линии 
+ * @author Егор
+ *
+ */
 public class Line implements Cloneable{
 	ArrayList<Point> points; 
-	//конструктор
+	/**конструктор*/
 	public Line() {
 		points = new ArrayList<Point>();
 	}

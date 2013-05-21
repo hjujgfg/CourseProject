@@ -3,7 +3,11 @@ package com.lapidus.android.reader;
 import java.util.Vector;
 
 import com.lapidus.android.primitives.Point;
-
+/**
+ * класс аппроксимации
+ * @author Егор
+ *
+ */
 public class Approximizer {
 	/**
 	 * аппроксимация точек
@@ -59,7 +63,7 @@ public class Approximizer {
 	 * @param v массив точек 
 	 * @param j индекс начала 
 	 * @param k индекс конца
-	 * @param mk массив индексов
+	 * @param mk массив отметок
 	 */
 	private static void simplifyDP2D(float tol, Point[] v, int j, int k, int [] mk){
         

@@ -7,13 +7,13 @@ import android.util.Log;
 import com.lapidus.android.primitives.Segment;
 
 public class TrackHolder {
-//сохраненный трек
+/**сохраненный трек*/
 static Track t;
-//рабочий индекс коллизии
+/**рабочий индекс коллизии*/
 static int workingCollisionIndex;
-//рабочая коллизия
+/**рабочая коллизия*/
 static Collision c;
-//разрешенные линии
+/**разрешенные линии*/
 static ArrayList<Line> newLines = new ArrayList<Line>();
 	/**
 	 * обновить линии разрешения коллизии по отрезкам
